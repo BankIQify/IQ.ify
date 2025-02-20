@@ -1,16 +1,14 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  BookOpen,
-  Brain,
-  LayoutDashboard,
-  Menu,
-  X,
-} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { BookOpen, Brain, LayoutDashboard, Menu, X, LogIn } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const navItems = [
     {
@@ -29,6 +27,11 @@ const Navigation = () => {
       icon: <Brain className="w-5 h-5" />,
     },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <nav className="bg-white shadow-sm">
@@ -54,6 +57,22 @@ const Navigation = () => {
                 <span>{item.name}</span>
               </Link>
             ))}
+            {user ? (
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="ml-4"
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <Link to="/auth">
+                <Button variant="default" className="ml-4">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Navigation Button */}
@@ -83,6 +102,22 @@ const Navigation = () => {
                 <span>{item.name}</span>
               </Link>
             ))}
+            {user ? (
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="w-full mt-4"
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <Link to="/auth" className="block" onClick={() => setIsOpen(false)}>
+                <Button variant="default" className="w-full mt-4">
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </div>
