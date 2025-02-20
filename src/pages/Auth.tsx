@@ -15,12 +15,22 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
+  // Redirect if already authenticated
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fill in all fields",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       if (isLogin) {
@@ -44,6 +54,13 @@ const Auth = () => {
     setLoading(true);
     try {
       console.log("Initiating Google sign in...");
+      // Add window focus handling for popup
+      const handleWindowFocus = () => {
+        console.log("Window focused - checking auth state");
+        window.removeEventListener('focus', handleWindowFocus);
+      };
+      window.addEventListener('focus', handleWindowFocus);
+      
       await signInWithGoogle();
     } catch (error) {
       console.error("Google sign in error:", error);
@@ -71,6 +88,8 @@ const Auth = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
+              aria-label="Email"
             />
           </div>
           <div>
@@ -80,6 +99,8 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
+              aria-label="Password"
             />
           </div>
           <Button
