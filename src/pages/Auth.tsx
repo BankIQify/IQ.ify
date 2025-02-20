@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 
 const Auth = () => {
   const { user, signInWithEmail, signInWithGoogle, signUp } = useAuth();
@@ -12,6 +13,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   if (user) {
     return <Navigate to="/dashboard" replace />;
@@ -28,6 +30,28 @@ const Auth = () => {
       }
     } catch (error) {
       console.error("Authentication error:", error);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: error instanceof Error ? error.message : "Failed to authenticate",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    try {
+      console.log("Initiating Google sign in...");
+      await signInWithGoogle();
+    } catch (error) {
+      console.error("Google sign in error:", error);
+      toast({
+        variant: "destructive",
+        title: "Google Sign In Error",
+        description: error instanceof Error ? error.message : "Failed to sign in with Google",
+      });
     } finally {
       setLoading(false);
     }
@@ -87,7 +111,7 @@ const Auth = () => {
           type="button"
           variant="outline"
           className="w-full"
-          onClick={() => signInWithGoogle()}
+          onClick={handleGoogleSignIn}
           disabled={loading}
         >
           Sign in with Google
@@ -96,7 +120,7 @@ const Auth = () => {
         <div className="text-center text-sm">
           <button
             type="button"
-            className="text-education-600 hover:underline"
+            className="text-primary hover:underline"
             onClick={() => setIsLogin(!isLogin)}
           >
             {isLogin
