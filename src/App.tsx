@@ -8,14 +8,25 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import Practice from "./pages/Practice";
-import BrainTraining from "./pages/BrainTraining";
 import ManageQuestions from "./pages/ManageQuestions";
 import ManageExams from "./pages/ManageExams";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import { useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
+
+// Protected route component
+const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  const isAdmin = user?.email === "admin@example.com"; // Replace with your admin email
+
+  if (!isAdmin) {
+    return <NotFound />;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -24,15 +35,20 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen bg-gradient-to-b from-[#D3E4FD]/10 to-[#FFDEE2]/10">
             <Navigation />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/practice" element={<Practice />} />
-              <Route path="/brain-training" element={<BrainTraining />} />
-              <Route path="/manage-questions" element={<ManageQuestions />} />
-              <Route path="/manage-exams" element={<ManageExams />} />
+              <Route path="/lets-practice" element={<ManageExams />} />
+              <Route 
+                path="/manage-questions" 
+                element={
+                  <ProtectedAdminRoute>
+                    <ManageQuestions />
+                  </ProtectedAdminRoute>
+                } 
+              />
               <Route path="/auth" element={<Auth />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -44,4 +60,3 @@ const App = () => (
 );
 
 export default App;
-
