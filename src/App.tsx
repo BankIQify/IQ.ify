@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Practice from "./pages/Practice";
 import BrainTraining from "./pages/BrainTraining";
 import ManageQuestions from "./pages/ManageQuestions";
+import ManageExams from "./pages/ManageExams";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/practice" element={<Practice />} />
               <Route path="/brain-training" element={<BrainTraining />} />
               <Route path="/manage-questions" element={<ManageQuestions />} />
+              <Route path="/manage-exams" element={<ManageExams />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
@@ -42,3 +44,4 @@ const App = () => (
 );
 
 export default App;
+

@@ -44,11 +44,18 @@ const Navigation = () => {
               </Link>
             </NavigationMenuItem>
             {user && (
-              <NavigationMenuItem>
-                <Link to="/manage-questions" className={navigationMenuTriggerStyle()}>
-                  Manage Questions
-                </Link>
-              </NavigationMenuItem>
+              <>
+                <NavigationMenuItem>
+                  <Link to="/manage-questions" className={navigationMenuTriggerStyle()}>
+                    Manage Questions
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/manage-exams" className={navigationMenuTriggerStyle()}>
+                    Manage Exams
+                  </Link>
+                </NavigationMenuItem>
+              </>
             )}
           </NavigationMenuList>
         </NavigationMenu>
@@ -69,3 +76,4 @@ const Navigation = () => {
 };
 
 export default Navigation;
+
