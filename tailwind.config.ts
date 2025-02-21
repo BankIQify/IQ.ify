@@ -65,6 +65,16 @@ export default {
           800: "#075985",
           900: "#0c4a6e",
         },
+        pastel: {
+          blue: "#D3E4FD",
+          pink: "#FFDEE2",
+          yellow: "#FEF7CD",
+          purple: "#E5DEFF",
+          green: "#F2FCE2",
+          orange: "#FEC6A1",
+          peach: "#FDE1D3",
+          gray: "#F1F0FB"
+        }
       },
       keyframes: {
         "accordion-down": {
@@ -83,12 +93,20 @@ export default {
           "0%": { transform: "translateX(-100%)" },
           "100%": { transform: "translateX(0)" },
         },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: "fadeIn 0.5s ease-out",
         slideIn: "slideIn 0.3s ease-out",
+        float: "float 3s ease-in-out infinite"
+      },
+      backgroundImage: {
+        'gradient-pastel': 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
       },
     },
   },
