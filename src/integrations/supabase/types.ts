@@ -9,6 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      exam_sub_topics: {
+        Row: {
+          created_at: string | null
+          exam_id: string | null
+          id: string
+          sub_topic_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string
+          sub_topic_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string
+          sub_topic_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_sub_topics_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_sub_topics_sub_topic_id_fkey"
+            columns: ["sub_topic_id"]
+            isOneToOne: false
+            referencedRelation: "sub_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          category: Database["public"]["Enums"]["question_category"] | null
+          created_at: string | null
+          id: string
+          is_standard: boolean | null
+          name: string
+          question_count: number
+          time_limit_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["question_category"] | null
+          created_at?: string | null
+          id?: string
+          is_standard?: boolean | null
+          name: string
+          question_count: number
+          time_limit_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["question_category"] | null
+          created_at?: string | null
+          id?: string
+          is_standard?: boolean | null
+          name?: string
+          question_count?: number
+          time_limit_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -78,6 +147,7 @@ export type Database = {
           generation_prompt: string | null
           id: string
           section_id: string | null
+          sub_topic_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -88,6 +158,7 @@ export type Database = {
           generation_prompt?: string | null
           id?: string
           section_id?: string | null
+          sub_topic_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -98,11 +169,51 @@ export type Database = {
           generation_prompt?: string | null
           id?: string
           section_id?: string | null
+          sub_topic_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "questions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "question_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_sub_topic_id_fkey"
+            columns: ["sub_topic_id"]
+            isOneToOne: false
+            referencedRelation: "sub_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sub_topics: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          section_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          section_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          section_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sub_topics_section_id_fkey"
             columns: ["section_id"]
             isOneToOne: false
             referencedRelation: "question_sections"

@@ -21,10 +21,42 @@ type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
 const ManageQuestions = () => {
   const [category, setCategory] = useState<QuestionCategory>('verbal');
+  const [subTopicId, setSubTopicId] = useState<string>("");
   const [customPrompt, setCustomPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Fetch sub-topics based on selected category
+  const { data: subTopics } = useQuery({
+    queryKey: ['subTopics', category],
+    queryFn: async () => {
+      const { data: sections } = await supabase
+        .from('question_sections')
+        .select('id')
+        .eq('category', category)
+        .single();
+
+      if (!sections?.id) return [];
+
+      const { data, error } = await supabase
+        .from('sub_topics')
+        .select('*')
+        .eq('section_id', sections.id);
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
   const generateQuestion = async () => {
+    if (!subTopicId) {
+      toast({
+        title: "Error",
+        description: "Please select a sub-topic",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-question', {
@@ -34,21 +66,11 @@ const ManageQuestions = () => {
       if (error) throw error;
 
       // Store the generated question in Supabase
-      const { data: sectionData } = await supabase
-        .from('question_sections')
-        .select('id')
-        .eq('category', category)
-        .single();
-
-      if (!sectionData?.id) {
-        throw new Error('Section not found');
-      }
-
       const { error: insertError } = await supabase
         .from('questions')
         .insert({
           content: data,
-          section_id: sectionData.id,
+          sub_topic_id: subTopicId,
           generation_prompt: customPrompt || null,
           ai_generated: true,
         });
@@ -73,25 +95,25 @@ const ManageQuestions = () => {
 
   // Fetch existing questions
   const { data: questions, isLoading } = useQuery({
-    queryKey: ['questions', category],
+    queryKey: ['questions', subTopicId],
     queryFn: async () => {
-      const { data: sections } = await supabase
-        .from('question_sections')
-        .select('id')
-        .eq('category', category)
-        .single();
-
-      if (!sections?.id) return [];
+      if (!subTopicId) return [];
 
       const { data, error } = await supabase
         .from('questions')
-        .select('*')
-        .eq('section_id', sections.id)
+        .select(`
+          *,
+          sub_topics (
+            name
+          )
+        `)
+        .eq('sub_topic_id', subTopicId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!subTopicId,
   });
 
   return (
@@ -104,7 +126,10 @@ const ManageQuestions = () => {
             <Label htmlFor="category">Category</Label>
             <Select
               value={category}
-              onValueChange={(value: QuestionCategory) => setCategory(value)}
+              onValueChange={(value: QuestionCategory) => {
+                setCategory(value);
+                setSubTopicId("");
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
@@ -113,6 +138,25 @@ const ManageQuestions = () => {
                 <SelectItem value="verbal">Verbal Reasoning</SelectItem>
                 <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
                 <SelectItem value="brain_training">Brain Training</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="subTopic">Sub-topic</Label>
+            <Select
+              value={subTopicId}
+              onValueChange={setSubTopicId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select sub-topic" />
+              </SelectTrigger>
+              <SelectContent>
+                {subTopics?.map((subTopic) => (
+                  <SelectItem key={subTopic.id} value={subTopic.id}>
+                    {subTopic.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -130,7 +174,7 @@ const ManageQuestions = () => {
 
           <Button 
             onClick={generateQuestion} 
-            disabled={isGenerating}
+            disabled={isGenerating || !subTopicId}
             className="w-full"
           >
             {isGenerating ? "Generating..." : "Generate New Question"}
@@ -140,7 +184,9 @@ const ManageQuestions = () => {
 
       <div className="space-y-6">
         <h2 className="text-xl font-semibold">Generated Questions</h2>
-        {isLoading ? (
+        {!subTopicId ? (
+          <p className="text-gray-600">Select a sub-topic to view questions</p>
+        ) : isLoading ? (
           <p>Loading questions...</p>
         ) : questions && questions.length > 0 ? (
           questions.map((question, index) => {
@@ -148,7 +194,12 @@ const ManageQuestions = () => {
             return (
               <Card key={question.id} className="p-6">
                 <div className="space-y-4">
-                  <h3 className="font-medium">Question {index + 1}</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-medium">Question {index + 1}</h3>
+                    <span className="text-sm text-gray-500">
+                      {question.sub_topics?.name}
+                    </span>
+                  </div>
                   <p>{content.question}</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {content.options.map((option: string, i: number) => (
@@ -170,7 +221,7 @@ const ManageQuestions = () => {
                   </div>
                 </div>
               </Card>
-            )
+            );
           })
         ) : (
           <p className="text-gray-600">No questions generated yet.</p>
@@ -181,4 +232,3 @@ const ManageQuestions = () => {
 };
 
 export default ManageQuestions;
-
