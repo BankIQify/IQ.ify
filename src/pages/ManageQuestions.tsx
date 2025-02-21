@@ -10,8 +10,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
+type QuestionContent = {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+};
+
+type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
+
 const ManageQuestions = () => {
-  const [category, setCategory] = useState<'verbal' | 'non-verbal'>('verbal');
+  const [category, setCategory] = useState<QuestionCategory>('verbal');
   const [customPrompt, setCustomPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -95,14 +104,15 @@ const ManageQuestions = () => {
             <Label htmlFor="category">Category</Label>
             <Select
               value={category}
-              onValueChange={(value: 'verbal' | 'non-verbal') => setCategory(value)}
+              onValueChange={(value: QuestionCategory) => setCategory(value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="verbal">Verbal Reasoning</SelectItem>
-                <SelectItem value="non-verbal">Non-Verbal Reasoning</SelectItem>
+                <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
+                <SelectItem value="brain_training">Brain Training</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -133,32 +143,35 @@ const ManageQuestions = () => {
         {isLoading ? (
           <p>Loading questions...</p>
         ) : questions && questions.length > 0 ? (
-          questions.map((question, index) => (
-            <Card key={question.id} className="p-6">
-              <div className="space-y-4">
-                <h3 className="font-medium">Question {index + 1}</h3>
-                <p>{question.content.question}</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {question.content.options.map((option: string, i: number) => (
-                    <div
-                      key={i}
-                      className={`p-3 rounded-lg border ${
-                        option.startsWith(question.content.correctAnswer)
-                          ? "border-green-500 bg-green-50"
-                          : "border-gray-200"
-                      }`}
-                    >
-                      {option}
-                    </div>
-                  ))}
+          questions.map((question, index) => {
+            const content = question.content as QuestionContent;
+            return (
+              <Card key={question.id} className="p-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium">Question {index + 1}</h3>
+                  <p>{content.question}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {content.options.map((option: string, i: number) => (
+                      <div
+                        key={i}
+                        className={`p-3 rounded-lg border ${
+                          option.startsWith(content.correctAnswer)
+                            ? "border-green-500 bg-green-50"
+                            : "border-gray-200"
+                        }`}
+                      >
+                        {option}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <p className="font-medium mb-2">Explanation:</p>
+                    <p>{content.explanation}</p>
+                  </div>
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <p className="font-medium mb-2">Explanation:</p>
-                  <p>{question.content.explanation}</p>
-                </div>
-              </div>
-            </Card>
-          ))
+              </Card>
+            )
+          })
         ) : (
           <p className="text-gray-600">No questions generated yet.</p>
         )}
@@ -168,3 +181,4 @@ const ManageQuestions = () => {
 };
 
 export default ManageQuestions;
+
