@@ -10,11 +10,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
+
 const ManageExams = () => {
   const { toast } = useToast();
-  const [standardCategory, setStandardCategory] = useState<string>("");
+  const [standardCategory, setStandardCategory] = useState<QuestionCategory | ''>('');
   const [customName, setCustomName] = useState("");
-  const [customCategory, setCustomCategory] = useState<string[]>([]);
+  const [customCategory, setCustomCategory] = useState<QuestionCategory[]>([]);
   const [questionCount, setQuestionCount] = useState<number>(20);
   const [timeLimit, setTimeLimit] = useState<number | undefined>();
 
@@ -44,8 +46,8 @@ const ManageExams = () => {
       const { error } = await supabase
         .from('exams')
         .insert({
-          name: `Standard ${standardCategory} Test`,
-          category: standardCategory.toLowerCase(),
+          name: `Standard ${standardCategory.replace('_', ' ')} Test`,
+          category: standardCategory,
           question_count: 20,
           is_standard: true
         });
@@ -57,7 +59,7 @@ const ManageExams = () => {
         description: "Standard exam created successfully"
       });
 
-      setStandardCategory("");
+      setStandardCategory('');
     } catch (error) {
       console.error('Error creating standard exam:', error);
       toast({
@@ -158,7 +160,7 @@ const ManageExams = () => {
                 <Label htmlFor="standardCategory">Category</Label>
                 <Select 
                   value={standardCategory} 
-                  onValueChange={setStandardCategory}
+                  onValueChange={(value: QuestionCategory) => setStandardCategory(value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
@@ -195,7 +197,7 @@ const ManageExams = () => {
                 <Label htmlFor="categories">Categories</Label>
                 <Select
                   value={customCategory[0]}
-                  onValueChange={(value) => setCustomCategory([value])}
+                  onValueChange={(value: QuestionCategory) => setCustomCategory([value])}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select categories" />
