@@ -42,6 +42,74 @@ export type Database = {
         }
         Relationships: []
       }
+      question_sections: {
+        Row: {
+          category: Database["public"]["Enums"]["question_category"]
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["question_category"]
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["question_category"]
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          ai_generated: boolean | null
+          content: Json
+          created_at: string | null
+          difficulty: number | null
+          generation_prompt: string | null
+          id: string
+          section_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          content: Json
+          created_at?: string | null
+          difficulty?: number | null
+          generation_prompt?: string | null
+          id?: string
+          section_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_generated?: boolean | null
+          content?: Json
+          created_at?: string | null
+          difficulty?: number | null
+          generation_prompt?: string | null
+          id?: string
+          section_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "question_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -50,7 +118,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      question_category: "verbal" | "non_verbal" | "brain_training"
     }
     CompositeTypes: {
       [_ in never]: never
