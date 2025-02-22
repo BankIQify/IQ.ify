@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { QuestionGenerator } from "@/components/questions/QuestionGenerator";
 import { ManualQuestionUpload } from "@/components/questions/ManualQuestionUpload";
 import { QuestionsList } from "@/components/questions/QuestionsList";
+import { CategoryManager } from "@/components/questions/CategoryManager";
 import { supabase } from "@/integrations/supabase/client";
 
 export type QuestionContent = {
@@ -88,76 +89,83 @@ const ManageQuestions = () => {
     <div className="page-container">
       <h1 className="section-title">Question Management</h1>
 
-      <Card className="p-6 mb-8">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="category">Category</Label>
-            <Select
-              value={category}
-              onValueChange={(value: QuestionCategory) => {
-                setCategory(value);
-                setSubTopicId("");
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="verbal">Verbal Reasoning</SelectItem>
-                <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
-                <SelectItem value="brain_training">Brain Training</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+      <Tabs defaultValue="generate" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="generate">Generate Questions</TabsTrigger>
+          <TabsTrigger value="manual">Manual Upload</TabsTrigger>
+          <TabsTrigger value="categories">Manage Categories</TabsTrigger>
+        </TabsList>
 
-          <div>
-            <Label htmlFor="subTopic">Sub-topic</Label>
-            <Select
-              value={subTopicId}
-              onValueChange={setSubTopicId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select sub-topic" />
-              </SelectTrigger>
-              <SelectContent>
-                {subTopics?.map((subTopic) => (
-                  <SelectItem key={subTopic.id} value={subTopic.id}>
-                    {subTopic.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <TabsContent value="categories">
+          <CategoryManager />
+        </TabsContent>
 
-          <Tabs defaultValue="generate" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="generate">Generate Questions</TabsTrigger>
-              <TabsTrigger value="manual">Manual Upload</TabsTrigger>
-            </TabsList>
+        <TabsContent value="generate">
+          <Card className="p-6 mb-8">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={category}
+                  onValueChange={(value: QuestionCategory) => {
+                    setCategory(value);
+                    setSubTopicId("");
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="verbal">Verbal Reasoning</SelectItem>
+                    <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
+                    <SelectItem value="brain_training">Brain Training</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <TabsContent value="generate">
+              <div>
+                <Label htmlFor="subTopic">Sub-topic</Label>
+                <Select
+                  value={subTopicId}
+                  onValueChange={setSubTopicId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select sub-topic" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subTopics?.map((subTopic) => (
+                      <SelectItem key={subTopic.id} value={subTopic.id}>
+                        {subTopic.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <QuestionGenerator 
                 subTopicId={subTopicId} 
                 category={category}
               />
-            </TabsContent>
+            </div>
+          </Card>
 
-            <TabsContent value="manual">
-              <ManualQuestionUpload subTopicId={subTopicId} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </Card>
+          {!subTopicId ? (
+            <p className="text-gray-600">Select a sub-topic to view questions</p>
+          ) : isLoading ? (
+            <p>Loading questions...</p>
+          ) : questions && questions.length > 0 ? (
+            <QuestionsList questions={questions} />
+          ) : (
+            <p className="text-gray-600">No questions generated yet.</p>
+          )}
+        </TabsContent>
 
-      {!subTopicId ? (
-        <p className="text-gray-600">Select a sub-topic to view questions</p>
-      ) : isLoading ? (
-        <p>Loading questions...</p>
-      ) : questions && questions.length > 0 ? (
-        <QuestionsList questions={questions} />
-      ) : (
-        <p className="text-gray-600">No questions generated yet.</p>
-      )}
+        <TabsContent value="manual">
+          <Card className="p-6 mb-8">
+            <ManualQuestionUpload subTopicId={subTopicId} />
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
