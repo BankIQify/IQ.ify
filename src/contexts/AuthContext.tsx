@@ -23,12 +23,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   const checkAdminStatus = async (userId: string) => {
-    const { data, error } = await supabase.rpc('is_admin', { user_id: userId });
-    if (error) {
-      console.error('Error checking admin status:', error);
-      return;
+    try {
+      const { data, error } = await supabase.rpc('is_admin', { user_id: userId });
+      if (error) {
+        console.error('Error checking admin status:', error);
+        return;
+      }
+      setIsAdmin(data || false);
+    } catch (error) {
+      console.error('Error in checkAdminStatus:', error);
+      setIsAdmin(false);
     }
-    setIsAdmin(data || false);
   };
 
   useEffect(() => {
@@ -59,18 +64,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const getProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
 
-    if (error) {
-      console.error("Error fetching profile:", error);
-      return;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
+
+      setProfile(data);
+    } catch (error) {
+      console.error("Error in getProfile:", error);
+      setProfile(null);
     }
-
-    setProfile(data);
   };
 
   const signInWithEmail = async (email: string, password: string) => {
@@ -153,3 +163,4 @@ export const useAuth = () => {
   }
   return context;
 };
+
