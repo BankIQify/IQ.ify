@@ -13,12 +13,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const CategoryManager = () => {
   const [newSectionName, setNewSectionName] = useState("");
   const [newSubTopicName, setNewSubTopicName] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<'verbal' | 'non_verbal' | 'brain_training'>('verbal');
   const [selectedSection, setSelectedSection] = useState<string>("");
 
   // Fetch all sections and their sub-topics
@@ -41,6 +49,9 @@ export const CategoryManager = () => {
     }
   });
 
+  // Filter sections based on selected category
+  const filteredSections = sections?.filter(section => section.category === selectedCategory);
+
   const handleAddSection = async () => {
     if (!newSectionName.trim()) {
       toast.error("Please enter a section name");
@@ -52,7 +63,7 @@ export const CategoryManager = () => {
         .from('question_sections')
         .insert([{ 
           name: newSectionName,
-          category: 'verbal' // Default to verbal, can be enhanced with category selection
+          category: selectedCategory
         }]);
 
       if (error) throw error;
@@ -97,6 +108,25 @@ export const CategoryManager = () => {
         <h3 className="text-lg font-semibold mb-4">Add New Section</h3>
         <div className="flex gap-4 items-end">
           <div className="flex-1">
+            <Label htmlFor="category">Category</Label>
+            <Select
+              value={selectedCategory}
+              onValueChange={(value: 'verbal' | 'non_verbal' | 'brain_training') => {
+                setSelectedCategory(value);
+                setSelectedSection("");
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="verbal">Verbal Reasoning</SelectItem>
+                <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
+                <SelectItem value="brain_training">Brain Training</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex-1">
             <Label htmlFor="sectionName">Section Name</Label>
             <Input
               id="sectionName"
@@ -121,7 +151,7 @@ export const CategoryManager = () => {
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="">Select a section</option>
-              {sections?.map((section) => (
+              {filteredSections?.map((section) => (
                 <option key={section.id} value={section.id}>
                   {section.name}
                 </option>
@@ -147,6 +177,7 @@ export const CategoryManager = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Section</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead>Sub-topics</TableHead>
             </TableRow>
           </TableHeader>
@@ -154,6 +185,7 @@ export const CategoryManager = () => {
             {sections?.map((section) => (
               <TableRow key={section.id}>
                 <TableCell className="font-medium">{section.name}</TableCell>
+                <TableCell>{section.category}</TableCell>
                 <TableCell>
                   {section.sub_topics?.map((subTopic) => subTopic.name).join(", ")}
                 </TableCell>
@@ -165,3 +197,4 @@ export const CategoryManager = () => {
     </div>
   );
 };
+
