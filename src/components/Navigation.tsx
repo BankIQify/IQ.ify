@@ -2,7 +2,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu as MenuIcon, X as CloseIcon } from "lucide-react";
 import { useState } from "react";
 import {
   NavigationMenu,
@@ -86,7 +86,11 @@ const Navigation = () => {
             onClick={toggleMobileMenu}
             className="p-2"
           >
-            {isMobileMenuOpen ? <X /> : <Menu />}
+            {isMobileMenuOpen ? (
+              <CloseIcon className="h-6 w-6" />
+            ) : (
+              <MenuIcon className="h-6 w-6" />
+            )}
           </Button>
         </div>
 
