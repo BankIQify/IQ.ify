@@ -24,6 +24,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const checkAdminStatus = async (userId: string) => {
     try {
+      console.log('Checking admin status for user:', userId);
+      
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
@@ -35,8 +37,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error('Error checking admin status:', error);
         return;
       }
-      
+
+      console.log('Admin check result:', data);
       setIsAdmin(!!data);
+      console.log('isAdmin state set to:', !!data);
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
