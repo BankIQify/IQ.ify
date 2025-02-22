@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { AuthError } from "@supabase/supabase-js";
 
 const Auth = () => {
   const { user, signInWithEmail, signInWithGoogle, signUp } = useAuth();
@@ -19,6 +20,32 @@ const Auth = () => {
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  const handleAuthError = (error: AuthError) => {
+    console.error("Authentication error:", error);
+    let message = "An error occurred during authentication.";
+
+    // Customize error messages based on error code
+    switch (error.message) {
+      case "Invalid login credentials":
+        message = "Email or password is incorrect. Please try again.";
+        break;
+      case "Email not confirmed":
+        message = "Please check your email to confirm your account before signing in.";
+        break;
+      case "User already registered":
+        message = "This email is already registered. Please sign in instead.";
+        break;
+      default:
+        message = error.message;
+    }
+
+    toast({
+      variant: "destructive",
+      title: "Authentication Error",
+      description: message,
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,12 +66,7 @@ const Auth = () => {
         await signUp(email, password);
       }
     } catch (error) {
-      console.error("Authentication error:", error);
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: error instanceof Error ? error.message : "Failed to authenticate",
-      });
+      handleAuthError(error as AuthError);
     } finally {
       setLoading(false);
     }
@@ -63,12 +85,7 @@ const Auth = () => {
       
       await signInWithGoogle();
     } catch (error) {
-      console.error("Google sign in error:", error);
-      toast({
-        variant: "destructive",
-        title: "Google Sign In Error",
-        description: error instanceof Error ? error.message : "Failed to sign in with Google",
-      });
+      handleAuthError(error as AuthError);
     } finally {
       setLoading(false);
     }
