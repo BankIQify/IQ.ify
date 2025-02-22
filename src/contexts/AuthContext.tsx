@@ -26,21 +26,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Checking admin status for user:', userId);
       
-      const { data, error } = await supabase
+      const { data: adminRoleCheck, error: adminCheckError } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('*')
         .eq('user_id', userId)
         .eq('role', 'admin')
         .maybeSingle();
 
-      if (error) {
-        console.error('Error checking admin status:', error);
+      if (adminCheckError) {
+        console.error('Error checking admin status:', adminCheckError);
         return;
       }
 
-      console.log('Admin check result:', data);
-      setIsAdmin(!!data);
-      console.log('isAdmin state set to:', !!data);
+      console.log('Admin check result:', adminRoleCheck);
+      const hasAdminRole = !!adminRoleCheck;
+      console.log('Setting isAdmin to:', hasAdminRole);
+      setIsAdmin(hasAdminRole);
+
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
@@ -50,10 +52,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Check active sessions
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        console.log('Session found, checking profile and admin status');
         getProfile(session.user.id);
         checkAdminStatus(session.user.id);
+      } else {
+        console.log('No session found');
       }
     });
 
@@ -61,6 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', { event: _event, session });
       setUser(session?.user ?? null);
       if (session?.user) {
         getProfile(session.user.id);
@@ -95,12 +102,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signInWithEmail = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    console.log('Attempting email sign in:', email);
+    const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
+      console.error('Sign in error:', error);
       toast({
         variant: "destructive",
         title: "Error signing in",
@@ -108,6 +117,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       throw error;
     }
+
+    console.log('Sign in successful:', data);
   };
 
   const signInWithGoogle = async () => {

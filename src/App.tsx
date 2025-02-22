@@ -19,10 +19,11 @@ const queryClient = new QueryClient();
 
 // Protected route component
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  const isAdmin = user?.email === "admin@example.com"; // Replace with your admin email
-
-  if (!isAdmin) {
+  const { user, isAdmin } = useAuth();
+  
+  console.log('ProtectedAdminRoute check:', { user, isAdmin }); // Debug log
+  
+  if (!user || !isAdmin) {
     return <NotFound />;
   }
 
