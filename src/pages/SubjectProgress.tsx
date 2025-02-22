@@ -4,9 +4,12 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+type QuestionCategory = Database["public"]["Enums"]["question_category"];
 
 const SubjectProgress = () => {
-  const { subject } = useParams();
+  const { subject } = useParams<{ subject: string }>();
   
   const { data: examResults, isLoading } = useQuery({
     queryKey: ['exam-results', subject],
@@ -20,16 +23,16 @@ const SubjectProgress = () => {
             category
           )
         `)
-        .eq('exams.category', subject);
+        .eq('exams.category', subject as QuestionCategory);
       
       if (error) throw error;
-      return data;
+      return data || [];
     },
     enabled: !!subject,
   });
 
   const calculateProgress = () => {
-    if (!examResults || examResults.length === 0) return {};
+    if (!examResults || examResults.length === 0) return [];
     
     const totalScores: { [key: string]: { total: number; count: number } } = {};
     
@@ -38,7 +41,7 @@ const SubjectProgress = () => {
       if (!totalScores[examName]) {
         totalScores[examName] = { total: 0, count: 0 };
       }
-      totalScores[examName].total += result.score;
+      totalScores[examName].total += result.score || 0;
       totalScores[examName].count += 1;
     });
 

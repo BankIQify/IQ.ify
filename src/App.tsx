@@ -12,6 +12,7 @@ import ManageQuestions from "./pages/ManageQuestions";
 import ManageExams from "./pages/ManageExams";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import SubjectProgress from "./pages/SubjectProgress";
 import { useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/lets-practice" element={<ManageExams />} />
+              <Route path="/progress/:subject" element={<SubjectProgress />} />
               <Route 
                 path="/manage-questions" 
                 element={
