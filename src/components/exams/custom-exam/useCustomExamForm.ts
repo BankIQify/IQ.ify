@@ -5,6 +5,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
+interface Section {
+  id: string;
+  category: QuestionCategory;
+}
+
+interface SubTopic {
+  id: string;
+  section_id: string;
+}
+
 export function useCustomExamForm() {
   const { toast } = useToast();
   const [customName, setCustomName] = useState("");
@@ -13,6 +23,8 @@ export function useCustomExamForm() {
   const [questionCount, setQuestionCount] = useState<number>(20);
   const [timeLimit, setTimeLimit] = useState<number | undefined>();
   const [topicSelectorOpen, setTopicSelectorOpen] = useState(false);
+  const [sections, setSections] = useState<Section[]>([]);
+  const [subTopics, setSubTopics] = useState<SubTopic[]>([]);
 
   const handleTopicSelection = (topic: QuestionCategory) => {
     setSelectedTopics(prev => {
