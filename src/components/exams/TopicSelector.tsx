@@ -46,28 +46,24 @@ export function TopicSelector({ selectedTopics, onTopicSelection, open, onOpenCh
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className="w-[200px] p-0" side="bottom" align="start" sideOffset={5}>
         <Command>
-          <CommandInput placeholder="Search topics..." />
+          <CommandInput placeholder="Search topics..." className="h-9" />
           <CommandEmpty>No topics found.</CommandEmpty>
           <CommandGroup>
             {topics.map((topic) => (
               <CommandItem
                 key={topic.value}
                 value={topic.value}
-                onSelect={() => {
-                  onTopicSelection(topic.value);
-                }}
+                onSelect={() => onTopicSelection(topic.value)}
               >
-                <div className="flex items-center">
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      selectedTopics.includes(topic.value) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {topic.label}
-                </div>
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    selectedTopics.includes(topic.value) ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {topic.label}
               </CommandItem>
             ))}
           </CommandGroup>
@@ -76,4 +72,3 @@ export function TopicSelector({ selectedTopics, onTopicSelection, open, onOpenCh
     </Popover>
   );
 }
-
