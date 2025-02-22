@@ -1,14 +1,20 @@
+
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu as MenuIcon, X as CloseIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Navigation = () => {
   const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // For debugging
+  useEffect(() => {
+    console.log('Current auth state:', { user, isAdmin });
+  }, [user, isAdmin]);
 
   const handleSignOut = async () => {
     await signOut();
