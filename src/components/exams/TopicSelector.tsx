@@ -32,44 +32,58 @@ const topics: { value: QuestionCategory; label: string }[] = [
 
 export function TopicSelector({ selectedTopics, onTopicSelection, open, onOpenChange }: TopicSelectorProps) {
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
+    <div className="relative">
+      <Popover open={open} onOpenChange={onOpenChange}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-full justify-between"
+          >
+            <span className="truncate">
+              {selectedTopics.length === 0
+                ? "Select topics..."
+                : `${selectedTopics.length} topic${selectedTopics.length === 1 ? '' : 's'} selected`}
+            </span>
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent 
+          className="w-[300px] p-0" 
+          align="start"
+          side="bottom"
+          sideOffset={5}
         >
-          {selectedTopics.length === 0
-            ? "Select topics..."
-            : `${selectedTopics.length} topic${selectedTopics.length === 1 ? '' : 's'} selected`}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
-        <Command shouldFilter={false}>
-          <CommandInput placeholder="Search topics..." />
-          <CommandEmpty>No topics found.</CommandEmpty>
-          <CommandGroup>
-            {topics.map((topic) => (
-              <CommandItem
-                key={topic.value}
-                value={topic.value}
-                onSelect={() => onTopicSelection(topic.value)}
-                className="flex items-center gap-2"
-              >
-                <Check
-                  className={cn(
-                    "h-4 w-4",
-                    selectedTopics.includes(topic.value) ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                <span>{topic.label}</span>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+          <Command>
+            <CommandInput placeholder="Search topics..." className="h-9" />
+            <CommandEmpty>No topics found.</CommandEmpty>
+            <CommandGroup className="max-h-[200px] overflow-auto">
+              {topics.map((topic) => (
+                <CommandItem
+                  key={topic.value}
+                  value={topic.value}
+                  onSelect={() => {
+                    onTopicSelection(topic.value);
+                    // Don't close the popover after selection since we support multiple selections
+                  }}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <Check
+                      className={cn(
+                        "h-4 w-4",
+                        selectedTopics.includes(topic.value) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <span>{topic.label}</span>
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
