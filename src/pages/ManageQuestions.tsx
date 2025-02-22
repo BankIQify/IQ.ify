@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -16,6 +15,7 @@ type QuestionContent = {
   options: string[];
   correctAnswer: string;
   explanation: string;
+  imageUrl?: string; // Added imageUrl as optional property
 };
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
