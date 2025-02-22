@@ -63,7 +63,7 @@ export const CategoryManager = () => {
         .from('question_sections')
         .insert([{ 
           name: newSectionName,
-          category: selectedCategory
+          category: 'verbal' // Default to verbal since we removed the category selection here
         }]);
 
       if (error) throw error;
@@ -108,6 +108,22 @@ export const CategoryManager = () => {
         <h3 className="text-lg font-semibold mb-4">Add New Section</h3>
         <div className="flex gap-4 items-end">
           <div className="flex-1">
+            <Label htmlFor="sectionName">Section Name</Label>
+            <Input
+              id="sectionName"
+              value={newSectionName}
+              onChange={(e) => setNewSectionName(e.target.value)}
+              placeholder="Enter section name"
+            />
+          </div>
+          <Button onClick={handleAddSection}>Add Section</Button>
+        </div>
+      </Card>
+
+      <Card className="p-4">
+        <h3 className="text-lg font-semibold mb-4">Add New Sub-topic</h3>
+        <div className="flex gap-4 items-end">
+          <div className="flex-1">
             <Label htmlFor="category">Category</Label>
             <Select
               value={selectedCategory}
@@ -126,22 +142,6 @@ export const CategoryManager = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex-1">
-            <Label htmlFor="sectionName">Section Name</Label>
-            <Input
-              id="sectionName"
-              value={newSectionName}
-              onChange={(e) => setNewSectionName(e.target.value)}
-              placeholder="Enter section name"
-            />
-          </div>
-          <Button onClick={handleAddSection}>Add Section</Button>
-        </div>
-      </Card>
-
-      <Card className="p-4">
-        <h3 className="text-lg font-semibold mb-4">Add New Sub-topic</h3>
-        <div className="flex gap-4 items-end">
           <div className="flex-1">
             <Label htmlFor="sectionSelect">Select Section</Label>
             <select
@@ -197,4 +197,3 @@ export const CategoryManager = () => {
     </div>
   );
 };
-
