@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,10 @@ import { Menu as MenuIcon, X as CloseIcon } from "lucide-react";
 import { useState } from "react";
 
 const Navigation = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const isAdmin = user?.email === "admin@example.com"; // Replace with your admin email
 
   const handleSignOut = async () => {
     await signOut();

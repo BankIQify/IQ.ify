@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/use-toast";
 type AuthContextType = {
   user: User | null;
   profile: any | null;
+  isAdmin: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
@@ -18,7 +19,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
+
+  const checkAdminStatus = async (userId: string) => {
+    const { data, error } = await supabase.rpc('is_admin', { user_id: userId });
+    if (error) {
+      console.error('Error checking admin status:', error);
+      return;
+    }
+    setIsAdmin(data || false);
+  };
 
   useEffect(() => {
     // Check active sessions
@@ -26,6 +37,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         getProfile(session.user.id);
+        checkAdminStatus(session.user.id);
       }
     });
 
@@ -36,8 +48,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         getProfile(session.user.id);
+        checkAdminStatus(session.user.id);
       } else {
         setProfile(null);
+        setIsAdmin(false);
       }
     });
 
@@ -125,7 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, signInWithEmail, signInWithGoogle, signUp, signOut }}
+      value={{ user, profile, isAdmin, signInWithEmail, signInWithGoogle, signUp, signOut }}
     >
       {children}
     </AuthContext.Provider>
