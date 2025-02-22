@@ -46,8 +46,8 @@ export function TopicSelector({ selectedTopics, onTopicSelection, open, onOpenCh
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="p-0" align="start" sideOffset={5}>
-        <Command className="w-[200px]">
+      <PopoverContent className="w-[200px] p-0">
+        <Command shouldFilter={false}>
           <CommandInput placeholder="Search topics..." />
           <CommandEmpty>No topics found.</CommandEmpty>
           <CommandGroup>
@@ -73,4 +73,3 @@ export function TopicSelector({ selectedTopics, onTopicSelection, open, onOpenCh
     </Popover>
   );
 }
-
