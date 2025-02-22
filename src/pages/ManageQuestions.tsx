@@ -20,6 +20,14 @@ export type QuestionContent = {
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
+type Question = {
+  id: string;
+  content: QuestionContent;
+  sub_topics: {
+    name: string;
+  };
+};
+
 const ManageQuestions = () => {
   const [category, setCategory] = useState<QuestionCategory>('verbal');
   const [subTopicId, setSubTopicId] = useState<string>("");
@@ -47,7 +55,7 @@ const ManageQuestions = () => {
   });
 
   // Fetch existing questions
-  const { data: questions, isLoading } = useQuery({
+  const { data: rawQuestions, isLoading } = useQuery({
     queryKey: ['questions', subTopicId],
     queryFn: async () => {
       if (!subTopicId) return [];
@@ -68,6 +76,13 @@ const ManageQuestions = () => {
     },
     enabled: !!subTopicId,
   });
+
+  // Transform raw questions to match our frontend type
+  const questions: Question[] = (rawQuestions || []).map(q => ({
+    id: q.id,
+    content: q.content as QuestionContent,
+    sub_topics: q.sub_topics
+  }));
 
   return (
     <div className="page-container">
