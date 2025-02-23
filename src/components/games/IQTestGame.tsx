@@ -15,6 +15,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string>("");
   const [showExplanation, setShowExplanation] = useState(false);
   const [answeredQuestions, setAnsweredQuestions] = useState<number[]>([]);
+  const [gameQuestions, setGameQuestions] = useState<Question[]>([]);
   const { toast } = useToast();
 
   const gameState = useGameState({
@@ -25,16 +26,32 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
     },
   });
 
-  const filteredQuestions = QUESTIONS.filter(q => q.difficulty === difficulty);
-  const currentQuestion = filteredQuestions[currentQuestionIndex];
-
   useEffect(() => {
-    gameState.startGame();
+    // Get questions for the current difficulty
+    const questionsForDifficulty = QUESTIONS.filter(q => q.difficulty === difficulty);
+    
+    // Randomly select 15 questions
+    const shuffled = [...questionsForDifficulty].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, 15);
+    
+    // If we don't have enough questions for the difficulty, pad with random questions from other difficulties
+    if (selected.length < 15) {
+      const remainingQuestions = QUESTIONS
+        .filter(q => q.difficulty !== difficulty)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 15 - selected.length);
+      
+      selected.push(...remainingQuestions);
+    }
+    
+    setGameQuestions(selected);
+    
     // Reset game state when difficulty changes
     setCurrentQuestionIndex(0);
     setSelectedAnswer("");
     setShowExplanation(false);
     setAnsweredQuestions([]);
+    gameState.startGame();
   }, [difficulty]);
 
   const handleAnswer = () => {
@@ -47,6 +64,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
       return;
     }
 
+    const currentQuestion = gameQuestions[currentQuestionIndex];
     const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
     
     if (isCorrect) {
@@ -68,7 +86,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const handleNext = () => {
-    if (currentQuestionIndex < filteredQuestions.length - 1) {
+    if (currentQuestionIndex < gameQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer("");
       setShowExplanation(false);
@@ -78,7 +96,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const handleGameOver = () => {
-    const totalQuestions = filteredQuestions.length;
+    const totalQuestions = gameQuestions.length;
     const answeredCount = answeredQuestions.length;
     const accuracy = Math.round((gameState.score / (answeredCount * 10)) * 100);
 
@@ -90,6 +108,8 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
     gameState.resetGame();
   };
 
+  const currentQuestion = gameQuestions[currentQuestionIndex];
+
   if (!currentQuestion) return null;
 
   return (
@@ -97,7 +117,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
       <div className="flex justify-between items-center mb-4">
         <div>
           <span className="text-sm text-muted-foreground">
-            Question {currentQuestionIndex + 1} of {filteredQuestions.length}
+            Question {currentQuestionIndex + 1} of {gameQuestions.length}
           </span>
         </div>
         <div className="flex items-center gap-4">
@@ -145,7 +165,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
                 onClick={handleNext}
                 className="w-full"
               >
-                {currentQuestionIndex < filteredQuestions.length - 1
+                {currentQuestionIndex < gameQuestions.length - 1
                   ? "Next Question"
                   : "Finish Game"}
               </Button>
