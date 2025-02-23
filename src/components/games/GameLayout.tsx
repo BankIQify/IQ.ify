@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, RotateCcw, Settings } from "lucide-react";
+import type { Difficulty } from "@/components/games/GameSettings";
 
 interface GameLayoutProps {
   title: string;
@@ -11,6 +12,7 @@ interface GameLayoutProps {
   score?: number;
   timer?: number;
   showSettings?: boolean;
+  difficulty: Difficulty;
   onReset?: () => void;
   settingsContent?: ReactNode;
   children: ReactNode;
@@ -22,6 +24,7 @@ export const GameLayout = ({
   score = 0,
   timer,
   showSettings = true,
+  difficulty,
   onReset,
   settingsContent,
   children,
