@@ -7,6 +7,8 @@ import type { Difficulty } from "@/components/games/GameSettings";
 import { Puzzle, Grid, BookOpen, LayoutGrid } from "lucide-react";
 import { MemoryGame } from "@/components/games/MemoryGame";
 import { SudokuGame } from "@/components/games/SudokuGame";
+import { WordSearchGame } from "@/components/games/WordSearchGame";
+import { CrosswordGame } from "@/components/games/CrosswordGame";
 
 const BrainTraining = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
@@ -26,11 +28,21 @@ const BrainTraining = () => {
                  selectedGame === "crossword" ? "Crossword" :
                  selectedGame === "memory" ? "Memory Game" : "Sudoku"}
           difficulty={difficulty}
+          settingsContent={
+            <GameSettings
+              difficulty={difficulty}
+              onDifficultyChange={setDifficulty}
+            />
+          }
         >
           {selectedGame === "memory" ? (
             <MemoryGame difficulty={difficulty} />
           ) : selectedGame === "sudoku" ? (
             <SudokuGame difficulty={difficulty} />
+          ) : selectedGame === "word_search" ? (
+            <WordSearchGame difficulty={difficulty} />
+          ) : selectedGame === "crossword" ? (
+            <CrosswordGame difficulty={difficulty} />
           ) : (
             <div className="grid place-items-center min-h-[400px]">
               <p className="text-muted-foreground">Game content will be displayed here</p>
