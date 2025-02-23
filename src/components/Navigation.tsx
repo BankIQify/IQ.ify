@@ -41,6 +41,13 @@ const Navigation = () => {
       >
         Let's Practice!
       </Link>
+      <Link 
+        to="/brain-training" 
+        className="block px-4 py-2 text-sm hover:bg-pastel-yellow/20 rounded-md"
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
+        Brain Training Games
+      </Link>
       {isAdmin && (
         <Link 
           to="/manage-questions" 

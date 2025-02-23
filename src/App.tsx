@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import ManageQuestions from "./pages/ManageQuestions";
 import ManageExams from "./pages/ManageExams";
+import BrainTraining from "./pages/BrainTraining";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SubjectProgress from "./pages/SubjectProgress";
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/lets-practice" element={<ManageExams />} />
+              <Route path="/brain-training" element={<BrainTraining />} />
               <Route path="/progress/:subject" element={<SubjectProgress />} />
               <Route 
                 path="/manage-questions" 
