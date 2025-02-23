@@ -13,7 +13,7 @@ export interface GameState {
 
 interface UseGameStateProps {
   initialTimer?: number;
-  gameType: 'word_search' | 'crossword' | 'sudoku';
+  gameType: 'word_search' | 'crossword' | 'sudoku' | 'times_tables';
   onGameOver?: () => void;
 }
 
