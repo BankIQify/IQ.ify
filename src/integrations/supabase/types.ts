@@ -123,6 +123,39 @@ export type Database = {
         }
         Relationships: []
       }
+      game_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          duration_seconds: number | null
+          game_type: Database["public"]["Enums"]["game_type"]
+          id: string
+          score: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          game_type: Database["public"]["Enums"]["game_type"]
+          id?: string
+          score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          game_type?: Database["public"]["Enums"]["game_type"]
+          id?: string
+          score?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -307,6 +340,12 @@ export type Database = {
       }
     }
     Enums: {
+      game_type:
+        | "times_tables"
+        | "memory_cards"
+        | "chess"
+        | "number_sequence"
+        | "word_scramble"
       question_category: "verbal" | "non_verbal" | "brain_training"
       user_role: "admin" | "user"
     }
