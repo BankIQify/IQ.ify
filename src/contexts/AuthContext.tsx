@@ -3,14 +3,25 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { FocusArea } from "@/types/auth";
+
+type Profile = {
+  id: string;
+  name: string | null;
+  age: number | null;
+  city: string | null;
+  country: string | null;
+  school: string | null;
+  focus_areas: FocusArea[];
+};
 
 type AuthContextType = {
   user: User | null;
-  profile: any | null;
+  profile: Profile | null;
   isAdmin: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, profileData: Partial<Profile>) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -18,7 +29,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
 
@@ -50,7 +61,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Check active sessions
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session check:', session);
       setUser(session?.user ?? null);
@@ -63,7 +73,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -94,6 +103,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      if (data) {
+        // Fetch focus areas
+        const { data: focusAreasData, error: focusAreasError } = await supabase
+          .from("user_focus_areas")
+          .select("focus_area")
+          .eq("user_id", userId);
+
+        if (focusAreasError) {
+          console.error("Error fetching focus areas:", focusAreasError);
+        } else {
+          data.focus_areas = focusAreasData?.map(fa => fa.focus_area) || [];
+        }
+      }
+
       setProfile(data);
     } catch (error) {
       console.error("Error in getProfile:", error);
@@ -103,22 +126,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithEmail = async (email: string, password: string) => {
     console.log('Attempting email sign in:', email);
-    const { error, data } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       console.error('Sign in error:', error);
-      toast({
-        variant: "destructive",
-        title: "Error signing in",
-        description: error.message,
-      });
       throw error;
     }
-
-    console.log('Sign in successful:', data);
   };
 
   const signInWithGoogle = async () => {
@@ -126,30 +142,51 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       provider: "google",
     });
 
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error signing in with Google",
-        description: error.message,
-      });
-      throw error;
-    }
+    if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, profileData: Partial<Profile>) => {
+    const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password,
     });
 
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error signing up",
-        description: error.message,
-      });
-      throw error;
-    } else {
+    if (signUpError) throw signUpError;
+
+    if (data.user) {
+      // Update profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          name: profileData.name,
+          age: profileData.age,
+          country: profileData.country,
+          city: profileData.city,
+        })
+        .eq('id', data.user.id);
+
+      if (profileError) {
+        console.error("Error updating profile:", profileError);
+        throw profileError;
+      }
+
+      // Insert focus areas
+      if (profileData.focus_areas && profileData.focus_areas.length > 0) {
+        const focusAreasToInsert = profileData.focus_areas.map(focus_area => ({
+          user_id: data.user.id,
+          focus_area,
+        }));
+
+        const { error: focusAreasError } = await supabase
+          .from('user_focus_areas')
+          .insert(focusAreasToInsert);
+
+        if (focusAreasError) {
+          console.error("Error inserting focus areas:", focusAreasError);
+          throw focusAreasError;
+        }
+      }
+
       toast({
         title: "Success!",
         description: "Please check your email to confirm your account.",
@@ -159,19 +196,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Error signing out",
-        description: error.message,
-      });
-      throw error;
-    }
+    if (error) throw error;
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, isAdmin, signInWithEmail, signInWithGoogle, signUp, signOut }}
+      value={{
+        user,
+        profile,
+        isAdmin,
+        signInWithEmail,
+        signInWithGoogle,
+        signUp,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

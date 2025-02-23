@@ -6,15 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import { AuthError } from "@supabase/supabase-js";
+import { FocusArea, focusAreaLabels } from "@/types/auth";
+import { Label } from "@/components/ui/label";
 
 const Auth = () => {
   const { user, signInWithEmail, signInWithGoogle, signUp } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  // Form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [selectedFocusAreas, setSelectedFocusAreas] = useState<FocusArea[]>([]);
 
   // Redirect if already authenticated
   if (user) {
@@ -25,7 +35,6 @@ const Auth = () => {
     console.error("Authentication error:", error);
     let message = "An error occurred during authentication.";
 
-    // Customize error messages based on error code
     switch (error.message) {
       case "Invalid login credentials":
         message = "Email or password is incorrect. Please try again.";
@@ -49,11 +58,22 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!email || !password) {
       toast({
         variant: "destructive",
         title: "Validation Error",
-        description: "Please fill in all fields",
+        description: "Please fill in all required fields",
+      });
+      return;
+    }
+
+    // Additional validation for registration
+    if (!isLogin && (!name || !age || !country || !city)) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please fill in all required fields",
       });
       return;
     }
@@ -63,7 +83,13 @@ const Auth = () => {
       if (isLogin) {
         await signInWithEmail(email, password);
       } else {
-        await signUp(email, password);
+        await signUp(email, password, {
+          name,
+          age: parseInt(age),
+          country,
+          city,
+          focus_areas: selectedFocusAreas,
+        });
       }
     } catch (error) {
       handleAuthError(error as AuthError);
@@ -76,7 +102,6 @@ const Auth = () => {
     setLoading(true);
     try {
       console.log("Initiating Google sign in...");
-      // Add window focus handling for popup
       const handleWindowFocus = () => {
         console.log("Window focused - checking auth state");
         window.removeEventListener('focus', handleWindowFocus);
@@ -91,8 +116,16 @@ const Auth = () => {
     }
   };
 
+  const handleFocusAreaToggle = (focusArea: FocusArea) => {
+    setSelectedFocusAreas(current =>
+      current.includes(focusArea)
+        ? current.filter(area => area !== focusArea)
+        : [...current, focusArea]
+    );
+  };
+
   return (
-    <div className="page-container flex items-center justify-center min-h-[calc(100vh-4rem)]">
+    <div className="page-container flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
       <Card className="w-full max-w-md p-6 space-y-6">
         <h1 className="text-2xl font-bold text-center">
           {isLogin ? "Sign In" : "Sign Up"}
@@ -120,6 +153,80 @@ const Auth = () => {
               aria-label="Password"
             />
           </div>
+
+          {!isLogin && (
+            <>
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={loading}
+                  aria-label="Name"
+                />
+              </div>
+              <div>
+                <Input
+                  type="number"
+                  placeholder="Age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required
+                  disabled={loading}
+                  min="1"
+                  max="120"
+                  aria-label="Age"
+                />
+              </div>
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  required
+                  disabled={loading}
+                  aria-label="Country"
+                />
+              </div>
+              <div>
+                <Input
+                  type="text"
+                  placeholder="City"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  disabled={loading}
+                  aria-label="City"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Areas of Focus</Label>
+                <div className="space-y-2">
+                  {Object.entries(focusAreaLabels).map(([value, label]) => (
+                    <div key={value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={value}
+                        checked={selectedFocusAreas.includes(value as FocusArea)}
+                        onCheckedChange={() => handleFocusAreaToggle(value as FocusArea)}
+                        disabled={loading}
+                      />
+                      <Label
+                        htmlFor={value}
+                        className="text-sm font-normal cursor-pointer"
+                      >
+                        {label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
           <Button
             type="submit"
             className="w-full"

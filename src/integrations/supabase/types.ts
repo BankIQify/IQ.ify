@@ -162,6 +162,7 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          focus_areas: Database["public"]["Enums"]["focus_area"][] | null
           id: string
           name: string | null
           school: string | null
@@ -172,6 +173,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          focus_areas?: Database["public"]["Enums"]["focus_area"][] | null
           id: string
           name?: string | null
           school?: string | null
@@ -182,6 +184,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          focus_areas?: Database["public"]["Enums"]["focus_area"][] | null
           id?: string
           name?: string | null
           school?: string | null
@@ -299,6 +302,35 @@ export type Database = {
           },
         ]
       }
+      user_focus_areas: {
+        Row: {
+          created_at: string | null
+          focus_area: Database["public"]["Enums"]["focus_area"]
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          focus_area: Database["public"]["Enums"]["focus_area"]
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          focus_area?: Database["public"]["Enums"]["focus_area"]
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_focus_areas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -340,6 +372,14 @@ export type Database = {
       }
     }
     Enums: {
+      focus_area:
+        | "eleven_plus_prep"
+        | "iq_improvement"
+        | "focus_improvement"
+        | "test_taking"
+        | "problem_solving"
+        | "time_management"
+        | "confidence_building"
       game_type:
         | "times_tables"
         | "memory_cards"
