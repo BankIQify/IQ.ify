@@ -6,6 +6,7 @@ import { GameSettings } from "@/components/games/GameSettings";
 import type { Difficulty } from "@/components/games/GameSettings";
 import { Puzzle, Grid, BookOpen, LayoutGrid } from "lucide-react";
 import { MemoryGame } from "@/components/games/MemoryGame";
+import { SudokuGame } from "@/components/games/SudokuGame";
 
 const BrainTraining = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
@@ -28,6 +29,8 @@ const BrainTraining = () => {
         >
           {selectedGame === "memory" ? (
             <MemoryGame difficulty={difficulty} />
+          ) : selectedGame === "sudoku" ? (
+            <SudokuGame difficulty={difficulty} />
           ) : (
             <div className="grid place-items-center min-h-[400px]">
               <p className="text-muted-foreground">Game content will be displayed here</p>
@@ -117,4 +120,3 @@ const BrainTraining = () => {
 };
 
 export default BrainTraining;
-
