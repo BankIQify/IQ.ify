@@ -21,24 +21,32 @@ interface SubTopicFormProps {
 
 export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) => {
   const [selectedCategory, setSelectedCategory] = useState<'verbal' | 'non_verbal' | 'brain_training'>('verbal');
-  const [selectedSection, setSelectedSection] = useState<string>("");
   const [newSubTopicName, setNewSubTopicName] = useState("");
 
-  // Filter sections based on selected category
-  const filteredSections = sections?.filter(section => section.category === selectedCategory);
-
   const handleAddSubTopic = async () => {
-    if (!selectedSection || !newSubTopicName.trim()) {
-      toast.error("Please select a section and enter a sub-topic name");
+    if (!newSubTopicName.trim()) {
+      toast.error("Please enter a sub-topic name");
       return;
     }
 
     try {
+      // Get the section ID for the selected category
+      const { data: sectionData } = await supabase
+        .from('question_sections')
+        .select('id')
+        .eq('category', selectedCategory)
+        .single();
+
+      if (!sectionData) {
+        toast.error("Failed to find section for selected category");
+        return;
+      }
+
       const { error } = await supabase
         .from('sub_topics')
         .insert([{ 
           name: newSubTopicName,
-          section_id: selectedSection
+          section_id: sectionData.id
         }]);
 
       if (error) throw error;
@@ -62,7 +70,6 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
             value={selectedCategory}
             onValueChange={(value: 'verbal' | 'non_verbal' | 'brain_training') => {
               setSelectedCategory(value);
-              setSelectedSection("");
             }}
           >
             <SelectTrigger>
@@ -72,24 +79,6 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
               <SelectItem value="verbal">Verbal Reasoning</SelectItem>
               <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
               <SelectItem value="brain_training">Brain Training</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex-1">
-          <Label htmlFor="sectionSelect">Select Section</Label>
-          <Select
-            value={selectedSection}
-            onValueChange={setSelectedSection}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select a section" />
-            </SelectTrigger>
-            <SelectContent>
-              {filteredSections?.map((section) => (
-                <SelectItem key={section.id} value={section.id}>
-                  {section.name}
-                </SelectItem>
-              ))}
             </SelectContent>
           </Select>
         </div>
