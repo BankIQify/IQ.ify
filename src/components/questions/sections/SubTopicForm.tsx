@@ -6,13 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 interface SubTopicFormProps {
   sections?: any[];
@@ -58,22 +51,19 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
       <div className="flex gap-4 items-end">
         <div className="flex-1">
           <Label htmlFor="category">Category</Label>
-          <Select
+          <select
+            id="category"
             value={selectedCategory}
-            onValueChange={(value: 'verbal' | 'non_verbal' | 'brain_training') => {
-              setSelectedCategory(value);
+            onChange={(e) => {
+              setSelectedCategory(e.target.value as 'verbal' | 'non_verbal' | 'brain_training');
               setSelectedSection("");
             }}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="verbal">Verbal Reasoning</SelectItem>
-              <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
-              <SelectItem value="brain_training">Brain Training</SelectItem>
-            </SelectContent>
-          </Select>
+            <option value="verbal">Verbal Reasoning</option>
+            <option value="non_verbal">Non-Verbal Reasoning</option>
+            <option value="brain_training">Brain Training</option>
+          </select>
         </div>
         <div className="flex-1">
           <Label htmlFor="sectionSelect">Select Section</Label>
@@ -105,4 +95,3 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
     </Card>
   );
 };
-
