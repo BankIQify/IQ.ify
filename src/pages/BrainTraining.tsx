@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { GameLayout } from "@/components/games/GameLayout";
@@ -11,7 +10,7 @@ import { WordSearchGame } from "@/components/games/WordSearchGame";
 import { CrosswordGame } from "@/components/games/CrosswordGame";
 import { GeographyGame } from "@/components/games/GeographyGame";
 import { TimesTablesGame } from "@/components/games/TimesTablesGame";
-import { IQTestGame } from "@/components/games/IQTestGame";
+import IQTestGame from "@/components/games/IQTestGame";
 
 const BrainTraining = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
