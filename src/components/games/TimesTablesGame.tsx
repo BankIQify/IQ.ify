@@ -1,58 +1,28 @@
+
 import { useState, useEffect } from "react";
-import { Check, Timer, X } from "lucide-react";
+import { Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useGameState } from "@/hooks/use-game-state";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-
-type Question = {
-  num1: number;
-  num2: number;
-  operation: "multiply" | "divide";
-  answer: number;
-  userAnswer?: number;
-  isCorrect?: boolean;
-};
+import { TableSelector } from "./times-tables/TableSelector";
+import { TimeLimitSelector } from "./times-tables/TimeLimitSelector";
+import { GameResults } from "./times-tables/GameResults";
+import { generateQuestion } from "./times-tables/utils";
+import type { Question } from "./times-tables/types";
 
 export const TimesTablesGame = () => {
   const [selectedTables, setSelectedTables] = useState<number[]>([]);
-  const [timeLimit, setTimeLimit] = useState<number>(60); // 1 minute default
+  const [timeLimit, setTimeLimit] = useState<number>(60);
   const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
   const [userAnswer, setUserAnswer] = useState<string>("");
   const [answeredQuestions, setAnsweredQuestions] = useState<Question[]>([]);
   const { toast } = useToast();
   const { timer, isActive, startGame, resetGame } = useGameState({
     initialTimer: timeLimit,
-    gameType: "sudoku", // Temporarily using sudoku as the game type since it's supported
+    gameType: "sudoku",
   });
-
-  const generateQuestion = (): Question | null => {
-    if (selectedTables.length === 0) return null;
-
-    const tableIndex = Math.floor(Math.random() * selectedTables.length);
-    const num1 = selectedTables[tableIndex];
-    const num2 = Math.floor(Math.random() * 25) + 1;
-    const operation: "multiply" | "divide" = Math.random() < 0.5 ? "multiply" : "divide";
-
-    if (operation === "multiply") {
-      return {
-        num1,
-        num2,
-        operation,
-        answer: num1 * num2,
-      };
-    } else {
-      return {
-        num1: num1 * num2, // The dividend
-        num2: num1, // The divisor
-        operation,
-        answer: num2, // The quotient
-      };
-    }
-  };
 
   const handleAnswer = () => {
     if (!currentQuestion || !userAnswer) return;
@@ -68,7 +38,7 @@ export const TimesTablesGame = () => {
 
     setAnsweredQuestions((prev) => [...prev, answeredQuestion]);
     setUserAnswer("");
-    setCurrentQuestion(generateQuestion());
+    setCurrentQuestion(generateQuestion(selectedTables));
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -87,15 +57,9 @@ export const TimesTablesGame = () => {
       return;
     }
     setAnsweredQuestions([]);
-    setCurrentQuestion(generateQuestion());
+    setCurrentQuestion(generateQuestion(selectedTables));
     startGame();
   };
-
-  useEffect(() => {
-    if (timer === 0) {
-      setCurrentQuestion(null);
-    }
-  }, [timer]);
 
   const toggleTable = (table: number) => {
     setSelectedTables((prev) =>
@@ -105,47 +69,26 @@ export const TimesTablesGame = () => {
     );
   };
 
+  useEffect(() => {
+    if (timer === 0) {
+      setCurrentQuestion(null);
+    }
+  }, [timer]);
+
   const progressPercentage = (timer / timeLimit) * 100;
 
   return (
     <div className="space-y-6">
       {!isActive && (
         <div className="space-y-4">
-          <div className="grid grid-cols-5 gap-4">
-            {Array.from({ length: 25 }, (_, i) => i + 1).map((table) => (
-              <div key={table} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`table-${table}`}
-                  checked={selectedTables.includes(table)}
-                  onCheckedChange={() => toggleTable(table)}
-                />
-                <Label htmlFor={`table-${table}`}>{table}×</Label>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2">
-            <Label>Time Limit</Label>
-            <div className="flex gap-2">
-              <Button
-                variant={timeLimit === 60 ? "default" : "outline"}
-                onClick={() => setTimeLimit(60)}
-              >
-                1 Minute
-              </Button>
-              <Button
-                variant={timeLimit === 120 ? "default" : "outline"}
-                onClick={() => setTimeLimit(120)}
-              >
-                2 Minutes
-              </Button>
-              <Button
-                variant={timeLimit === 180 ? "default" : "outline"}
-                onClick={() => setTimeLimit(180)}
-              >
-                3 Minutes
-              </Button>
-            </div>
-          </div>
+          <TableSelector
+            selectedTables={selectedTables}
+            onToggleTable={toggleTable}
+          />
+          <TimeLimitSelector
+            timeLimit={timeLimit}
+            onTimeLimitChange={setTimeLimit}
+          />
           <Button onClick={handleStart}>Start Game</Button>
         </div>
       )}
@@ -178,33 +121,12 @@ export const TimesTablesGame = () => {
       )}
 
       {timer === 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-bold">Game Over!</h3>
-          <div className="space-y-2">
-            <p>
-              Score: {answeredQuestions.filter((q) => q.isCorrect).length} /{" "}
-              {answeredQuestions.length}
-            </p>
-            <div className="space-y-2">
-              <h4 className="font-semibold">Incorrect Answers:</h4>
-              {answeredQuestions
-                .filter((q) => !q.isCorrect)
-                .map((q, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 text-destructive"
-                  >
-                    <X className="h-4 w-4" />
-                    {q.operation === "multiply"
-                      ? `${q.num1} × ${q.num2} = ${q.answer} (you answered: ${q.userAnswer})`
-                      : `${q.num1} ÷ ${q.num2} = ${q.answer} (you answered: ${q.userAnswer})`}
-                  </div>
-                ))}
-            </div>
-          </div>
-          <Button onClick={resetGame}>Try Again</Button>
-        </div>
+        <GameResults
+          answeredQuestions={answeredQuestions}
+          onReset={resetGame}
+        />
       )}
     </div>
   );
 };
+
