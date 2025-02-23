@@ -346,6 +346,9 @@ export type Database = {
         | "chess"
         | "number_sequence"
         | "word_scramble"
+        | "word_search"
+        | "crossword"
+        | "sudoku"
       question_category: "verbal" | "non_verbal" | "brain_training"
       user_role: "admin" | "user"
     }
