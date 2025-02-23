@@ -23,6 +23,7 @@ export const ExampleGame = () => {
       description="Find hidden words in the grid"
       score={score}
       timer={timer}
+      difficulty={difficulty}
       onReset={resetGame}
       settingsContent={
         <GameSettings
