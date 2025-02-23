@@ -1,18 +1,18 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { GameLayout } from "@/components/games/GameLayout";
 import { GameSettings } from "@/components/games/GameSettings";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Puzzle, Grid, BookOpen, LayoutGrid } from "lucide-react";
+import { Puzzle, Grid, BookOpen, LayoutGrid, Globe2 } from "lucide-react";
 import { MemoryGame } from "@/components/games/MemoryGame";
 import { SudokuGame } from "@/components/games/SudokuGame";
 import { WordSearchGame } from "@/components/games/WordSearchGame";
 import { CrosswordGame } from "@/components/games/CrosswordGame";
+import { GeographyGame } from "@/components/games/GeographyGame";
 
 const BrainTraining = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | "memory" | null>(null);
+  const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | "memory" | "geography" | null>(null);
 
   if (selectedGame) {
     return (
@@ -26,7 +26,8 @@ const BrainTraining = () => {
         <GameLayout
           title={selectedGame === "word_search" ? "Word Search" : 
                  selectedGame === "crossword" ? "Crossword" :
-                 selectedGame === "memory" ? "Memory Game" : "Sudoku"}
+                 selectedGame === "memory" ? "Memory Game" :
+                 selectedGame === "geography" ? "Geography Quiz" : "Sudoku"}
           difficulty={difficulty}
           settingsContent={
             <GameSettings
@@ -43,6 +44,8 @@ const BrainTraining = () => {
             <WordSearchGame difficulty={difficulty} />
           ) : selectedGame === "crossword" ? (
             <CrosswordGame difficulty={difficulty} />
+          ) : selectedGame === "geography" ? (
+            <GeographyGame difficulty={difficulty} />
           ) : (
             <div className="grid place-items-center min-h-[400px]">
               <p className="text-muted-foreground">Game content will be displayed here</p>
@@ -123,6 +126,21 @@ const BrainTraining = () => {
             <CardTitle>Memory Game</CardTitle>
             <CardDescription>
               Test your memory by matching pairs of cards in this classic concentration game.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedGame("geography")}
+        >
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <Globe2 className="w-12 h-12 text-pastel-green" />
+            </div>
+            <CardTitle>Geography Quiz</CardTitle>
+            <CardDescription>
+              Test your knowledge of countries and their capitals by identifying flags from around the world.
             </CardDescription>
           </CardHeader>
         </Card>
