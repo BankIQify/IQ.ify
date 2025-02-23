@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Check, Timer, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useGameState } from "@/hooks/use-game-state";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 
 type Question = {
   num1: number;
@@ -105,6 +105,8 @@ export const TimesTablesGame = () => {
     );
   };
 
+  const progressPercentage = (timer / timeLimit) * 100;
+
   return (
     <div className="space-y-6">
       {!isActive && (
@@ -150,6 +152,11 @@ export const TimesTablesGame = () => {
 
       {isActive && currentQuestion && (
         <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Timer className="h-4 w-4" />
+            <span>{timer}s</span>
+            <Progress value={progressPercentage} className="flex-1" />
+          </div>
           <div className="text-2xl font-bold text-center">
             {currentQuestion.operation === "multiply"
               ? `${currentQuestion.num1} × ${currentQuestion.num2} = ?`
@@ -201,4 +208,3 @@ export const TimesTablesGame = () => {
     </div>
   );
 };
-
