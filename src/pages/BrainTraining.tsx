@@ -1,13 +1,36 @@
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { GameLayout } from "@/components/games/GameLayout";
 import { GameSettings } from "@/components/games/GameSettings";
 import type { Difficulty } from "@/components/games/GameSettings";
+import { Puzzle, Grid, BookOpen } from "lucide-react";
 
 const BrainTraining = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | null>(null);
+
+  if (selectedGame) {
+    return (
+      <div className="page-container">
+        <button 
+          onClick={() => setSelectedGame(null)}
+          className="mb-4 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          ← Back to games
+        </button>
+        <GameLayout
+          title={selectedGame === "word_search" ? "Word Search" : 
+                 selectedGame === "crossword" ? "Crossword" : "Sudoku"}
+          difficulty={difficulty}
+        >
+          <div className="grid place-items-center min-h-[400px]">
+            <p className="text-muted-foreground">Game content will be displayed here</p>
+          </div>
+        </GameLayout>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container">
@@ -22,34 +45,52 @@ const BrainTraining = () => {
         />
       </Card>
 
-      <Tabs defaultValue="word-search" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="word-search">Word Search</TabsTrigger>
-          <TabsTrigger value="crossword">Crossword</TabsTrigger>
-          <TabsTrigger value="sudoku">Sudoku</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedGame("word_search")}
+        >
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <BookOpen className="w-12 h-12 text-pastel-blue" />
+            </div>
+            <CardTitle>Word Search</CardTitle>
+            <CardDescription>
+              Challenge your vocabulary and attention to detail by finding hidden words in a grid of letters.
+            </CardDescription>
+          </CardHeader>
+        </Card>
 
-        <TabsContent value="word-search">
-          <GameLayout
-            gameType="word_search"
-            difficulty={difficulty}
-          />
-        </TabsContent>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedGame("crossword")}
+        >
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <Puzzle className="w-12 h-12 text-pastel-purple" />
+            </div>
+            <CardTitle>Crossword</CardTitle>
+            <CardDescription>
+              Test your knowledge and problem-solving skills with interconnected word puzzles and clever clues.
+            </CardDescription>
+          </CardHeader>
+        </Card>
 
-        <TabsContent value="crossword">
-          <GameLayout
-            gameType="crossword"
-            difficulty={difficulty}
-          />
-        </TabsContent>
-
-        <TabsContent value="sudoku">
-          <GameLayout
-            gameType="sudoku"
-            difficulty={difficulty}
-          />
-        </TabsContent>
-      </Tabs>
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedGame("sudoku")}
+        >
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <Grid className="w-12 h-12 text-pastel-green" />
+            </div>
+            <CardTitle>Sudoku</CardTitle>
+            <CardDescription>
+              Exercise your logical thinking by filling a 9x9 grid with numbers following specific rules.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
     </div>
   );
 };
