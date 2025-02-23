@@ -30,33 +30,46 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
     }
 
     try {
-      // Get the section ID for the selected category
-      const { data: sectionData } = await supabase
+      // First, let's get all sections for the selected category
+      const { data: sections, error: sectionError } = await supabase
         .from('question_sections')
         .select('id')
-        .eq('category', selectedCategory)
-        .single();
+        .eq('category', selectedCategory);
 
-      if (!sectionData) {
+      if (sectionError) {
+        console.error("Error fetching section:", sectionError);
         toast.error("Failed to find section for selected category");
         return;
       }
 
-      const { error } = await supabase
+      if (!sections || sections.length === 0) {
+        console.error("No section found for category:", selectedCategory);
+        toast.error("No section found for selected category");
+        return;
+      }
+
+      // Use the first section found for this category
+      const sectionId = sections[0].id;
+
+      const { error: insertError } = await supabase
         .from('sub_topics')
         .insert([{ 
           name: newSubTopicName,
-          section_id: sectionData.id
+          section_id: sectionId
         }]);
 
-      if (error) throw error;
+      if (insertError) {
+        console.error("Error inserting sub-topic:", insertError);
+        toast.error("Failed to add sub-topic: " + insertError.message);
+        return;
+      }
 
       toast.success("Sub-topic added successfully");
       setNewSubTopicName("");
       onSubTopicAdded();
     } catch (error) {
-      toast.error("Failed to add sub-topic");
-      console.error("Error adding sub-topic:", error);
+      console.error("Unexpected error adding sub-topic:", error);
+      toast.error("An unexpected error occurred while adding the sub-topic");
     }
   };
 
@@ -96,3 +109,4 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
     </Card>
   );
 };
+
