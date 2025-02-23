@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { GameLayout } from "@/components/games/GameLayout";
 import { GameSettings } from "@/components/games/GameSettings";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Puzzle, Grid, BookOpen, Layout2 } from "lucide-react";
+import { Puzzle, Grid, BookOpen, LayoutGrid } from "lucide-react";
 import { MemoryGame } from "@/components/games/MemoryGame";
 
 const BrainTraining = () => {
@@ -103,7 +103,7 @@ const BrainTraining = () => {
         >
           <CardHeader>
             <div className="flex justify-center mb-4">
-              <Layout2 className="w-12 h-12 text-pastel-orange" />
+              <LayoutGrid className="w-12 h-12 text-pastel-orange" />
             </div>
             <CardTitle>Memory Game</CardTitle>
             <CardDescription>
@@ -117,3 +117,4 @@ const BrainTraining = () => {
 };
 
 export default BrainTraining;
+
