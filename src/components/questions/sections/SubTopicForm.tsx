@@ -22,6 +22,7 @@ interface SubTopicFormProps {
 export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) => {
   const [selectedCategory, setSelectedCategory] = useState<'verbal' | 'non_verbal' | 'brain_training'>('verbal');
   const [newSubTopicName, setNewSubTopicName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddSubTopic = async () => {
     if (!newSubTopicName.trim()) {
@@ -30,11 +31,14 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
     }
 
     try {
-      // First, let's get all sections for the selected category
+      setIsSubmitting(true);
+
+      // First, let's get the section for the selected category
       const { data: sections, error: sectionError } = await supabase
         .from('question_sections')
         .select('id')
-        .eq('category', selectedCategory);
+        .eq('category', selectedCategory)
+        .limit(1);
 
       if (sectionError) {
         console.error("Error fetching section:", sectionError);
@@ -44,11 +48,10 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
 
       if (!sections || sections.length === 0) {
         console.error("No section found for category:", selectedCategory);
-        toast.error("No section found for selected category");
+        toast.error("No section found for selected category. Please create a section first.");
         return;
       }
 
-      // Use the first section found for this category
       const sectionId = sections[0].id;
 
       const { error: insertError } = await supabase
@@ -60,7 +63,7 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
 
       if (insertError) {
         console.error("Error inserting sub-topic:", insertError);
-        toast.error("Failed to add sub-topic: " + insertError.message);
+        toast.error("Failed to add sub-topic");
         return;
       }
 
@@ -69,7 +72,9 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
       onSubTopicAdded();
     } catch (error) {
       console.error("Unexpected error adding sub-topic:", error);
-      toast.error("An unexpected error occurred while adding the sub-topic");
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,9 +109,13 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
             placeholder="Enter sub-topic name"
           />
         </div>
-        <Button onClick={handleAddSubTopic}>Add Sub-topic</Button>
+        <Button 
+          onClick={handleAddSubTopic}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Adding..." : "Add Sub-topic"}
+        </Button>
       </div>
     </Card>
   );
 };
-
