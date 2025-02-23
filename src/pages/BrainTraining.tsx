@@ -1,19 +1,21 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { GameLayout } from "@/components/games/GameLayout";
 import { GameSettings } from "@/components/games/GameSettings";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Puzzle, Grid, BookOpen, LayoutGrid, Globe2, Calculator } from "lucide-react";
+import { Puzzle, Grid, BookOpen, LayoutGrid, Globe2, Calculator, Brain } from "lucide-react";
 import { MemoryGame } from "@/components/games/MemoryGame";
 import { SudokuGame } from "@/components/games/SudokuGame";
 import { WordSearchGame } from "@/components/games/WordSearchGame";
 import { CrosswordGame } from "@/components/games/CrosswordGame";
 import { GeographyGame } from "@/components/games/GeographyGame";
 import { TimesTablesGame } from "@/components/games/TimesTablesGame";
+import { IQTestGame } from "@/components/games/IQTestGame";
 
 const BrainTraining = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | "memory" | "geography" | "times_tables" | null>(null);
+  const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | "memory" | "geography" | "times_tables" | "iq_test" | null>(null);
 
   if (selectedGame) {
     return (
@@ -30,6 +32,7 @@ const BrainTraining = () => {
                  selectedGame === "memory" ? "Memory Game" :
                  selectedGame === "geography" ? "Geography Quiz" :
                  selectedGame === "times_tables" ? "Times Tables Test" :
+                 selectedGame === "iq_test" ? "IQ Test" :
                  "Sudoku"}
           difficulty={difficulty}
           settingsContent={selectedGame !== "times_tables" ? (
@@ -52,6 +55,8 @@ const BrainTraining = () => {
             <GeographyGame difficulty={difficulty} />
           ) : selectedGame === "times_tables" ? (
             <TimesTablesGame />
+          ) : selectedGame === "iq_test" ? (
+            <IQTestGame difficulty={difficulty} />
           ) : (
             <div className="grid place-items-center min-h-[400px]">
               <p className="text-muted-foreground">Game content will be displayed here</p>
@@ -162,6 +167,21 @@ const BrainTraining = () => {
             <CardTitle>Times Tables Test</CardTitle>
             <CardDescription>
               Practice multiplication and division with a rapid-fire times tables test.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedGame("iq_test")}
+        >
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <Brain className="w-12 h-12 text-pastel-purple" />
+            </div>
+            <CardTitle>IQ Test</CardTitle>
+            <CardDescription>
+              Challenge your intelligence with pattern recognition, logical reasoning, and numerical sequence puzzles.
             </CardDescription>
           </CardHeader>
         </Card>
