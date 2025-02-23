@@ -4,11 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { GameLayout } from "@/components/games/GameLayout";
 import { GameSettings } from "@/components/games/GameSettings";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Puzzle, Grid, BookOpen } from "lucide-react";
+import { Puzzle, Grid, BookOpen, Layout2 } from "lucide-react";
+import { MemoryGame } from "@/components/games/MemoryGame";
 
 const BrainTraining = () => {
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | null>(null);
+  const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | "memory" | null>(null);
 
   if (selectedGame) {
     return (
@@ -21,12 +22,17 @@ const BrainTraining = () => {
         </button>
         <GameLayout
           title={selectedGame === "word_search" ? "Word Search" : 
-                 selectedGame === "crossword" ? "Crossword" : "Sudoku"}
+                 selectedGame === "crossword" ? "Crossword" :
+                 selectedGame === "memory" ? "Memory Game" : "Sudoku"}
           difficulty={difficulty}
         >
-          <div className="grid place-items-center min-h-[400px]">
-            <p className="text-muted-foreground">Game content will be displayed here</p>
-          </div>
+          {selectedGame === "memory" ? (
+            <MemoryGame difficulty={difficulty} />
+          ) : (
+            <div className="grid place-items-center min-h-[400px]">
+              <p className="text-muted-foreground">Game content will be displayed here</p>
+            </div>
+          )}
         </GameLayout>
       </div>
     );
@@ -45,7 +51,7 @@ const BrainTraining = () => {
         />
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card 
           className="cursor-pointer hover:shadow-lg transition-shadow"
           onClick={() => setSelectedGame("word_search")}
@@ -87,6 +93,21 @@ const BrainTraining = () => {
             <CardTitle>Sudoku</CardTitle>
             <CardDescription>
               Exercise your logical thinking by filling a 9x9 grid with numbers following specific rules.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card 
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => setSelectedGame("memory")}
+        >
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <Layout2 className="w-12 h-12 text-pastel-orange" />
+            </div>
+            <CardTitle>Memory Game</CardTitle>
+            <CardDescription>
+              Test your memory by matching pairs of cards in this classic concentration game.
             </CardDescription>
           </CardHeader>
         </Card>

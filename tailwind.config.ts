@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -96,17 +95,31 @@ export default {
         float: {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
-        }
+        },
+        "rotate-y": {
+          "0%": { transform: "rotateY(0deg)" },
+          "100%": { transform: "rotateY(180deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         fadeIn: "fadeIn 0.5s ease-out",
         slideIn: "slideIn 0.3s ease-out",
-        float: "float 3s ease-in-out infinite"
+        float: "float 3s ease-in-out infinite",
+        "rotate-y": "rotate-y 0.5s ease-out",
       },
       backgroundImage: {
         'gradient-pastel': 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
+      },
+      transform: {
+        'perspective-1000': 'perspective(1000px)',
+      },
+      rotate: {
+        'y-180': 'rotateY(180deg)',
+      },
+      backfaceVisibility: {
+        'hidden': 'hidden',
       },
     },
   },
