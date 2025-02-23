@@ -1,9 +1,15 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import type { Difficulty } from "@/components/games/GameSettings";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Country {
   name: string;
@@ -41,7 +47,29 @@ export const GeographyGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [countryGuess, setCountryGuess] = useState("");
   const [capitalGuess, setCapitalGuess] = useState("");
   const [score, setScore] = useState(0);
+  const [countryOptions, setCountryOptions] = useState<string[]>([]);
+  const [capitalOptions, setCapitalOptions] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const getRandomCountries = (exclude: Country, count: number): Country[] => {
+    const availableCountries = COUNTRIES[difficulty].filter(
+      (c) => c.name !== exclude.name
+    );
+    const shuffled = [...availableCountries].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
+  };
+
+  const generateOptions = (correct: Country) => {
+    const wrongCountries = getRandomCountries(correct, 2);
+    
+    // Generate country options
+    const countries = [correct.name, ...wrongCountries.map((c) => c.name)];
+    setCountryOptions(countries.sort(() => Math.random() - 0.5));
+    
+    // Generate capital options
+    const capitals = [correct.capital, ...wrongCountries.map((c) => c.capital)];
+    setCapitalOptions(capitals.sort(() => Math.random() - 0.5));
+  };
 
   useEffect(() => {
     pickRandomCountry();
@@ -50,17 +78,19 @@ export const GeographyGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const pickRandomCountry = () => {
     const countries = COUNTRIES[difficulty];
     const randomIndex = Math.floor(Math.random() * countries.length);
-    setCurrentCountry(countries[randomIndex]);
+    const selected = countries[randomIndex];
+    setCurrentCountry(selected);
     setCountryGuess("");
     setCapitalGuess("");
+    generateOptions(selected);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentCountry) return;
 
-    const isCountryCorrect = countryGuess.toLowerCase() === currentCountry.name.toLowerCase();
-    const isCapitalCorrect = capitalGuess.toLowerCase() === currentCountry.capital.toLowerCase();
+    const isCountryCorrect = countryGuess === currentCountry.name;
+    const isCapitalCorrect = capitalGuess === currentCountry.capital;
 
     if (isCountryCorrect && isCapitalCorrect) {
       toast({
@@ -105,21 +135,33 @@ export const GeographyGame = ({ difficulty }: { difficulty: Difficulty }) => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <Input
-            type="text"
-            placeholder="Country name"
-            value={countryGuess}
-            onChange={(e) => setCountryGuess(e.target.value)}
-          />
+          <Select onValueChange={setCountryGuess} value={countryGuess}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select country" />
+            </SelectTrigger>
+            <SelectContent>
+              {countryOptions.map((country) => (
+                <SelectItem key={country} value={country}>
+                  {country}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         <div className="space-y-2">
-          <Input
-            type="text"
-            placeholder="Capital city"
-            value={capitalGuess}
-            onChange={(e) => setCapitalGuess(e.target.value)}
-          />
+          <Select onValueChange={setCapitalGuess} value={capitalGuess}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select capital city" />
+            </SelectTrigger>
+            <SelectContent>
+              {capitalOptions.map((capital) => (
+                <SelectItem key={capital} value={capital}>
+                  {capital}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <Button type="submit" className="w-full">
