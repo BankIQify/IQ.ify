@@ -21,12 +21,6 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
     mutationFn: async () => {
       try {
         console.log('Testing edge function connection...')
-        const config = {
-          projectId: supabase.projectId,
-          url: supabase.supabaseUrl
-        };
-        console.log('Supabase configuration:', config)
-
         const { data, error } = await supabase.functions.invoke('test-connection', {
           body: { test: true }
         })
