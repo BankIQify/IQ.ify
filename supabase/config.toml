@@ -5,6 +5,9 @@ project_id = "dqaihawavxlacegykwqu"
 [functions.test-connection]
 verify_jwt = false
 
+[functions.test-delay]
+verify_jwt = false
+
 [functions.generate-question]
 verify_jwt = false
 

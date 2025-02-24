@@ -15,6 +15,38 @@ interface QuestionGeneratorProps {
 export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorProps) => {
   const [customPrompt, setCustomPrompt] = useState("");
   const [isTestingConnection, setIsTestingConnection] = useState(false);
+  const [isTestingDelay, setIsTestingDelay] = useState(false);
+
+  // Test delay mutation
+  const testDelayMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        console.log('Testing delay function...');
+        setIsTestingDelay(true);
+        
+        const { data, error } = await supabase.functions.invoke('test-delay', {
+          body: { test: true },
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        console.log('Delay test response:', { data, error });
+        
+        if (error) {
+          console.error('Delay test error:', error);
+          throw error;
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Delay test error:', error);
+        throw error;
+      } finally {
+        setIsTestingDelay(false);
+      }
+    }
+  });
 
   // Test connection mutation
   const testConnectionMutation = useMutation({
@@ -144,21 +176,38 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         />
       </div>
 
-      <Button 
-        onClick={() => generateQuestionMutation.mutate()}
-        disabled={generateQuestionMutation.isPending || testConnectionMutation.isPending || !subTopicId}
-        className="w-full"
-      >
-        {generateQuestionMutation.isPending 
-          ? "Generating..." 
-          : isTestingConnection 
-          ? "Testing Connection..." 
-          : "Generate New Question"}
-      </Button>
+      <div className="space-y-2">
+        <Button 
+          onClick={() => testDelayMutation.mutate()}
+          disabled={testDelayMutation.isPending}
+          variant="outline"
+          className="w-full"
+        >
+          {testDelayMutation.isPending ? "Testing Delay..." : "Test Delay Function"}
+        </Button>
+
+        <Button 
+          onClick={() => generateQuestionMutation.mutate()}
+          disabled={generateQuestionMutation.isPending || testConnectionMutation.isPending || !subTopicId}
+          className="w-full"
+        >
+          {generateQuestionMutation.isPending 
+            ? "Generating..." 
+            : isTestingConnection 
+            ? "Testing Connection..." 
+            : "Generate New Question"}
+        </Button>
+      </div>
 
       {testConnectionMutation.isError && (
         <p className="text-sm text-red-500">
           Connection test failed. Please check your network connection and try again.
+        </p>
+      )}
+
+      {testDelayMutation.isError && (
+        <p className="text-sm text-red-500">
+          Delay test failed: {testDelayMutation.error?.message}
         </p>
       )}
     </div>
