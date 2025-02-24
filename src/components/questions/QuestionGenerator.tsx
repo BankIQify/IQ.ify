@@ -21,6 +21,11 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
   const testDelayMutation = useMutation({
     mutationFn: async () => {
       try {
+        toast({
+          title: "Testing delay function",
+          description: "Starting 2-second delay test...",
+        });
+        
         console.log('Testing delay function...');
         setIsTestingDelay(true);
         
@@ -38,9 +43,21 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
           throw error;
         }
 
+        // Show success toast
+        toast({
+          title: "Success",
+          description: "Delay test completed successfully!",
+        });
+
         return data;
       } catch (error) {
         console.error('Delay test error:', error);
+        // Show error toast
+        toast({
+          title: "Error",
+          description: `Failed to test delay: ${error.message}`,
+          variant: "destructive",
+        });
         throw error;
       } finally {
         setIsTestingDelay(false);
