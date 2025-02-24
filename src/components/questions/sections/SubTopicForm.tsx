@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SubTopicList } from "./SubTopicList";
 
 interface SubTopicFormProps {
   sections?: any[];
@@ -116,6 +117,11 @@ export const SubTopicForm = ({ sections, onSubTopicAdded }: SubTopicFormProps) =
           {isSubmitting ? "Adding..." : "Add Sub-topic"}
         </Button>
       </div>
+
+      <SubTopicList 
+        selectedCategory={selectedCategory}
+        onSubTopicUpdated={onSubTopicAdded}
+      />
     </Card>
   );
 };
