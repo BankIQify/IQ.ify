@@ -14,6 +14,25 @@ interface QuestionGeneratorProps {
 
 export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorProps) => {
   const [customPrompt, setCustomPrompt] = useState("");
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
+
+  // Test connection mutation
+  const testConnectionMutation = useMutation({
+    mutationFn: async () => {
+      try {
+        console.log('Testing edge function connection...');
+        const { data, error } = await supabase.functions.invoke('test-connection');
+        
+        console.log('Test connection response:', { data, error });
+        
+        if (error) throw error;
+        return data;
+      } catch (error) {
+        console.error('Test connection error:', error);
+        throw error;
+      }
+    }
+  });
 
   const generateQuestionMutation = useMutation({
     mutationFn: async () => {
@@ -22,6 +41,11 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
       }
 
       try {
+        // First test the connection
+        setIsTestingConnection(true);
+        await testConnectionMutation.mutateAsync();
+        setIsTestingConnection(false);
+
         console.log('Calling generate-question function with:', {
           category,
           prompt: customPrompt || undefined
@@ -105,11 +129,21 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
 
       <Button 
         onClick={() => generateQuestionMutation.mutate()}
-        disabled={generateQuestionMutation.isPending || !subTopicId}
+        disabled={generateQuestionMutation.isPending || testConnectionMutation.isPending || !subTopicId}
         className="w-full"
       >
-        {generateQuestionMutation.isPending ? "Generating..." : "Generate New Question"}
+        {generateQuestionMutation.isPending 
+          ? "Generating..." 
+          : isTestingConnection 
+          ? "Testing Connection..." 
+          : "Generate New Question"}
       </Button>
+
+      {testConnectionMutation.isError && (
+        <p className="text-sm text-red-500">
+          Connection test failed. Please check your network connection and try again.
+        </p>
+      )}
     </div>
   );
 };
