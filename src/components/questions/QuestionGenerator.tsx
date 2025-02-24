@@ -14,52 +14,54 @@ interface QuestionGeneratorProps {
 
 export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorProps) => {
   const [customPrompt, setCustomPrompt] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
 
-  const generateQuestion = async () => {
-    if (!subTopicId) {
-      toast({
-        title: "Error",
-        description: "Please select a sub-topic",
-        variant: "destructive",
-      });
-      return;
-    }
+  const generateQuestionMutation = useMutation({
+    mutationFn: async () => {
+      if (!subTopicId) {
+        throw new Error("Please select a sub-topic");
+      }
 
-    setIsGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-question', {
+      const { data: generatedQuestion, error: generateError } = await supabase.functions.invoke('generate-question', {
         body: { category, prompt: customPrompt || undefined }
       });
 
-      if (error) throw error;
+      if (generateError) {
+        console.error('Generation error:', generateError);
+        throw new Error(generateError.message || 'Failed to generate question');
+      }
 
       const { error: insertError } = await supabase
         .from('questions')
         .insert({
-          content: data,
+          content: generatedQuestion,
           sub_topic_id: subTopicId,
           generation_prompt: customPrompt || null,
           ai_generated: true,
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw new Error('Failed to save generated question');
+      }
 
+      return generatedQuestion;
+    },
+    onSuccess: () => {
       toast({
         title: "Success!",
         description: "New question generated and saved.",
       });
-    } catch (error) {
-      console.error('Error:', error);
+      setCustomPrompt(""); // Clear the prompt after successful generation
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to generate question. Please try again.",
+        description: error.message || "Failed to generate question. Please try again.",
         variant: "destructive"
       });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="space-y-4">
@@ -75,11 +77,11 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
       </div>
 
       <Button 
-        onClick={generateQuestion} 
-        disabled={isGenerating || !subTopicId}
+        onClick={() => generateQuestionMutation.mutate()}
+        disabled={generateQuestionMutation.isPending || !subTopicId}
         className="w-full"
       >
-        {isGenerating ? "Generating..." : "Generate New Question"}
+        {generateQuestionMutation.isPending ? "Generating..." : "Generate New Question"}
       </Button>
     </div>
   );
