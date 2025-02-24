@@ -10,20 +10,40 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Log initial request details
+  console.log('Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  });
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    console.log('Handling CORS preflight request');
+    return new Response(null, { 
+      headers: corsHeaders 
+    });
   }
 
   try {
     if (!openAIApiKey) {
-      console.error('OpenAI API key not found');
+      console.error('OpenAI API key not configured in environment variables');
       throw new Error('OpenAI API key not configured');
     }
 
-    const { category, prompt } = await req.json();
-    console.log('Generating question for category:', category);
-    console.log('Custom prompt:', prompt);
+    const bodyText = await req.text();
+    console.log('Raw request body:', bodyText);
+
+    let body;
+    try {
+      body = JSON.parse(bodyText);
+    } catch (error) {
+      console.error('Error parsing request body:', error);
+      throw new Error('Invalid JSON in request body');
+    }
+
+    const { category, prompt } = body;
+    console.log('Processing request:', { category, prompt });
 
     const systemPrompt = `You are an expert at creating ${category} reasoning questions for 11+ exams. 
     Create challenging but age-appropriate questions that test critical thinking skills.
@@ -37,8 +57,8 @@ serve(async (req) => {
 
     const userPrompt = prompt || `Create an engaging ${category} reasoning question suitable for 11+ exam preparation.`;
 
-    console.log('Making OpenAI request with prompt:', userPrompt);
-
+    console.log('Making OpenAI API request...');
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -55,39 +75,49 @@ serve(async (req) => {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI API error: ${error}`);
+      const errorText = await response.text();
+      console.error('OpenAI API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    const generatedContent = data.choices[0].message.content;
-    console.log('Generated content:', generatedContent);
+    console.log('OpenAI API response received');
 
-    // Parse the JSON string from the response
+    // Parse the response content to ensure it's valid JSON
+    const generatedContent = data.choices[0].message.content;
     let questionData;
     try {
       questionData = JSON.parse(generatedContent);
     } catch (error) {
-      console.error('Error parsing question data:', error);
-      throw new Error('Failed to parse generated question data');
+      console.error('Error parsing OpenAI response:', error);
+      throw new Error('Invalid response format from OpenAI');
     }
 
-    // Validate the response format
+    // Validate the question data structure
     if (!questionData.question || !questionData.options || !questionData.correctAnswer || !questionData.explanation) {
-      throw new Error('Invalid question format returned from AI');
+      console.error('Invalid question data structure:', questionData);
+      throw new Error('Generated question does not match required format');
     }
 
+    console.log('Successfully generated question');
     return new Response(JSON.stringify(questionData), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('Error in generate-question function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
+      JSON.stringify({
+        error: error.message || 'Internal server error',
+        details: error.toString()
+      }),
+      {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
   }
