@@ -20,6 +20,12 @@ serve(async (req) => {
     });
   }
 
+  console.log('Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  });
+
   try {
     console.log('Starting delay test...');
     
@@ -45,7 +51,14 @@ serve(async (req) => {
     console.error('Error in delay test:', error);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: error.stack,
+        details: {
+          name: error.name,
+          message: error.message
+        }
+      }),
       {
         headers: {
           ...corsHeaders,
