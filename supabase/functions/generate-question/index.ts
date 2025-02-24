@@ -16,6 +16,11 @@ serve(async (req) => {
   }
 
   try {
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not found');
+      throw new Error('OpenAI API key not configured');
+    }
+
     const { category, prompt } = await req.json();
     console.log('Generating question for category:', category);
     console.log('Custom prompt:', prompt);
@@ -32,8 +37,7 @@ serve(async (req) => {
 
     const userPrompt = prompt || `Create an engaging ${category} reasoning question suitable for 11+ exam preparation.`;
 
-    console.log('Making request to OpenAI with system prompt:', systemPrompt);
-    console.log('User prompt:', userPrompt);
+    console.log('Making OpenAI request with prompt:', userPrompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
