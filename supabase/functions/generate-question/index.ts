@@ -17,6 +17,8 @@ serve(async (req) => {
 
   try {
     const { category, prompt } = await req.json();
+    console.log('Generating question for category:', category);
+    console.log('Custom prompt:', prompt);
 
     const systemPrompt = `You are an expert at creating ${category} reasoning questions for 11+ exams. 
     Create challenging but age-appropriate questions that test critical thinking skills.
@@ -24,13 +26,14 @@ serve(async (req) => {
     {
       "question": "The actual question text",
       "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
-      "correctAnswer": "A",
+      "correctAnswer": "One of the options exactly as written above",
       "explanation": "Detailed explanation of why this is the correct answer"
     }`;
 
     const userPrompt = prompt || `Create an engaging ${category} reasoning question suitable for 11+ exam preparation.`;
 
-    console.log('Making request to OpenAI with:', { systemPrompt, userPrompt });
+    console.log('Making request to OpenAI with system prompt:', systemPrompt);
+    console.log('User prompt:', userPrompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -55,6 +58,7 @@ serve(async (req) => {
 
     const data = await response.json();
     const generatedContent = data.choices[0].message.content;
+    console.log('Generated content:', generatedContent);
 
     // Parse the JSON string from the response
     let questionData;

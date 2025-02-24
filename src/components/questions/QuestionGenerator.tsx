@@ -30,6 +30,10 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         throw new Error(generateError.message || 'Failed to generate question');
       }
 
+      if (!generatedQuestion || typeof generatedQuestion.error === 'string') {
+        throw new Error(generatedQuestion?.error || 'Failed to generate question');
+      }
+
       const { error: insertError } = await supabase
         .from('questions')
         .insert({
