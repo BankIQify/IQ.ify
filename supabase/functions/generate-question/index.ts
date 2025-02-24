@@ -12,49 +12,41 @@ serve(async (req) => {
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight');
+    console.log('Handling CORS preflight request');
     return new Response(null, { 
       headers: corsHeaders 
     });
   }
 
   try {
-    // Validate OpenAI API key
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
+      console.error('OpenAI API key not found');
       throw new Error('OpenAI API key not configured');
     }
 
     // Parse request body
-    let body;
-    try {
-      body = await req.json();
-      console.log('Received request with category:', body.category);
-    } catch (error) {
-      console.error('Failed to parse request body:', error);
-      throw new Error('Invalid request format');
-    }
+    const { category, prompt } = await req.json();
+    console.log('Request received:', { category, hasPrompt: !!prompt });
 
-    const { category, prompt } = body;
     if (!category) {
       throw new Error('Category is required');
     }
 
-    // Prepare OpenAI request
-    const messages = [
-      {
-        role: 'system',
-        content: `You are an expert at creating ${category} reasoning questions for 11+ exams. Create challenging but age-appropriate questions that test critical thinking skills.`
-      },
-      {
-        role: 'user',
-        content: prompt || `Create an engaging ${category} reasoning question suitable for 11+ exam preparation.`
-      }
-    ];
-
-    console.log('Sending request to OpenAI...');
+    // Prepare system message based on category
+    const systemMessage = `You are an expert at creating ${category} reasoning questions for 11+ exams. 
+    Create a challenging but age-appropriate question that tests critical thinking skills.
     
+    Return the question in this EXACT JSON format:
+    {
+      "question": "The question text",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": "The correct option (must be one of the options)",
+      "explanation": "Detailed explanation of the answer"
+    }`;
+
     // Make OpenAI API request
+    console.log('Sending request to OpenAI...');
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -63,7 +55,10 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
-        messages: messages,
+        messages: [
+          { role: 'system', content: systemMessage },
+          { role: 'user', content: prompt || `Create an engaging ${category} reasoning question suitable for 11+ exam preparation.` }
+        ],
         temperature: 0.7,
       }),
     });
@@ -79,13 +74,13 @@ serve(async (req) => {
     }
 
     const openAIData = await openAIResponse.json();
-    console.log('Received response from OpenAI');
+    const generatedContent = openAIData.choices[0].message.content;
+    console.log('Generated content:', generatedContent);
 
-    // Extract and validate the generated content
-    const content = openAIData.choices[0].message.content;
+    // Parse and validate the response
     let questionData;
     try {
-      questionData = JSON.parse(content);
+      questionData = JSON.parse(generatedContent);
     } catch (error) {
       console.error('Failed to parse OpenAI response:', error);
       throw new Error('Invalid response format from OpenAI');
@@ -113,7 +108,7 @@ serve(async (req) => {
       throw new Error('Correct answer must be one of the options');
     }
 
-    console.log('Successfully generated and validated question');
+    console.log('Successfully validated question data');
 
     return new Response(JSON.stringify(questionData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
