@@ -1,4 +1,5 @@
 
+// deno-lint-ignore-file no-explicit-any
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -7,37 +8,56 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS
+  // Log request details
+  console.log('Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  });
+
+  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, {
       headers: corsHeaders
-    })
+    });
   }
 
   try {
-    console.log('Test connection function called')
+    console.log('Test connection function called');
     
     // Return a simple success response
+    const responseBody = { 
+      status: 'success',
+      message: 'Edge function connection working',
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('Sending response:', responseBody);
+
     return new Response(
-      JSON.stringify({ 
-        status: 'success',
-        message: 'Edge function connection working' 
-      }),
+      JSON.stringify(responseBody),
       { 
         headers: { 
           ...corsHeaders,
           'Content-Type': 'application/json'
         } 
       }
-    )
+    );
   } catch (error) {
-    console.error('Error in test connection:', error)
+    console.error('Error in test connection:', error);
+    console.error('Error stack:', error.stack);
     
+    const errorResponse = { 
+      error: 'Test connection failed',
+      details: error.message,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log('Sending error response:', errorResponse);
+
     return new Response(
-      JSON.stringify({ 
-        error: 'Test connection failed',
-        details: error.message 
-      }),
+      JSON.stringify(errorResponse),
       { 
         headers: { 
           ...corsHeaders,
@@ -45,6 +65,7 @@ serve(async (req) => {
         },
         status: 500
       }
-    )
+    );
   }
-})
+});
+

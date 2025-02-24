@@ -20,23 +20,26 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
   const testConnectionMutation = useMutation({
     mutationFn: async () => {
       try {
-        console.log('Testing edge function connection...')
+        console.log('Testing edge function connection...');
+        console.log('Supabase URL:', supabase.supabaseUrl);
+        console.log('Function endpoint:', `${supabase.supabaseUrl}/functions/v1/test-connection`);
+
         const { data, error } = await supabase.functions.invoke('test-connection', {
           body: { test: true }
-        })
+        });
         
-        console.log('Test connection response:', { data, error })
+        console.log('Test connection response:', { data, error });
         
         if (error) {
-          console.error('Test connection error details:', error)
-          throw error
+          console.error('Test connection error details:', error);
+          throw error;
         }
 
-        return data
+        return data;
       } catch (error) {
-        console.error('Test connection error:', error)
-        console.error('Error stack:', error.stack)
-        throw error
+        console.error('Test connection error:', error);
+        console.error('Error stack:', error.stack);
+        throw error;
       }
     }
   });
@@ -154,3 +157,4 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
     </div>
   );
 };
+
