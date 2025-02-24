@@ -7,14 +7,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+console.log('Test connection function loaded');
+
 serve(async (req) => {
+  console.log('Received request:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  });
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    return new Response(JSON.stringify({ status: 'success', message: 'Connection test successful' }), {
+    console.log('Processing test connection request');
+    const response = { status: 'success', message: 'Connection test successful' };
+    console.log('Sending response:', response);
+
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
@@ -25,3 +38,4 @@ serve(async (req) => {
     });
   }
 });
+
