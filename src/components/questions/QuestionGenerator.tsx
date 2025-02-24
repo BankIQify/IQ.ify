@@ -21,41 +21,52 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         throw new Error("Please select a sub-topic");
       }
 
-      const { data: generatedQuestion, error: generateError } = await supabase.functions.invoke('generate-question', {
-        body: { category, prompt: customPrompt || undefined }
+      console.log('Calling generate-question function with:', {
+        category,
+        prompt: customPrompt || undefined
       });
 
-      if (generateError) {
-        console.error('Generation error:', generateError);
-        throw new Error(generateError.message || 'Failed to generate question');
+      const { data, error } = await supabase.functions.invoke('generate-question', {
+        body: { 
+          category,
+          prompt: customPrompt || undefined
+        }
+      });
+
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw new Error(error.message || 'Failed to generate question');
       }
 
-      if (!generatedQuestion || typeof generatedQuestion.error === 'string') {
-        throw new Error(generatedQuestion?.error || 'Failed to generate question');
+      if (!data || data.error) {
+        console.error('Generation error:', data?.error);
+        throw new Error(data?.error || 'Failed to generate question');
       }
+
+      console.log('Question generated successfully:', data);
 
       const { error: insertError } = await supabase
         .from('questions')
         .insert({
-          content: generatedQuestion,
+          content: data,
           sub_topic_id: subTopicId,
           generation_prompt: customPrompt || null,
           ai_generated: true,
         });
 
       if (insertError) {
-        console.error('Insert error:', insertError);
+        console.error('Database insert error:', insertError);
         throw new Error('Failed to save generated question');
       }
 
-      return generatedQuestion;
+      return data;
     },
     onSuccess: () => {
       toast({
         title: "Success!",
         description: "New question generated and saved.",
       });
-      setCustomPrompt(""); // Clear the prompt after successful generation
+      setCustomPrompt("");
     },
     onError: (error) => {
       console.error('Mutation error:', error);
