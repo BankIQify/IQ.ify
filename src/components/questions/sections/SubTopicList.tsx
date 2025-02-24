@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -60,7 +60,6 @@ export const SubTopicList = ({ selectedCategory, onSubTopicUpdated }: SubTopicLi
     }
   };
 
-  // Fetch sub-topics when category changes
   React.useEffect(() => {
     fetchSubTopics();
   }, [selectedCategory]);
@@ -183,3 +182,4 @@ export const SubTopicList = ({ selectedCategory, onSubTopicUpdated }: SubTopicLi
     </div>
   );
 };
+
