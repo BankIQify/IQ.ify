@@ -21,11 +21,15 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
     mutationFn: async () => {
       try {
         console.log('Testing edge function connection...');
-        console.log('Supabase URL:', supabase.supabaseUrl);
-        console.log('Function endpoint:', `${supabase.supabaseUrl}/functions/v1/test-connection`);
+        
+        const functionEndpoint = 'test-connection';
+        console.log('Calling function:', functionEndpoint);
 
-        const { data, error } = await supabase.functions.invoke('test-connection', {
-          body: { test: true }
+        const { data, error } = await supabase.functions.invoke(functionEndpoint, {
+          body: { test: true },
+          headers: {
+            'Content-Type': 'application/json',
+          }
         });
         
         console.log('Test connection response:', { data, error });
@@ -65,6 +69,9 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
           body: { 
             category,
             prompt: customPrompt || undefined
+          },
+          headers: {
+            'Content-Type': 'application/json',
           }
         });
 
@@ -157,4 +164,3 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
     </div>
   );
 };
-
