@@ -2,30 +2,26 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
 serve(async (req) => {
-  console.log('Function invoked:', new Date().toISOString());
-
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
-    return new Response(null, { 
-      headers: corsHeaders 
-    });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
     if (!openAIApiKey) {
       console.error('OpenAI API key not found');
       throw new Error('OpenAI API key not configured');
     }
 
-    // Parse request body
     const { category, prompt } = await req.json();
     console.log('Request received:', { category, hasPrompt: !!prompt });
 
@@ -34,8 +30,7 @@ serve(async (req) => {
     }
 
     // Prepare system message based on category
-    const systemMessage = `You are an expert at creating ${category} reasoning questions for 11+ exams. 
-    Create a challenging but age-appropriate question that tests critical thinking skills.
+    const systemMessage = `You are an expert at creating ${category} reasoning questions for 11+ exams. Create a challenging but age-appropriate question that tests critical thinking skills.
     
     Return the question in this EXACT JSON format:
     {
@@ -74,16 +69,20 @@ serve(async (req) => {
     }
 
     const openAIData = await openAIResponse.json();
+    if (!openAIData.choices?.[0]?.message?.content) {
+      console.error('Invalid OpenAI response structure:', openAIData);
+      throw new Error('Invalid response from OpenAI');
+    }
+
     const generatedContent = openAIData.choices[0].message.content;
     console.log('Generated content:', generatedContent);
 
-    // Parse and validate the response
     let questionData;
     try {
       questionData = JSON.parse(generatedContent);
     } catch (error) {
-      console.error('Failed to parse OpenAI response:', error);
-      throw new Error('Invalid response format from OpenAI');
+      console.error('Failed to parse generated content:', error);
+      throw new Error('Invalid JSON format in OpenAI response');
     }
 
     // Validate question structure
@@ -108,8 +107,7 @@ serve(async (req) => {
       throw new Error('Correct answer must be one of the options');
     }
 
-    console.log('Successfully validated question data');
-
+    console.log('Question validation successful, returning data');
     return new Response(JSON.stringify(questionData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -118,7 +116,7 @@ serve(async (req) => {
     console.error('Edge function error:', error);
     return new Response(
       JSON.stringify({
-        error: error.message,
+        error: error.message || 'An unexpected error occurred',
         timestamp: new Date().toISOString()
       }),
       {

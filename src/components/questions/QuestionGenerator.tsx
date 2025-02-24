@@ -21,45 +21,57 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         throw new Error("Please select a sub-topic");
       }
 
-      console.log('Calling generate-question function with:', {
-        category,
-        prompt: customPrompt || undefined
-      });
-
-      const { data, error } = await supabase.functions.invoke('generate-question', {
-        body: { 
+      try {
+        console.log('Calling generate-question function with:', {
           category,
           prompt: customPrompt || undefined
-        }
-      });
-
-      if (error) {
-        console.error('Function invocation error:', error);
-        throw new Error(error.message || 'Failed to generate question');
-      }
-
-      if (!data || data.error) {
-        console.error('Generation error:', data?.error);
-        throw new Error(data?.error || 'Failed to generate question');
-      }
-
-      console.log('Question generated successfully:', data);
-
-      const { error: insertError } = await supabase
-        .from('questions')
-        .insert({
-          content: data,
-          sub_topic_id: subTopicId,
-          generation_prompt: customPrompt || null,
-          ai_generated: true,
         });
 
-      if (insertError) {
-        console.error('Database insert error:', insertError);
-        throw new Error('Failed to save generated question');
-      }
+        const { data, error } = await supabase.functions.invoke('generate-question', {
+          body: { 
+            category,
+            prompt: customPrompt || undefined
+          }
+        });
 
-      return data;
+        console.log('Function response:', { data, error });
+
+        if (error) {
+          console.error('Function invocation error:', error);
+          throw new Error(error.message || 'Failed to generate question');
+        }
+
+        if (!data) {
+          console.error('No data returned from function');
+          throw new Error('No response from question generator');
+        }
+
+        if ('error' in data) {
+          console.error('Generation error:', data.error);
+          throw new Error(data.error || 'Failed to generate question');
+        }
+
+        console.log('Question generated successfully:', data);
+
+        const { error: insertError } = await supabase
+          .from('questions')
+          .insert({
+            content: data,
+            sub_topic_id: subTopicId,
+            generation_prompt: customPrompt || null,
+            ai_generated: true,
+          });
+
+        if (insertError) {
+          console.error('Database insert error:', insertError);
+          throw new Error('Failed to save generated question');
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Caught error in mutation:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       toast({
@@ -68,7 +80,7 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
       });
       setCustomPrompt("");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Mutation error:', error);
       toast({
         title: "Error",
