@@ -34,37 +34,55 @@ const ManageQuestions = () => {
   const [subTopicId, setSubTopicId] = useState<string>("");
 
   // Fetch sub-topics based on selected category
-  const { data: subTopics } = useQuery({
+  const { data: subTopics, isLoading: isLoadingSubTopics } = useQuery({
     queryKey: ['subTopics', category],
     queryFn: async () => {
+      console.log('Fetching sub-topics for category:', category);
+      
       const { data: sections } = await supabase
         .from('question_sections')
         .select('id')
         .eq('category', category)
         .single();
 
-      if (!sections?.id) return [];
+      if (!sections?.id) {
+        console.log('No section found for category:', category);
+        return [];
+      }
+
+      console.log('Found section:', sections.id);
 
       const { data, error } = await supabase
         .from('sub_topics')
         .select('*')
         .eq('section_id', sections.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching sub-topics:', error);
+        throw error;
+      }
+
+      console.log('Fetched sub-topics:', data);
       return data;
     }
   });
 
-  // Fetch existing questions
-  const { data: rawQuestions, isLoading } = useQuery({
+  // Fetch questions based on selected sub-topic
+  const { data: questions, isLoading: isLoadingQuestions } = useQuery({
     queryKey: ['questions', subTopicId],
     queryFn: async () => {
-      if (!subTopicId) return [];
+      if (!subTopicId) {
+        console.log('No sub-topic selected, skipping question fetch');
+        return [];
+      }
+
+      console.log('Fetching questions for sub-topic:', subTopicId);
 
       const { data, error } = await supabase
         .from('questions')
         .select(`
-          *,
+          id,
+          content,
           sub_topics (
             name
           )
@@ -72,18 +90,22 @@ const ManageQuestions = () => {
         .eq('sub_topic_id', subTopicId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('Error fetching questions:', error);
+        throw error;
+      }
+
+      console.log('Fetched questions:', data);
+      return data.map(q => ({
+        id: q.id,
+        content: q.content as QuestionContent,
+        sub_topics: q.sub_topics
+      }));
     },
     enabled: !!subTopicId,
   });
 
-  // Transform raw questions to match our frontend type
-  const questions: Question[] = (rawQuestions || []).map(q => ({
-    id: q.id,
-    content: q.content as QuestionContent,
-    sub_topics: q.sub_topics
-  }));
+  const isLoading = isLoadingSubTopics || isLoadingQuestions;
 
   return (
     <div className="page-container">
@@ -128,9 +150,10 @@ const ManageQuestions = () => {
                 <Select
                   value={subTopicId}
                   onValueChange={setSubTopicId}
+                  disabled={isLoadingSubTopics}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select sub-topic" />
+                    <SelectValue placeholder={isLoadingSubTopics ? "Loading..." : "Select sub-topic"} />
                   </SelectTrigger>
                   <SelectContent>
                     {subTopics?.map((subTopic) => (
@@ -152,7 +175,7 @@ const ManageQuestions = () => {
           {!subTopicId ? (
             <p className="text-gray-600">Select a sub-topic to view questions</p>
           ) : isLoading ? (
-            <p>Loading questions...</p>
+            <p className="text-gray-600">Loading questions...</p>
           ) : questions && questions.length > 0 ? (
             <QuestionsList questions={questions} />
           ) : (
@@ -171,3 +194,4 @@ const ManageQuestions = () => {
 };
 
 export default ManageQuestions;
+
