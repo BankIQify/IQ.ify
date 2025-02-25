@@ -11,10 +11,12 @@ import { QuestionContent } from "@/pages/ManageQuestions";
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 
+type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
+
 export const CompleteQuestionBank = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [category, setCategory] = useState<string>("");
-  const [subTopicId, setSubTopicId] = useState<string>("");
+  const [category, setCategory] = useState<QuestionCategory | "all">("all");
+  const [subTopicId, setSubTopicId] = useState<string>("all");
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -22,7 +24,7 @@ export const CompleteQuestionBank = () => {
   const { data: subTopics } = useQuery({
     queryKey: ['bank-subTopics', category],
     queryFn: async () => {
-      if (!category) return [];
+      if (category === "all") return [];
 
       const { data: sections } = await supabase
         .from('question_sections')
@@ -40,7 +42,7 @@ export const CompleteQuestionBank = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!category,
+    enabled: category !== "all",
   });
 
   // Fetch questions with filters and pagination
@@ -61,11 +63,11 @@ export const CompleteQuestionBank = () => {
         `)
         .order('created_at', { ascending: false });
 
-      if (category) {
+      if (category !== "all") {
         query = query.eq('sub_topics.question_sections.category', category);
       }
 
-      if (subTopicId) {
+      if (subTopicId !== "all") {
         query = query.eq('sub_topic_id', subTopicId);
       }
 
@@ -107,12 +109,15 @@ export const CompleteQuestionBank = () => {
 
           <div>
             <Label>Category</Label>
-            <Select value={category} onValueChange={setCategory}>
+            <Select value={category} onValueChange={(value: QuestionCategory | "all") => {
+              setCategory(value);
+              setSubTopicId("all");
+            }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="verbal">Verbal Reasoning</SelectItem>
                 <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
                 <SelectItem value="brain_training">Brain Training</SelectItem>
@@ -125,13 +130,13 @@ export const CompleteQuestionBank = () => {
             <Select 
               value={subTopicId} 
               onValueChange={setSubTopicId}
-              disabled={!category}
+              disabled={category === "all"}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select sub-topic" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Sub-topics</SelectItem>
+                <SelectItem value="all">All Sub-topics</SelectItem>
                 {subTopics?.map((subTopic) => (
                   <SelectItem key={subTopic.id} value={subTopic.id}>
                     {subTopic.name}
@@ -175,4 +180,3 @@ export const CompleteQuestionBank = () => {
     </div>
   );
 };
-
