@@ -29,19 +29,25 @@ serve(async (req) => {
     // Base instructions for each category
     const categoryInstructions = {
       verbal: `
-        Generate a verbal reasoning question that tests logical thinking.
-        Focus on word relationships, patterns, or comprehension.
-        The question must be clearly written and have exactly ONE correct answer.
+        Generate a verbal reasoning question. Follow these rules:
+        1. The question must test logical thinking or word relationships
+        2. Include exactly 4 options labeled A), B), C), D)
+        3. Only ONE answer can be correct
+        4. The explanation must clearly justify why the answer is correct
       `,
       non_verbal: `
-        Create a non-verbal reasoning question focusing on patterns or sequences.
-        The question should test visual-spatial reasoning skills.
-        The question must be clearly written and have exactly ONE correct answer.
+        Generate a non-verbal reasoning question. Follow these rules:
+        1. The question must test visual or pattern recognition
+        2. Include exactly 4 options labeled A), B), C), D)
+        3. Only ONE answer can be correct
+        4. The explanation must clearly justify why the answer is correct
       `,
       brain_training: `
-        Design a brain training question that tests problem-solving abilities.
-        Include clear logical steps to reach the solution.
-        The question must be clearly written and have exactly ONE correct answer.
+        Generate a brain training question. Follow these rules:
+        1. The question must test problem-solving abilities
+        2. Include exactly 4 options labeled A), B), C), D)
+        3. Only ONE answer can be correct
+        4. The explanation must clearly justify why the answer is correct
       `
     };
 
@@ -55,13 +61,13 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are an expert question generator. Create questions that:
+            content: `You are an expert question generator. Generate questions that:
               1. Have exactly ONE correct answer
-              2. Include 4 options labeled A, B, C, and D
+              2. Include 4 options labeled A), B), C), D)
               3. Provide a clear, detailed explanation
               4. Are appropriate for the given category: ${category}
               
@@ -76,6 +82,7 @@ serve(async (req) => {
           { role: 'user', content: customInstructions }
         ],
         temperature: 0.3,
+        max_tokens: 1000,
       }),
     });
 
@@ -83,11 +90,11 @@ serve(async (req) => {
       console.error('OpenAI API error status:', response.status);
       const error = await response.text();
       console.error('OpenAI API error:', error);
-      throw new Error('Failed to generate question: OpenAI API error');
+      throw new Error(`OpenAI API error: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('OpenAI response received');
+    console.log('OpenAI response received:', data);
 
     if (!data.choices?.[0]?.message?.content) {
       console.error('Invalid response format from OpenAI:', data);
@@ -121,7 +128,7 @@ serve(async (req) => {
     console.error('Error in generate-question function:', error);
     return new Response(
       JSON.stringify({
-        error: error.message || 'Failed to generate question',
+        error: error.message,
         stack: error.stack
       }),
       {
