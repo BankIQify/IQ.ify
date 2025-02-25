@@ -26,27 +26,28 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const systemPrompt = `You are a friendly teacher who creates fun questions for children. Create an array of exactly 5 questions.
-      Each question should:
-      1. Use simple, child-friendly language
-      2. Include colorful imagery and fun examples
-      3. Make learning feel like a game or adventure
-      4. Have exactly 4 options labeled A), B), C), D)
-      5. Have exactly ONE correct answer
-      6. Include a friendly, encouraging explanation
-      7. Use emojis where appropriate
+    const systemPrompt = `You are a teacher creating multiple choice questions for children. Create exactly 5 questions following this strict format and rules:
 
-      Return ONLY a JSON array containing exactly 5 question objects in this exact format:
-      [
-        {
-          "question": "The fun question text with emojis",
-          "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
-          "correctAnswer": "A) First option",
-          "explanation": "A friendly explanation"
-        }
-      ]`;
+1. Each question must be child-friendly and engaging
+2. Each question must have exactly 4 multiple choice options labeled A), B), C), D)
+3. One and only one option must be correct
+4. Include a brief, encouraging explanation for the correct answer
+5. Return ONLY a valid JSON array of 5 question objects with this exact structure, no other text:
+[
+  {
+    "question": "Question text here",
+    "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
+    "correctAnswer": "A) First option",
+    "explanation": "Brief explanation here"
+  }
+]`;
 
-    const userPrompt = prompt?.trim() || `Create 5 engaging ${category} questions for children!`;
+    const userPrompt = prompt?.trim() || `Create 5 ${category} questions suitable for children.`;
+
+    console.log('Sending request to OpenAI with:', {
+      systemPrompt,
+      userPrompt
+    });
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -61,6 +62,7 @@ serve(async (req) => {
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.7,
+        max_tokens: 2000,
       }),
     });
 
@@ -71,38 +73,36 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('OpenAI response received:', data);
+    console.log('OpenAI response:', data);
 
     if (!data.choices?.[0]?.message?.content) {
       console.error('Invalid response format from OpenAI:', data);
       throw new Error('Invalid response from OpenAI');
     }
 
-    // Parse the response content as JSON
     let questions;
     try {
-      questions = JSON.parse(data.choices[0].message.content);
+      const content = data.choices[0].message.content.trim();
+      questions = JSON.parse(content);
       console.log('Parsed questions:', questions);
+
+      if (!Array.isArray(questions) || questions.length !== 5) {
+        throw new Error('Expected exactly 5 questions in response');
+      }
+
+      // Validate each question object
+      questions.forEach((q, index) => {
+        if (!q.question || !Array.isArray(q.options) || q.options.length !== 4 
+            || !q.correctAnswer || !q.explanation) {
+          throw new Error(`Question ${index + 1} has invalid format`);
+        }
+      });
+
     } catch (error) {
       console.error('Error parsing OpenAI response:', error);
       console.error('Raw content:', data.choices[0].message.content);
-      throw new Error('Failed to parse questions from OpenAI response');
+      throw new Error(`Failed to parse OpenAI response: ${error.message}`);
     }
-
-    // Validate the questions array
-    if (!Array.isArray(questions) || questions.length !== 5) {
-      console.error('Invalid questions format:', questions);
-      throw new Error('Expected exactly 5 questions in response');
-    }
-
-    // Validate each question object
-    questions.forEach((q, index) => {
-      if (!q.question || !Array.isArray(q.options) || q.options.length !== 4 
-          || !q.correctAnswer || !q.explanation) {
-        console.error(`Invalid question format at index ${index}:`, q);
-        throw new Error(`Question ${index + 1} has invalid format`);
-      }
-    });
 
     return new Response(JSON.stringify(questions), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
