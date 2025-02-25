@@ -31,18 +31,12 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         setIsTestingDelay(true);
         
         const { data, error } = await supabase.functions.invoke('test-delay', {
-          body: { test: true },
-          headers: {
-            'Content-Type': 'application/json',
-          }
+          body: { test: true }
         });
         
         console.log('Delay test response:', { data, error });
         
-        if (error) {
-          console.error('Delay test error:', error);
-          throw error;
-        }
+        if (error) throw error;
 
         toast({
           title: "Success",
@@ -52,11 +46,6 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         return data;
       } catch (error) {
         console.error('Delay test error:', error);
-        toast({
-          title: "Error",
-          description: `Failed to test delay: ${error.message}`,
-          variant: "destructive",
-        });
         throw error;
       } finally {
         setIsTestingDelay(false);
@@ -74,23 +63,16 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         console.log('Calling function:', functionEndpoint);
 
         const { data, error } = await supabase.functions.invoke(functionEndpoint, {
-          body: { test: true },
-          headers: {
-            'Content-Type': 'application/json',
-          }
+          body: { test: true }
         });
         
         console.log('Test connection response:', { data, error });
         
-        if (error) {
-          console.error('Test connection error details:', error);
-          throw error;
-        }
+        if (error) throw error;
 
         return data;
       } catch (error) {
         console.error('Test connection error:', error);
-        console.error('Error stack:', error.stack);
         throw error;
       }
     }
@@ -110,42 +92,34 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
 
         console.log('Calling generate-question function with:', {
           category,
+          subTopicId,
           prompt: customPrompt || undefined
         });
 
-        const { data, error } = await supabase.functions.invoke('generate-question', {
+        const { data: response, error: functionError } = await supabase.functions.invoke('generate-question', {
           body: { 
             category,
+            subTopicId,
             prompt: customPrompt || undefined
-          },
-          headers: {
-            'Content-Type': 'application/json',
           }
         });
 
-        console.log('Function response:', { data, error });
+        console.log('Generate question response:', { response, functionError });
 
-        if (error) {
-          console.error('Function invocation error:', error);
-          throw new Error(error.message || 'Failed to generate question');
+        if (functionError) {
+          throw new Error(functionError.message || 'Failed to generate question');
         }
 
-        if (!data) {
-          console.error('No data returned from function');
+        if (!response) {
           throw new Error('No response from question generator');
         }
 
-        if ('error' in data) {
-          console.error('Generation error:', data.error);
-          throw new Error(data.error || 'Failed to generate question');
-        }
-
-        console.log('Question generated successfully:', data);
+        console.log('Question generated successfully:', response);
 
         const { error: insertError } = await supabase
           .from('questions')
           .insert({
-            content: data,
+            content: response,
             sub_topic_id: subTopicId,
             generation_prompt: customPrompt || null,
             ai_generated: true,
@@ -156,7 +130,7 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
           throw new Error('Failed to save generated question');
         }
 
-        return data;
+        return response;
       } catch (error) {
         console.error('Caught error in mutation:', error);
         throw error;
@@ -217,7 +191,7 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
 
       {testConnectionMutation.isError && (
         <p className="text-sm text-red-500">
-          Connection test failed. Please check your network connection and try again.
+          Connection test failed: {testConnectionMutation.error?.message}
         </p>
       )}
 
