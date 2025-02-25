@@ -14,10 +14,10 @@ interface ExamWithResults {
 }
 
 interface ExamResult {
-  id: string;
-  score: number;
+  id: number;
+  score: number | null;
   created_at: string;
-  exam_id: string;
+  exam_id: string | null;
   exams?: ExamWithResults;
 }
 
