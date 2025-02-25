@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionGenerator } from "@/components/questions/QuestionGenerator";
@@ -10,6 +11,7 @@ import { ManualQuestionUpload } from "@/components/questions/ManualQuestionUploa
 import { QuestionsList } from "@/components/questions/QuestionsList";
 import { CategoryManager } from "@/components/questions/CategoryManager";
 import { supabase } from "@/integrations/supabase/client";
+import { CompleteQuestionBank } from "@/components/questions/CompleteQuestionBank";
 
 export type QuestionContent = {
   question: string;
@@ -112,14 +114,19 @@ const ManageQuestions = () => {
       <h1 className="section-title">Question Management</h1>
 
       <Tabs defaultValue="generate" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="generate">Generate Questions</TabsTrigger>
           <TabsTrigger value="manual">Manual Upload</TabsTrigger>
           <TabsTrigger value="categories">Manage Categories</TabsTrigger>
+          <TabsTrigger value="bank">Complete Question Bank</TabsTrigger>
         </TabsList>
 
         <TabsContent value="categories">
           <CategoryManager />
+        </TabsContent>
+
+        <TabsContent value="bank">
+          <CompleteQuestionBank />
         </TabsContent>
 
         <TabsContent value="generate">
