@@ -1,6 +1,6 @@
 
 import { Card } from "@/components/ui/card";
-import { QuestionContent } from "@/pages/ManageQuestions";
+import type { QuestionContent } from "@/types/questions";
 
 interface QuestionsListProps {
   questions: Array<{

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -7,11 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { QuestionsList } from "./QuestionsList";
-import { QuestionContent } from "@/pages/ManageQuestions";
+import type { QuestionContent, QuestionCategory } from "@/types/questions";
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
-
-type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
 export const CompleteQuestionBank = () => {
   const [searchQuery, setSearchQuery] = useState("");
