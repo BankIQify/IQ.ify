@@ -7,16 +7,23 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Database } from "@/integrations/supabase/types";
+
+type QuestionType = Database["public"]["Enums"]["question_type"];
 
 interface ManualQuestionUploadProps {
   subTopicId: string;
 }
 
 export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) => {
+  const [questionType, setQuestionType] = useState<QuestionType>("multiple_choice");
   const [manualQuestion, setManualQuestion] = useState("");
   const [questionImage, setQuestionImage] = useState<File | null>(null);
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
   const [correctAnswerIndex, setCorrectAnswerIndex] = useState(0);
+  const [correctTextAnswer, setCorrectTextAnswer] = useState("");
+  const [correctImageCoordinates, setCorrectImageCoordinates] = useState({ x: 0, y: 0 });
   const [isProcessingManual, setIsProcessingManual] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,10 +48,38 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
       return;
     }
 
-    if (!manualQuestion || options.some(opt => !opt.trim())) {
+    if (!manualQuestion) {
       toast({
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please enter a question",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validation based on question type
+    if (questionType === "multiple_choice" && options.some(opt => !opt.trim())) {
+      toast({
+        title: "Error",
+        description: "Please fill in all options for multiple choice question",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (questionType === "text" && !correctTextAnswer.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide the correct text answer",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (questionType === "image" && !questionImage) {
+      toast({
+        title: "Error",
+        description: "Please upload an image for the image-based question",
         variant: "destructive"
       });
       return;
@@ -71,31 +106,50 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
         imageUrl = publicUrl;
       }
 
+      // Prepare question content based on type
+      let questionContent = {
+        question: manualQuestion,
+        imageUrl: imageUrl,
+      };
+
+      if (questionType === "multiple_choice") {
+        questionContent = {
+          ...questionContent,
+          options,
+          correctAnswer: options[correctAnswerIndex],
+        };
+      } else if (questionType === "text") {
+        questionContent = {
+          ...questionContent,
+          correctAnswer: correctTextAnswer,
+        };
+      } else if (questionType === "image") {
+        questionContent = {
+          ...questionContent,
+          correctCoordinates: correctImageCoordinates,
+        };
+      }
+
+      // Get AI-generated explanation
       const { data: explanationData, error: explanationError } = await supabase.functions.invoke('generate-explanation', {
         body: {
-          question: manualQuestion,
-          options: options,
-          correctAnswer: options[correctAnswerIndex],
-          imageUrl: imageUrl
+          ...questionContent,
+          type: questionType,
         }
       });
 
       if (explanationError) throw explanationError;
 
-      const questionContent = {
-        question: manualQuestion,
-        options: options,
-        correctAnswer: options[correctAnswerIndex],
-        explanation: explanationData.explanation,
-        imageUrl: imageUrl
-      };
-
       const { error: insertError } = await supabase
         .from('questions')
         .insert({
-          content: questionContent,
+          content: {
+            ...questionContent,
+            explanation: explanationData.explanation,
+          },
           sub_topic_id: subTopicId,
           ai_generated: false,
+          question_type: questionType,
         });
 
       if (insertError) throw insertError;
@@ -110,6 +164,8 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
       setQuestionImage(null);
       setOptions(["", "", "", ""]);
       setCorrectAnswerIndex(0);
+      setCorrectTextAnswer("");
+      setCorrectImageCoordinates({ x: 0, y: 0 });
     } catch (error) {
       console.error('Error uploading question:', error);
       toast({
@@ -125,6 +181,20 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
   return (
     <div className="space-y-4">
       <div>
+        <Label>Question Type</Label>
+        <Select value={questionType} onValueChange={(value: QuestionType) => setQuestionType(value)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+            <SelectItem value="text">Text</SelectItem>
+            <SelectItem value="image">Image</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div>
         <Label htmlFor="questionText">Question Text</Label>
         <Textarea
           id="questionText"
@@ -135,36 +205,79 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
         />
       </div>
 
-      <div>
-        <Label htmlFor="questionImage">Question Image (Optional)</Label>
-        <Input
-          id="questionImage"
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="mt-1"
-        />
-      </div>
+      {questionType !== "text" && (
+        <div>
+          <Label htmlFor="questionImage">Question Image {questionType === "image" ? "(Required)" : "(Optional)"}</Label>
+          <Input
+            id="questionImage"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="mt-1"
+          />
+        </div>
+      )}
 
-      <div className="space-y-4">
-        <Label>Answer Options</Label>
-        {options.map((option, index) => (
-          <div key={index} className="flex gap-2">
-            <Input
-              value={option}
-              onChange={(e) => handleOptionChange(index, e.target.value)}
-              placeholder={`Option ${index + 1}`}
-            />
-            <input
-              type="radio"
-              name="correctAnswer"
-              checked={correctAnswerIndex === index}
-              onChange={() => setCorrectAnswerIndex(index)}
-              className="mt-3"
-            />
+      {questionType === "multiple_choice" && (
+        <div className="space-y-4">
+          <Label>Answer Options</Label>
+          {options.map((option, index) => (
+            <div key={index} className="flex gap-2">
+              <Input
+                value={option}
+                onChange={(e) => handleOptionChange(index, e.target.value)}
+                placeholder={`Option ${index + 1}`}
+                className={correctAnswerIndex === index ? "border-green-500 border-2" : ""}
+              />
+              <input
+                type="radio"
+                name="correctAnswer"
+                checked={correctAnswerIndex === index}
+                onChange={() => setCorrectAnswerIndex(index)}
+                className="mt-3"
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {questionType === "text" && (
+        <div>
+          <Label htmlFor="correctAnswer">Correct Answer</Label>
+          <Input
+            id="correctAnswer"
+            value={correctTextAnswer}
+            onChange={(e) => setCorrectTextAnswer(e.target.value)}
+            placeholder="Enter the correct answer"
+          />
+        </div>
+      )}
+
+      {questionType === "image" && (
+        <div className="space-y-4">
+          <Label>Correct Answer Coordinates</Label>
+          <div className="flex gap-4">
+            <div>
+              <Label htmlFor="coordX">X Coordinate</Label>
+              <Input
+                id="coordX"
+                type="number"
+                value={correctImageCoordinates.x}
+                onChange={(e) => setCorrectImageCoordinates(prev => ({ ...prev, x: parseInt(e.target.value) || 0 }))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="coordY">Y Coordinate</Label>
+              <Input
+                id="coordY"
+                type="number"
+                value={correctImageCoordinates.y}
+                onChange={(e) => setCorrectImageCoordinates(prev => ({ ...prev, y: parseInt(e.target.value) || 0 }))}
+              />
+            </div>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
 
       <Button
         onClick={handleManualUpload}
@@ -176,3 +289,4 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
     </div>
   );
 };
+

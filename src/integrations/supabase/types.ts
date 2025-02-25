@@ -198,6 +198,7 @@ export type Database = {
           created_at: string | null
           generation_prompt: string | null
           id: string
+          question_type: Database["public"]["Enums"]["question_type"]
           sub_topic_id: string | null
           updated_at: string | null
         }
@@ -207,6 +208,7 @@ export type Database = {
           created_at?: string | null
           generation_prompt?: string | null
           id?: string
+          question_type?: Database["public"]["Enums"]["question_type"]
           sub_topic_id?: string | null
           updated_at?: string | null
         }
@@ -216,6 +218,7 @@ export type Database = {
           created_at?: string | null
           generation_prompt?: string | null
           id?: string
+          question_type?: Database["public"]["Enums"]["question_type"]
           sub_topic_id?: string | null
           updated_at?: string | null
         }
@@ -342,6 +345,7 @@ export type Database = {
         | "crossword"
         | "sudoku"
       question_category: "verbal" | "non_verbal" | "brain_training"
+      question_type: "multiple_choice" | "text" | "image"
       user_role: "admin" | "user"
     }
     CompositeTypes: {
