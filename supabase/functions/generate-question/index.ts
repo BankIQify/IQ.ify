@@ -1,6 +1,6 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -57,7 +57,7 @@ The response must be a JSON object with these exact fields:
 `;
 
     // Use custom prompt if provided, otherwise generate based on category
-    const userPrompt = prompt || `Generate a challenging ${category} reasoning question suitable for assessment tests.`;
+    const userPrompt = prompt?.trim() || `Generate a challenging ${category} reasoning question suitable for assessment tests.`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -125,4 +125,3 @@ The response must be a JSON object with these exact fields:
     );
   }
 });
-

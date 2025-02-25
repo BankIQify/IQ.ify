@@ -78,14 +78,14 @@ export const useQuestionMutations = (subTopicId: string) => {
           body: { 
             category,
             subTopicId,
-            prompt: customPrompt || undefined
+            prompt: customPrompt?.trim() || undefined
           }
         });
 
         console.log('Generate question response:', { response, functionError });
 
         if (functionError) {
-          throw new Error(functionError.message || 'Failed to generate question');
+          throw functionError;
         }
 
         if (!response) {
@@ -99,7 +99,7 @@ export const useQuestionMutations = (subTopicId: string) => {
           .insert({
             content: response,
             sub_topic_id: subTopicId,
-            generation_prompt: customPrompt || null,
+            generation_prompt: customPrompt?.trim() || null,
             ai_generated: true,
           });
 
