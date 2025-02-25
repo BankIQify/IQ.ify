@@ -15,9 +15,9 @@ interface ExamWithResults {
 
 interface ExamResult {
   id: string;
-  exam: string;
   score: number;
   created_at: string;
+  exam_id: string;
   exams?: ExamWithResults;
 }
 
@@ -31,10 +31,10 @@ const SubjectProgress = () => {
         .from('exam_results')
         .select(`
           id,
-          exam,
           score,
           created_at,
-          exams:exam (
+          exam_id,
+          exams:exam_id (
             name,
             category
           )
@@ -123,3 +123,4 @@ const SubjectProgress = () => {
 };
 
 export default SubjectProgress;
+
