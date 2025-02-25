@@ -25,24 +25,25 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const systemPrompt = `You are an expert teacher creating multiple choice questions. Follow these instructions precisely:
+    const systemPrompt = `You are an expert question creator. Create exactly 5 questions based on the provided criteria.
 
-1. Create EXACTLY 5 questions that match the user's requested difficulty level and specifications
-2. If no specific difficulty is mentioned, create questions suitable for children
+VERY IMPORTANT: Return ONLY a raw JSON array with 5 questions. Do not include any markdown formatting, code blocks, or extra text.
+
+Each question MUST follow this format:
+{
+  "question": "Question text here",
+  "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
+  "correctAnswer": "A) First option",
+  "explanation": "Brief explanation here"
+}
+
+REQUIREMENTS:
+1. Generate EXACTLY 5 questions
+2. If user specifies difficulty levels, follow them precisely
 3. Each question MUST have exactly 4 options labeled A), B), C), D)
 4. Only ONE option can be correct
-5. The explanation should match the complexity level of the question
-6. Pay close attention to any specific requirements in the user's prompt
-
-Return ONLY a JSON array with exactly 5 questions in this format:
-[
-  {
-    "question": "Question text here",
-    "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
-    "correctAnswer": "A) First option",
-    "explanation": "Brief explanation here"
-  }
-]`;
+5. The explanation should be clear and helpful
+6. Return ONLY the JSON array, no other text or formatting`;
 
     const userPrompt = prompt?.trim() || `Create 5 ${category} questions suitable for children.`;
 
@@ -84,10 +85,15 @@ Return ONLY a JSON array with exactly 5 questions in this format:
 
     let questions;
     try {
-      const content = data.choices[0].message.content.trim();
+      const content = data.choices[0].message.content.trim()
+        // Remove any potential markdown or code block formatting
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim();
+      
+      console.log('Cleaned content before parsing:', content);
       questions = JSON.parse(content);
-      console.log('Parsed questions:', questions);
-
+      
       if (!Array.isArray(questions) || questions.length !== 5) {
         throw new Error('Expected exactly 5 questions in response');
       }
