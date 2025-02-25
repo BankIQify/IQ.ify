@@ -35,56 +35,82 @@ serve(async (req) => {
     // Base instructions for each category
     const categoryInstructions = {
       verbal: `
-        - Focus on vocabulary, comprehension, or word relationships
-        - For vocabulary: test understanding of word meanings, synonyms, antonyms
-        - For comprehension: test understanding of short passages or statements
-        - For word relationships: test ability to identify analogies or word patterns
+        SPECIFIC VERBAL REASONING GUIDELINES:
+        1. For vocabulary questions:
+           - Test understanding of word meanings
+           - Use clear, unambiguous word relationships
+           - Ensure answers follow logical word patterns
+        2. For comprehension:
+           - Test understanding of short passages
+           - All answers must be supported by the text
+        3. For word patterns:
+           - Create clear, logical sequences
+           - Ensure pattern rules are consistent
+           - Every step must be logically justified
       `,
       non_verbal: `
-        - Focus on visual patterns, spatial reasoning, or sequence completion
-        - Use clear, unambiguous patterns that follow logical rules
-        - Patterns should increase in complexity from left to right or top to bottom
-        - Include geometric shapes, number sequences, or visual transformations
+        SPECIFIC NON-VERBAL REASONING GUIDELINES:
+        1. For pattern sequences:
+           - Use clear, visual transformation rules
+           - Each step must follow a logical progression
+           - Rules must be consistent across the sequence
+        2. For spatial reasoning:
+           - Use clear geometric relationships
+           - All transformations must be systematic
+        3. For numerical patterns:
+           - Use clear mathematical relationships
+           - Each number must follow a logical sequence
       `,
       brain_training: `
-        - Focus on logic, mathematical thinking, or problem-solving
-        - Include number sequences, mathematical patterns, or logical deductions
-        - Problems should be solvable without advanced mathematical knowledge
-        - Include step-by-step reasoning in the explanation
+        SPECIFIC BRAIN TRAINING GUIDELINES:
+        1. For logic problems:
+           - Use clear, step-by-step deduction
+           - All premises must lead to one valid conclusion
+        2. For mathematical thinking:
+           - Use clear numerical relationships
+           - Solutions must follow mathematical rules
+        3. For pattern recognition:
+           - Create clear, systematic patterns
+           - Each element must serve a purpose
       `
     };
 
-    // Enhanced system prompt with better guidance
+    // Enhanced system prompt with strict validation requirements
     const systemPrompt = `You are an expert question generator for ${category} reasoning tests.
 
-QUESTION STRUCTURE:
-1. Question text must be clear, concise, and unambiguous
-2. Provide exactly 4 distinct answer options
-3. One and only one option must be correct
-4. Each option must be complete and make sense on its own
+STRICT REQUIREMENTS:
+1. Each question must have ONE unambiguously correct answer
+2. All incorrect options must be clearly wrong but plausible
+3. Every answer must be fully justified with clear logic
+4. Do not use subjective or ambiguous reasoning
+5. Double-check all mathematical and logical steps
+6. Verify that the question tests the intended skill
 
-FORMATTING REQUIREMENTS:
+FORMAT REQUIREMENTS:
 Return a JSON object with these exact fields:
 {
-  "question": "The question text here",
+  "question": "Clear, unambiguous question text",
   "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswer": "Must exactly match one of the options",
-  "explanation": "Detailed explanation here"
+  "explanation": "Detailed explanation showing why the correct answer is right and others are wrong"
 }
 
-CATEGORY-SPECIFIC INSTRUCTIONS:
 ${categoryInstructions[category]}
 
 EXPLANATION REQUIREMENTS:
-The explanation must include:
-1. Why the correct answer is right
-2. Why each incorrect option is wrong
-3. The step-by-step reasoning process
-4. Any relevant patterns or rules that help solve similar questions
-`;
+1. State the correct answer clearly
+2. Explain step-by-step why it's correct
+3. Explain why each wrong option is incorrect
+4. Include the logical rule or pattern being tested
+5. Make sure explanations are mathematically and logically sound
+6. Verify all statements before including them`;
 
     // Use custom prompt if provided, otherwise use category-based prompt
-    const userPrompt = prompt?.trim() || `Generate a challenging ${category} reasoning question suitable for assessment tests that follows best practices for test design. The question should be clear, unambiguous, and have one definitively correct answer.`;
+    const userPrompt = prompt?.trim() || `Generate a challenging ${category} reasoning question that:
+1. Has one clear, unambiguous correct answer
+2. Tests logical thinking and pattern recognition
+3. Can be solved through careful reasoning
+4. Has plausible but clearly incorrect alternatives`;
 
     console.log('Sending request to OpenAI with prompt:', userPrompt);
 
@@ -95,12 +121,12 @@ The explanation must include:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.5, // Lower temperature for more focused responses
       }),
     });
 
@@ -132,6 +158,18 @@ The explanation must include:
       if (!questionData.options.includes(questionData.correctAnswer)) {
         throw new Error('Correct answer must match one of the options exactly');
       }
+
+      // Validate that all options are unique
+      if (new Set(questionData.options).size !== 4) {
+        throw new Error('All answer options must be unique');
+      }
+
+      // Validate explanation includes required components
+      if (!questionData.explanation.includes('correct answer') ||
+          !questionData.explanation.includes('incorrect') ||
+          !questionData.explanation.includes('because')) {
+        throw new Error('Explanation must include justification for correct and incorrect answers');
+      }
     } catch (error) {
       console.error('Error parsing AI response:', error);
       throw new Error('Failed to parse generated question: ' + error.message);
@@ -157,3 +195,4 @@ The explanation must include:
     );
   }
 });
+
