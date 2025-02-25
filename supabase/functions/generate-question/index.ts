@@ -14,8 +14,6 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Generate question function called');
-
     const { category, subTopicId, prompt } = await req.json();
 
     if (!category) {
@@ -34,7 +32,7 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Construct the system prompt based on the category
+    // Enhanced system prompt with better guidance for explanations
     let systemPrompt = `You are an expert question generator for ${category} reasoning tests. Generate a multiple choice question `;
     
     if (category === 'verbal') {
@@ -45,7 +43,18 @@ serve(async (req) => {
       systemPrompt += "that tests problem-solving, logic, or mathematical thinking. ";
     }
 
-    systemPrompt += "The response must be a JSON object with these exact fields: question (string), options (array of 4 strings), correctAnswer (string matching one of the options), and explanation (string explaining the answer).";
+    // Enhanced explanation requirements
+    systemPrompt += `
+The response must be a JSON object with these exact fields:
+- question (string): Clear, concise question text
+- options (array of 4 strings): Four distinct answer choices
+- correctAnswer (string): Must exactly match one of the options
+- explanation (string): Must include:
+  1. The correct answer and why it's right
+  2. Why the other options are incorrect
+  3. The logical steps or reasoning process to arrive at the answer
+  4. Any relevant rules or patterns that help solve similar questions
+`;
 
     // Use custom prompt if provided, otherwise generate based on category
     const userPrompt = prompt || `Generate a challenging ${category} reasoning question suitable for assessment tests.`;
@@ -57,7 +66,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4o',  // Using the more powerful model for better explanations
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -86,6 +95,11 @@ serve(async (req) => {
           !questionData.explanation) {
         throw new Error('Invalid question format from AI');
       }
+
+      // Additional validation for correct answer
+      if (!questionData.options.includes(questionData.correctAnswer)) {
+        throw new Error('Correct answer must match one of the options exactly');
+      }
     } catch (error) {
       console.error('Error parsing AI response:', error);
       throw new Error('Failed to parse generated question');
@@ -111,3 +125,4 @@ serve(async (req) => {
     );
   }
 });
+
