@@ -24,6 +24,75 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_sub_topics: {
+        Row: {
+          created_at: string | null
+          exam_id: string | null
+          id: string
+          sub_topic_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string
+          sub_topic_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          exam_id?: string | null
+          id?: string
+          sub_topic_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_sub_topics_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_sub_topics_sub_topic_id_fkey"
+            columns: ["sub_topic_id"]
+            isOneToOne: false
+            referencedRelation: "sub_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          is_standard: boolean | null
+          name: string
+          question_count: number
+          time_limit_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          is_standard?: boolean | null
+          name: string
+          question_count: number
+          time_limit_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          is_standard?: boolean | null
+          name?: string
+          question_count?: number
+          time_limit_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       game_sessions: {
         Row: {
           completed_at: string | null
