@@ -8,6 +8,18 @@ import { Database } from "@/integrations/supabase/types";
 
 type QuestionCategory = Database["public"]["Enums"]["question_category"];
 
+interface ExamWithResults {
+  name: string;
+  category: QuestionCategory;
+}
+
+interface ExamResult {
+  id: number;
+  score: number;
+  created_at: string;
+  exams?: ExamWithResults;
+}
+
 const SubjectProgress = () => {
   const { subject } = useParams<{ subject: string }>();
   
@@ -17,8 +29,10 @@ const SubjectProgress = () => {
       const { data, error } = await supabase
         .from('exam_results')
         .select(`
-          *,
-          exams (
+          id,
+          score,
+          created_at,
+          exams:exam_id (
             name,
             category
           )
@@ -26,7 +40,7 @@ const SubjectProgress = () => {
         .eq('exams.category', subject as QuestionCategory);
       
       if (error) throw error;
-      return data || [];
+      return data as ExamResult[] || [];
     },
     enabled: !!subject,
   });
@@ -37,12 +51,14 @@ const SubjectProgress = () => {
     const totalScores: { [key: string]: { total: number; count: number } } = {};
     
     examResults.forEach((result) => {
-      const examName = result.exams?.name || 'Unknown';
-      if (!totalScores[examName]) {
-        totalScores[examName] = { total: 0, count: 0 };
+      if (result.exams) {
+        const examName = result.exams.name;
+        if (!totalScores[examName]) {
+          totalScores[examName] = { total: 0, count: 0 };
+        }
+        totalScores[examName].total += result.score || 0;
+        totalScores[examName].count += 1;
       }
-      totalScores[examName].total += result.score || 0;
-      totalScores[examName].count += 1;
     });
 
     return Object.entries(totalScores).map(([name, stats]) => ({

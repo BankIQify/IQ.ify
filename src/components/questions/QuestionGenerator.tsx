@@ -26,9 +26,7 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
           description: "Starting 2-second delay test...",
         });
         
-        console.log('Testing delay function...', {
-          functionUrl: `${supabase.functions.url}/test-delay`
-        });
+        console.log('Testing delay function...');
         
         setIsTestingDelay(true);
         
@@ -231,4 +229,3 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
     </div>
   );
 };
-

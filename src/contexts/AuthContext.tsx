@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +7,8 @@ import { FocusArea } from "@/types/auth";
 type Profile = {
   id: string;
   name: string | null;
-  age: number | null;
-  city: string | null;
-  country: string | null;
-  school: string | null;
+  created_at: string;
+  updated_at: string;
   focus_areas: FocusArea[];
 };
 
@@ -50,9 +47,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log('Admin check result:', adminRoleCheck);
-      const hasAdminRole = !!adminRoleCheck;
-      console.log('Setting isAdmin to:', hasAdminRole);
-      setIsAdmin(hasAdminRole);
+      setIsAdmin(!!adminRoleCheck);
+      console.log('Setting isAdmin to:', !!adminRoleCheck);
 
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
