@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
   const [customPrompt, setCustomPrompt] = useState("");
   const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [isTestingDelay, setIsTestingDelay] = useState(false);
+  const queryClient = useQueryClient();
 
   // Test delay mutation
   const testDelayMutation = useMutation({
@@ -137,6 +138,8 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
       }
     },
     onSuccess: () => {
+      // Invalidate and refetch questions for the current sub-topic
+      queryClient.invalidateQueries({ queryKey: ['questions', subTopicId] });
       toast({
         title: "Success!",
         description: "New question generated and saved.",
