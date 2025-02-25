@@ -26,7 +26,10 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
           description: "Starting 2-second delay test...",
         });
         
-        console.log('Testing delay function...');
+        console.log('Testing delay function...', {
+          functionUrl: `${supabase.functions.url}/test-delay`
+        });
+        
         setIsTestingDelay(true);
         
         const { data, error } = await supabase.functions.invoke('test-delay', {
@@ -43,7 +46,6 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
           throw error;
         }
 
-        // Show success toast
         toast({
           title: "Success",
           description: "Delay test completed successfully!",
@@ -52,7 +54,6 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
         return data;
       } catch (error) {
         console.error('Delay test error:', error);
-        // Show error toast
         toast({
           title: "Error",
           description: `Failed to test delay: ${error.message}`,
@@ -230,3 +231,4 @@ export const QuestionGenerator = ({ subTopicId, category }: QuestionGeneratorPro
     </div>
   );
 };
+

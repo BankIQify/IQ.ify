@@ -1,17 +1,22 @@
 
+// Follow Deno deployment best practices
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-console.log("Test delay function loaded");
-
 serve(async (req) => {
+  console.log('Request received:', {
+    method: req.method,
+    url: req.url,
+    headers: Object.fromEntries(req.headers.entries())
+  });
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
     return new Response(null, {
       headers: {
         ...corsHeaders,
@@ -20,23 +25,18 @@ serve(async (req) => {
     });
   }
 
-  console.log('Request received:', {
-    method: req.method,
-    url: req.url,
-    headers: Object.fromEntries(req.headers.entries())
-  });
-
   try {
     console.log('Starting delay test...');
     
-    // Simulate a 2 second delay
+    // Simple 2 second delay
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    console.log('Delay completed, sending response');
+    console.log('Delay test completed successfully');
 
     return new Response(
-      JSON.stringify({ 
-        message: 'Delay test successful',
+      JSON.stringify({
+        success: true,
+        message: 'Delay test completed successfully',
         timestamp: new Date().toISOString()
       }),
       {
@@ -51,13 +51,9 @@ serve(async (req) => {
     console.error('Error in delay test:', error);
     
     return new Response(
-      JSON.stringify({ 
-        error: error.message,
-        stack: error.stack,
-        details: {
-          name: error.name,
-          message: error.message
-        }
+      JSON.stringify({
+        error: 'Internal server error',
+        details: error.message,
       }),
       {
         headers: {

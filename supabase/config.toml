@@ -4,13 +4,10 @@ project_id = "dqaihawavxlacegykwqu"
 [functions]
 [functions.test-connection]
 verify_jwt = false
-
 [functions.test-delay]
 verify_jwt = false
-
 [functions.generate-question]
 verify_jwt = false
-
 [functions.generate-explanation]
 verify_jwt = false
 
