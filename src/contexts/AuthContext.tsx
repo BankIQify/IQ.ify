@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,7 @@ type AuthContextType = {
   isAdmin: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  signUp: (email: string, password: string, profileData: Partial<Profile>) => Promise<void>;
+  signUp: (email: string, password: string, profileData: { name: string | null }) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -141,7 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, profileData: Partial<Profile>) => {
+  const signUp = async (email: string, password: string, profileData: { name: string | null }) => {
     const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password,
@@ -155,32 +156,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .from('profiles')
         .update({
           name: profileData.name,
-          age: profileData.age,
-          country: profileData.country,
-          city: profileData.city,
         })
         .eq('id', data.user.id);
 
       if (profileError) {
         console.error("Error updating profile:", profileError);
         throw profileError;
-      }
-
-      // Insert focus areas
-      if (profileData.focus_areas && profileData.focus_areas.length > 0) {
-        const focusAreasToInsert = profileData.focus_areas.map(focus_area => ({
-          user_id: data.user.id,
-          focus_area,
-        }));
-
-        const { error: focusAreasError } = await supabase
-          .from('user_focus_areas')
-          .insert(focusAreasToInsert);
-
-        if (focusAreasError) {
-          console.error("Error inserting focus areas:", focusAreasError);
-          throw focusAreasError;
-        }
       }
 
       toast({
@@ -219,3 +200,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

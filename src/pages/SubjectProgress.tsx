@@ -14,7 +14,8 @@ interface ExamWithResults {
 }
 
 interface ExamResult {
-  id: number;
+  id: string;
+  exam_id: string;
   score: number;
   created_at: string;
   exams?: ExamWithResults;
@@ -30,6 +31,7 @@ const SubjectProgress = () => {
         .from('exam_results')
         .select(`
           id,
+          exam_id,
           score,
           created_at,
           exams:exam_id (
@@ -40,7 +42,7 @@ const SubjectProgress = () => {
         .eq('exams.category', subject as QuestionCategory);
       
       if (error) throw error;
-      return data as ExamResult[] || [];
+      return data as ExamResult[];
     },
     enabled: !!subject,
   });
