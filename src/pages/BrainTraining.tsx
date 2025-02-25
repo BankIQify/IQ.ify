@@ -11,10 +11,26 @@ import { CrosswordGame } from "@/components/games/CrosswordGame";
 import { GeographyGame } from "@/components/games/GeographyGame";
 import { TimesTablesGame } from "@/components/games/TimesTablesGame";
 import IQTestGame from "@/components/games/IQTestGame";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/components/ui/use-toast";
 
 const BrainTraining = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [selectedGame, setSelectedGame] = useState<"word_search" | "crossword" | "sudoku" | "memory" | "geography" | "times_tables" | "iq_test" | null>(null);
+
+  if (!user) {
+    toast({
+      title: "Access Denied",
+      description: "You must be logged in to access Brain Training games.",
+      variant: "destructive"
+    });
+    navigate("/");
+    return null;
+  }
 
   if (selectedGame) {
     return (
