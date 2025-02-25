@@ -25,11 +25,17 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const systemPrompt = `You are an expert question creator. Create exactly 5 questions based on the provided criteria.
+    // Enhanced system prompt that emphasizes theme adherence
+    const systemPrompt = `You are an expert educational content creator specializing in ${category} questions. You must create exactly 5 questions that strictly follow any theme or requirements specified in the user's prompt.
 
-VERY IMPORTANT: Return ONLY a raw JSON array with 5 questions. Do not include any markdown formatting, code blocks, or extra text.
+CRITICAL REQUIREMENTS:
+1. Return ONLY a raw JSON array with 5 questions, no markdown or extra text
+2. STRICTLY FOLLOW the user's theme/requirements if provided
+3. If no specific theme is given, create age-appropriate questions for the ${category} category
+4. Questions should be challenging but solvable
+5. Match the explanation's complexity to the question's difficulty level
 
-Each question MUST follow this format:
+Each question MUST follow this exact format:
 {
   "question": "Question text here",
   "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
@@ -37,19 +43,21 @@ Each question MUST follow this format:
   "explanation": "Brief explanation here"
 }
 
-REQUIREMENTS:
-1. Generate EXACTLY 5 questions
-2. If user specifies difficulty levels, follow them precisely
-3. Each question MUST have exactly 4 options labeled A), B), C), D)
-4. Only ONE option can be correct
-5. The explanation should be clear and helpful
-6. Return ONLY the JSON array, no other text or formatting`;
+Additional requirements:
+- Each question must have exactly 4 options labeled A), B), C), D)
+- Only ONE option can be correct
+- Options should be plausible but clearly distinguishable
+- Explanations should be clear and educational
+- Format must be a plain JSON array without any markdown formatting`;
 
-    const userPrompt = prompt?.trim() || `Create 5 ${category} questions suitable for children.`;
+    // Enhanced user prompt handling
+    const basePrompt = prompt?.trim() 
+      ? `Create 5 ${category} questions with these specific requirements: ${prompt}. Make sure each question clearly relates to this theme/requirement.` 
+      : `Create 5 ${category} questions suitable for school students. Mix of easy and moderate difficulty.`;
 
     console.log('Sending request to OpenAI with:', {
       systemPrompt,
-      userPrompt
+      basePrompt
     });
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -62,10 +70,9 @@ REQUIREMENTS:
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+          { role: 'user', content: basePrompt }
         ],
-        temperature: 0.8,
-        max_tokens: 2000,
+        temperature: 0.7, // Slightly reduced for more focused responses
       }),
     });
 
@@ -86,7 +93,7 @@ REQUIREMENTS:
     let questions;
     try {
       const content = data.choices[0].message.content.trim()
-        // Remove any potential markdown or code block formatting
+        // Remove any markdown formatting
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
@@ -94,6 +101,7 @@ REQUIREMENTS:
       console.log('Cleaned content before parsing:', content);
       questions = JSON.parse(content);
       
+      // Validate questions structure
       if (!Array.isArray(questions) || questions.length !== 5) {
         throw new Error('Expected exactly 5 questions in response');
       }
