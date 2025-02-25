@@ -21,9 +21,6 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
-  const [age, setAge] = useState("");
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<FocusArea[]>([]);
 
   // Redirect if already authenticated
@@ -69,7 +66,7 @@ const Auth = () => {
     }
 
     // Additional validation for registration
-    if (!isLogin && (!name || !age || !country || !city)) {
+    if (!isLogin && !name) {
       toast({
         variant: "destructive",
         title: "Validation Error",
@@ -83,13 +80,7 @@ const Auth = () => {
       if (isLogin) {
         await signInWithEmail(email, password);
       } else {
-        await signUp(email, password, {
-          name,
-          age: parseInt(age),
-          country,
-          city,
-          focus_areas: selectedFocusAreas,
-        });
+        await signUp(email, password, { name });
       }
     } catch (error) {
       handleAuthError(error as AuthError);
@@ -155,76 +146,17 @@ const Auth = () => {
           </div>
 
           {!isLogin && (
-            <>
-              <div>
-                <Input
-                  type="text"
-                  placeholder="Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  disabled={loading}
-                  aria-label="Name"
-                />
-              </div>
-              <div>
-                <Input
-                  type="number"
-                  placeholder="Age"
-                  value={age}
-                  onChange={(e) => setAge(e.target.value)}
-                  required
-                  disabled={loading}
-                  min="1"
-                  max="120"
-                  aria-label="Age"
-                />
-              </div>
-              <div>
-                <Input
-                  type="text"
-                  placeholder="Country"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                  required
-                  disabled={loading}
-                  aria-label="Country"
-                />
-              </div>
-              <div>
-                <Input
-                  type="text"
-                  placeholder="City"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  required
-                  disabled={loading}
-                  aria-label="City"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Areas of Focus</Label>
-                <div className="space-y-2">
-                  {Object.entries(focusAreaLabels).map(([value, label]) => (
-                    <div key={value} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={value}
-                        checked={selectedFocusAreas.includes(value as FocusArea)}
-                        onCheckedChange={() => handleFocusAreaToggle(value as FocusArea)}
-                        disabled={loading}
-                      />
-                      <Label
-                        htmlFor={value}
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
+            <div>
+              <Input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                disabled={loading}
+                aria-label="Name"
+              />
+            </div>
           )}
 
           <Button
