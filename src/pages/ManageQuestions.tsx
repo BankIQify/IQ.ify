@@ -12,6 +12,9 @@ import { QuestionsList } from "@/components/questions/QuestionsList";
 import { CategoryManager } from "@/components/questions/CategoryManager";
 import { supabase } from "@/integrations/supabase/client";
 import { CompleteQuestionBank } from "@/components/questions/CompleteQuestionBank";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
 
 export type QuestionContent = {
   question: string;
@@ -32,8 +35,22 @@ type Question = {
 };
 
 const ManageQuestions = () => {
+  const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [category, setCategory] = useState<QuestionCategory>('verbal');
   const [subTopicId, setSubTopicId] = useState<string>("");
+
+  // Redirect if not admin
+  if (!user || !isAdmin) {
+    toast({
+      title: "Access Denied",
+      description: "You must be an admin to access this page.",
+      variant: "destructive"
+    });
+    navigate("/");
+    return null;
+  }
 
   // Fetch sub-topics based on selected category
   const { data: subTopics, isLoading: isLoadingSubTopics } = useQuery({
@@ -201,4 +218,3 @@ const ManageQuestions = () => {
 };
 
 export default ManageQuestions;
-
