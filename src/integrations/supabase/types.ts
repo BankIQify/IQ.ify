@@ -11,115 +11,16 @@ export type Database = {
     Tables: {
       exam_results: {
         Row: {
-          completed_at: string | null
-          created_at: string | null
-          exam_id: string | null
-          id: string
-          score: number | null
-          updated_at: string | null
-          user_id: string | null
+          created_at: string
+          id: number
         }
         Insert: {
-          completed_at?: string | null
-          created_at?: string | null
-          exam_id?: string | null
-          id?: string
-          score?: number | null
-          updated_at?: string | null
-          user_id?: string | null
+          created_at?: string
+          id?: number
         }
         Update: {
-          completed_at?: string | null
-          created_at?: string | null
-          exam_id?: string | null
-          id?: string
-          score?: number | null
-          updated_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exam_results_exam_id_fkey"
-            columns: ["exam_id"]
-            isOneToOne: false
-            referencedRelation: "exams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exam_results_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exam_sub_topics: {
-        Row: {
-          created_at: string | null
-          exam_id: string | null
-          id: string
-          sub_topic_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          exam_id?: string | null
-          id?: string
-          sub_topic_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          exam_id?: string | null
-          id?: string
-          sub_topic_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "exam_sub_topics_exam_id_fkey"
-            columns: ["exam_id"]
-            isOneToOne: false
-            referencedRelation: "exams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "exam_sub_topics_sub_topic_id_fkey"
-            columns: ["sub_topic_id"]
-            isOneToOne: false
-            referencedRelation: "sub_topics"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      exams: {
-        Row: {
-          category: Database["public"]["Enums"]["question_category"] | null
-          created_at: string | null
-          id: string
-          is_standard: boolean | null
-          name: string
-          question_count: number
-          time_limit_minutes: number | null
-          updated_at: string | null
-        }
-        Insert: {
-          category?: Database["public"]["Enums"]["question_category"] | null
-          created_at?: string | null
-          id?: string
-          is_standard?: boolean | null
-          name: string
-          question_count: number
-          time_limit_minutes?: number | null
-          updated_at?: string | null
-        }
-        Update: {
-          category?: Database["public"]["Enums"]["question_category"] | null
-          created_at?: string | null
-          id?: string
-          is_standard?: boolean | null
-          name?: string
-          question_count?: number
-          time_limit_minutes?: number | null
-          updated_at?: string | null
+          created_at?: string
+          id?: number
         }
         Relationships: []
       }
@@ -158,36 +59,24 @@ export type Database = {
       }
       profiles: {
         Row: {
-          age: number | null
-          city: string | null
-          country: string | null
           created_at: string
           focus_areas: Database["public"]["Enums"]["focus_area"][] | null
           id: string
           name: string | null
-          school: string | null
           updated_at: string
         }
         Insert: {
-          age?: number | null
-          city?: string | null
-          country?: string | null
           created_at?: string
           focus_areas?: Database["public"]["Enums"]["focus_area"][] | null
           id: string
           name?: string | null
-          school?: string | null
           updated_at?: string
         }
         Update: {
-          age?: number | null
-          city?: string | null
-          country?: string | null
           created_at?: string
           focus_areas?: Database["public"]["Enums"]["focus_area"][] | null
           id?: string
           name?: string | null
-          school?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -224,10 +113,8 @@ export type Database = {
           ai_generated: boolean | null
           content: Json
           created_at: string | null
-          difficulty: number | null
           generation_prompt: string | null
           id: string
-          section_id: string | null
           sub_topic_id: string | null
           updated_at: string | null
         }
@@ -235,10 +122,8 @@ export type Database = {
           ai_generated?: boolean | null
           content: Json
           created_at?: string | null
-          difficulty?: number | null
           generation_prompt?: string | null
           id?: string
-          section_id?: string | null
           sub_topic_id?: string | null
           updated_at?: string | null
         }
@@ -246,21 +131,12 @@ export type Database = {
           ai_generated?: boolean | null
           content?: Json
           created_at?: string | null
-          difficulty?: number | null
           generation_prompt?: string | null
           id?: string
-          section_id?: string | null
           sub_topic_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "questions_section_id_fkey"
-            columns: ["section_id"]
-            isOneToOne: false
-            referencedRelation: "question_sections"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "questions_sub_topic_id_fkey"
             columns: ["sub_topic_id"]
@@ -357,13 +233,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      has_role: {
-        Args: {
-          user_id: string
-          role: Database["public"]["Enums"]["user_role"]
-        }
-        Returns: boolean
-      }
       is_admin: {
         Args: {
           user_id: string
