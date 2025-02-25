@@ -12,17 +12,31 @@ export type Database = {
       exam_results: {
         Row: {
           created_at: string
+          exam_id: string | null
           id: number
+          score: number | null
         }
         Insert: {
           created_at?: string
+          exam_id?: string | null
           id?: number
+          score?: number | null
         }
         Update: {
           created_at?: string
+          exam_id?: string | null
           id?: number
+          score?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "exam_results_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       exam_sub_topics: {
         Row: {
