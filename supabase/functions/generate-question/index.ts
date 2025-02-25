@@ -8,11 +8,18 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openAIApiKey) {
+      console.error('OpenAI API key not configured');
+      throw new Error('OpenAI API key not configured');
+    }
+
     const { category, subTopicId, prompt } = await req.json();
     console.log('Generating questions for:', { category, subTopicId, prompt });
 
@@ -20,38 +27,8 @@ serve(async (req) => {
       throw new Error('Category and subTopicId are required');
     }
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured');
-    }
+    const customInstructions = prompt?.trim() || '';
 
-    const categoryInstructions = {
-      verbal: `Create 5 fun verbal reasoning questions for children! For each question remember to:
-        1. Use simple, friendly language that a child would understand
-        2. Include colorful examples or stories with animals, toys, or everyday objects
-        3. Make the explanation engaging and visual
-        4. Include exactly 4 options labeled A), B), C), D)
-        5. Only ONE answer can be correct
-        6. Make the explanation fun and memorable`,
-      non_verbal: `Create 5 exciting visual puzzles for children! For each question remember to:
-        1. Use shapes, patterns, or pictures that children love
-        2. Include colorful examples with fun objects like stars, hearts, or animals
-        3. Make the explanation like a treasure hunt or adventure
-        4. Include exactly 4 options labeled A), B), C), D)
-        5. Only ONE answer can be correct
-        6. Make the explanation playful and easy to remember`,
-      brain_training: `Create 5 brain-tickling puzzles for children! For each question remember to:
-        1. Use fun scenarios like planning a birthday party or organizing toys
-        2. Include colorful examples with familiar objects
-        3. Make it feel like a game or adventure
-        4. Include exactly 4 options labeled A), B), C), D)
-        5. Only ONE answer can be correct
-        6. Make the explanation exciting and memorable`
-    };
-
-    const customInstructions = prompt?.trim() || categoryInstructions[category];
-
-    console.log('Sending request to OpenAI...');
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -59,11 +36,12 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `You are a friendly teacher who creates fun questions for children. Create an array of exactly 5 questions. Each question should:
+            content: `You are a friendly teacher who creates fun questions for children. Create an array of exactly 5 questions.
+              Each question should:
               1. Use simple, child-friendly language
               2. Include colorful imagery and fun examples
               3. Make learning feel like a game or adventure
@@ -71,7 +49,7 @@ serve(async (req) => {
               5. Have exactly ONE correct answer
               6. Include a friendly, encouraging explanation
               7. Use emojis and imagery where appropriate
-              
+
               Return ONLY a JSON array containing exactly 5 question objects in this exact format:
               [
                 {
@@ -79,26 +57,29 @@ serve(async (req) => {
                   "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
                   "correctAnswer": "A) First option",
                   "explanation": "A friendly, colorful explanation that makes learning fun"
-                },
-                // ... 4 more question objects with the same format
+                }
               ]`
           },
-          { role: 'user', content: customInstructions }
+          {
+            role: 'user',
+            content: customInstructions || `Create 5 engaging ${category} questions for children!`
+          }
         ],
         temperature: 0.7,
-        max_tokens: 2500,
+        max_tokens: 2000,
       }),
     });
 
+    console.log('OpenAI API response status:', response.status);
+
     if (!response.ok) {
-      console.error('OpenAI API error status:', response.status);
-      const error = await response.text();
-      console.error('OpenAI API error:', error);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorData = await response.text();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorData}`);
     }
 
     const data = await response.json();
-    console.log('OpenAI response received');
+    console.log('OpenAI response received:', data);
 
     if (!data.choices?.[0]?.message?.content) {
       console.error('Invalid response format from OpenAI:', data);
@@ -107,7 +88,7 @@ serve(async (req) => {
 
     const generatedContent = data.choices[0].message.content;
     let questionsData;
-    
+
     try {
       questionsData = JSON.parse(generatedContent);
       
@@ -124,13 +105,14 @@ serve(async (req) => {
         }
       }
 
-      console.log('Questions generated successfully');
+      console.log('Questions generated successfully:', questionsData);
       return new Response(JSON.stringify(questionsData), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     } catch (error) {
       console.error('Error parsing AI response:', error);
+      console.error('Raw AI response:', generatedContent);
       throw new Error('Failed to parse AI response');
     }
   } catch (error) {
@@ -138,7 +120,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         error: error.message,
-        stack: error.stack
+        details: error.stack
       }),
       {
         status: 500,
