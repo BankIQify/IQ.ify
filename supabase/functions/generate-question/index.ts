@@ -8,7 +8,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -26,13 +25,16 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const systemPrompt = `You are a teacher creating multiple choice questions for children. Create exactly 5 questions following this strict format and rules:
+    const systemPrompt = `You are an expert teacher creating multiple choice questions. Follow these instructions precisely:
 
-1. Each question must be child-friendly and engaging
-2. Each question must have exactly 4 multiple choice options labeled A), B), C), D)
-3. One and only one option must be correct
-4. Include a brief, encouraging explanation for the correct answer
-5. Return ONLY a valid JSON array of 5 question objects with this exact structure, no other text:
+1. Create EXACTLY 5 questions that match the user's requested difficulty level and specifications
+2. If no specific difficulty is mentioned, create questions suitable for children
+3. Each question MUST have exactly 4 options labeled A), B), C), D)
+4. Only ONE option can be correct
+5. The explanation should match the complexity level of the question
+6. Pay close attention to any specific requirements in the user's prompt
+
+Return ONLY a JSON array with exactly 5 questions in this format:
 [
   {
     "question": "Question text here",
@@ -61,7 +63,7 @@ serve(async (req) => {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
+        temperature: 0.8,
         max_tokens: 2000,
       }),
     });
@@ -90,7 +92,6 @@ serve(async (req) => {
         throw new Error('Expected exactly 5 questions in response');
       }
 
-      // Validate each question object
       questions.forEach((q, index) => {
         if (!q.question || !Array.isArray(q.options) || q.options.length !== 4 
             || !q.correctAnswer || !q.explanation) {
@@ -108,7 +109,6 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
-
   } catch (error) {
     console.error('Error in generate-question function:', error);
     return new Response(
