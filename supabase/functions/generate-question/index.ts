@@ -95,7 +95,7 @@ The explanation must include:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -107,7 +107,7 @@ The explanation must include:
     if (!response.ok) {
       const error = await response.json();
       console.error('OpenAI API error:', error);
-      throw new Error('Failed to generate question: OpenAI API error');
+      throw new Error(`Failed to generate question: ${error.error?.message || 'OpenAI API error'}`);
     }
 
     const data = await response.json();
@@ -134,7 +134,7 @@ The explanation must include:
       }
     } catch (error) {
       console.error('Error parsing AI response:', error);
-      throw new Error('Failed to parse generated question');
+      throw new Error('Failed to parse generated question: ' + error.message);
     }
 
     console.log('Successfully generated question:', questionData);
