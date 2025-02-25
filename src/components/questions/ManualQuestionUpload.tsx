@@ -1,13 +1,14 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Database } from "@/integrations/supabase/types";
+import { QuestionTypeSelector } from "./upload/QuestionTypeSelector";
+import { QuestionText } from "./upload/QuestionText";
+import { ImageUpload } from "./upload/ImageUpload";
+import { MultipleChoiceOptions } from "./upload/MultipleChoiceOptions";
+import { TextAnswer } from "./upload/TextAnswer";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 
@@ -24,18 +25,6 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
   const [correctAnswerIndex, setCorrectAnswerIndex] = useState(0);
   const [correctTextAnswer, setCorrectTextAnswer] = useState("");
   const [isProcessingManual, setIsProcessingManual] = useState(false);
-
-  const handleQuestionImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setQuestionImage(e.target.files[0]);
-    }
-  };
-
-  const handleAnswerImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setAnswerImage(e.target.files[0]);
-    }
-  };
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
@@ -201,88 +190,46 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
 
   return (
     <div className="space-y-4">
-      <div>
-        <Label>Question Type</Label>
-        <Select value={questionType} onValueChange={(value: QuestionType) => setQuestionType(value)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-            <SelectItem value="text">Text</SelectItem>
-            <SelectItem value="image">Image</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      <QuestionTypeSelector 
+        value={questionType}
+        onChange={(value) => setQuestionType(value)}
+      />
 
-      <div>
-        <Label htmlFor="questionText">Question Text</Label>
-        <Textarea
-          id="questionText"
-          placeholder="Enter your question..."
-          value={manualQuestion}
-          onChange={(e) => setManualQuestion(e.target.value)}
-          className="h-24"
-        />
-      </div>
+      <QuestionText
+        value={manualQuestion}
+        onChange={setManualQuestion}
+      />
 
-      <div>
-        <Label htmlFor="questionImage">Question Image {questionType === "image" ? "(Required)" : "(Optional)"}</Label>
-        <Input
-          id="questionImage"
-          type="file"
-          accept="image/*"
-          onChange={handleQuestionImageUpload}
-          className="mt-1"
-        />
-      </div>
+      <ImageUpload
+        id="questionImage"
+        label="Question Image"
+        required={questionType === "image"}
+        onChange={setQuestionImage}
+      />
 
       {questionType === "multiple_choice" && (
-        <div className="space-y-4">
-          <Label>Answer Options</Label>
-          {options.map((option, index) => (
-            <div key={index} className="flex gap-2">
-              <Input
-                value={option}
-                onChange={(e) => handleOptionChange(index, e.target.value)}
-                placeholder={`Option ${index + 1}`}
-                className={correctAnswerIndex === index ? "border-green-500 border-2" : ""}
-              />
-              <input
-                type="radio"
-                name="correctAnswer"
-                checked={correctAnswerIndex === index}
-                onChange={() => setCorrectAnswerIndex(index)}
-                className="mt-3"
-              />
-            </div>
-          ))}
-        </div>
+        <MultipleChoiceOptions
+          options={options}
+          correctAnswerIndex={correctAnswerIndex}
+          onOptionChange={handleOptionChange}
+          onCorrectAnswerChange={setCorrectAnswerIndex}
+        />
       )}
 
       {questionType === "text" && (
-        <div>
-          <Label htmlFor="correctAnswer">Correct Answer</Label>
-          <Input
-            id="correctAnswer"
-            value={correctTextAnswer}
-            onChange={(e) => setCorrectTextAnswer(e.target.value)}
-            placeholder="Enter the correct answer"
-          />
-        </div>
+        <TextAnswer
+          value={correctTextAnswer}
+          onChange={setCorrectTextAnswer}
+        />
       )}
 
       {questionType === "image" && (
-        <div>
-          <Label htmlFor="answerImage">Answer Image (Required)</Label>
-          <Input
-            id="answerImage"
-            type="file"
-            accept="image/*"
-            onChange={handleAnswerImageUpload}
-            className="mt-1"
-          />
-        </div>
+        <ImageUpload
+          id="answerImage"
+          label="Answer Image"
+          required
+          onChange={setAnswerImage}
+        />
       )}
 
       <Button
