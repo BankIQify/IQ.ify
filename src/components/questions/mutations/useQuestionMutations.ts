@@ -74,7 +74,7 @@ export const useQuestionMutations = (subTopicId: string) => {
           prompt: customPrompt || undefined
         });
 
-        const { data: response, error: functionError } = await supabase.functions.invoke('generate-question', {
+        const { data: questions, error: functionError } = await supabase.functions.invoke('generate-question', {
           body: { 
             category,
             subTopicId,
@@ -82,33 +82,43 @@ export const useQuestionMutations = (subTopicId: string) => {
           }
         });
 
-        console.log('Generate question response:', { response, functionError });
+        console.log('Generate questions response:', { questions, functionError });
 
         if (functionError) {
           throw functionError;
         }
 
-        if (!response) {
-          throw new Error('No response from question generator');
+        if (!questions || !Array.isArray(questions)) {
+          throw new Error('No questions received from generator');
         }
 
-        console.log('Question generated successfully:', response);
+        console.log('Questions generated successfully:', questions);
 
-        const { error: insertError } = await supabase
-          .from('questions')
-          .insert({
-            content: response,
-            sub_topic_id: subTopicId,
-            generation_prompt: customPrompt?.trim() || null,
-            ai_generated: true,
-          });
+        // Insert all questions in parallel
+        const insertPromises = questions.map(question => 
+          supabase
+            .from('questions')
+            .insert({
+              content: question,
+              sub_topic_id: subTopicId,
+              generation_prompt: customPrompt?.trim() || null,
+              ai_generated: true,
+            })
+        );
 
-        if (insertError) {
-          console.error('Database insert error:', insertError);
-          throw new Error('Failed to save generated question');
+        const results = await Promise.all(insertPromises);
+        
+        // Check for any insert errors
+        const insertErrors = results
+          .map(result => result.error)
+          .filter(error => error !== null);
+
+        if (insertErrors.length > 0) {
+          console.error('Database insert errors:', insertErrors);
+          throw new Error('Failed to save some generated questions');
         }
 
-        return response;
+        return questions;
       } catch (error) {
         console.error('Caught error in mutation:', error);
         throw error;
@@ -118,14 +128,14 @@ export const useQuestionMutations = (subTopicId: string) => {
       queryClient.invalidateQueries({ queryKey: ['questions', subTopicId] });
       toast({
         title: "Success!",
-        description: "New question generated and saved.",
+        description: "5 new questions generated and saved.",
       });
     },
     onError: (error: Error) => {
       console.error('Mutation error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate question. Please try again.",
+        description: error.message || "Failed to generate questions. Please try again.",
         variant: "destructive"
       });
     },
