@@ -26,28 +26,34 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Base instructions for each category
+    // Child-friendly instructions for each category
     const categoryInstructions = {
       verbal: `
-        Generate a verbal reasoning question. Follow these rules:
-        1. The question must test logical thinking or word relationships
-        2. Include exactly 4 options labeled A), B), C), D)
-        3. Only ONE answer can be correct
-        4. The explanation must clearly justify why the answer is correct
+        Create a fun verbal reasoning question for children! Remember to:
+        1. Use simple, friendly language that a child would understand
+        2. Include colorful examples or stories with animals, toys, or everyday objects
+        3. Make the explanation engaging and visual (like "Imagine drawing a line between...")
+        4. Include exactly 4 options labeled A), B), C), D)
+        5. Only ONE answer can be correct
+        6. Make the explanation fun and memorable
       `,
       non_verbal: `
-        Generate a non-verbal reasoning question. Follow these rules:
-        1. The question must test visual or pattern recognition
-        2. Include exactly 4 options labeled A), B), C), D)
-        3. Only ONE answer can be correct
-        4. The explanation must clearly justify why the answer is correct
+        Create an exciting visual puzzle for children! Remember to:
+        1. Use shapes, patterns, or pictures that children love
+        2. Include colorful examples with fun objects like stars, hearts, or animals
+        3. Make the explanation like a treasure hunt or adventure
+        4. Include exactly 4 options labeled A), B), C), D)
+        5. Only ONE answer can be correct
+        6. Make the explanation playful and easy to remember
       `,
       brain_training: `
-        Generate a brain training question. Follow these rules:
-        1. The question must test problem-solving abilities
-        2. Include exactly 4 options labeled A), B), C), D)
-        3. Only ONE answer can be correct
-        4. The explanation must clearly justify why the answer is correct
+        Create a brain-tickling puzzle for children! Remember to:
+        1. Use fun scenarios like planning a birthday party or organizing toys
+        2. Include colorful examples with familiar objects
+        3. Make it feel like a game or adventure
+        4. Include exactly 4 options labeled A), B), C), D)
+        5. Only ONE answer can be correct
+        6. Make the explanation exciting and memorable
       `
     };
 
@@ -65,23 +71,26 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: `You are an expert question generator. Generate questions that:
-              1. Have exactly ONE correct answer
-              2. Include 4 options labeled A), B), C), D)
-              3. Provide a clear, detailed explanation
-              4. Are appropriate for the given category: ${category}
+            content: `You are a friendly teacher who creates fun questions for children. Your questions should:
+              1. Use simple, child-friendly language
+              2. Include colorful imagery and fun examples
+              3. Make learning feel like a game or adventure
+              4. Have exactly 4 options labeled A), B), C), D)
+              5. Have exactly ONE correct answer
+              6. Include a friendly, encouraging explanation
+              7. Use emojis and imagery where appropriate
               
               Return ONLY a JSON object in this exact format:
               {
-                "question": "The question text",
+                "question": "The fun question text with emojis and imagery",
                 "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
                 "correctAnswer": "A) First option",
-                "explanation": "Detailed explanation of why this is the correct answer"
+                "explanation": "A friendly, colorful explanation that makes learning fun"
               }`
           },
           { role: 'user', content: customInstructions }
         ],
-        temperature: 0.3,
+        temperature: 0.7,
         max_tokens: 1000,
       }),
     });
