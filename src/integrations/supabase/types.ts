@@ -432,7 +432,11 @@ export type Database = {
         | "problem_solving"
         | "time_management"
         | "confidence_building"
-      game_puzzle_type: "word_search" | "crossword"
+      game_puzzle_type:
+        | "word_search"
+        | "crossword"
+        | "new_value_1"
+        | "new_value_2"
       game_type:
         | "times_tables"
         | "memory_cards"
