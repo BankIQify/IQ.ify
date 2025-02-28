@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Check, RefreshCw, AlertTriangle } from "lucide-react";
+import { Check, RefreshCw, AlertTriangle, Trophy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface SudokuCell {
   value: number | null;
@@ -17,6 +18,7 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [hasErrors, setHasErrors] = useState(false);
+  const [animateSuccess, setAnimateSuccess] = useState(false);
 
   useEffect(() => {
     initializeBoard();
@@ -64,6 +66,7 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
     setSelectedCell(null);
     setIsComplete(false);
     setHasErrors(false);
+    setAnimateSuccess(false);
   };
 
   const handleCellClick = (row: number, col: number) => {
@@ -106,9 +109,10 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
       row.every(cell => cell.value !== null)
     );
     
-    setIsComplete(isFilled);
-    
-    // In a real game, we would also validate that the solution is correct
+    if (isFilled && !hasErrors) {
+      setIsComplete(true);
+      setAnimateSuccess(true);
+    }
   };
 
   const checkForErrors = () => {
@@ -176,42 +180,53 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
 
   const getBackgroundColor = (rowIdx: number, colIdx: number, cell: SudokuCell) => {
     if (cell.isError) return "bg-red-100";
-    if (selectedCell && selectedCell[0] === rowIdx && selectedCell[1] === colIdx) return "bg-pastel-yellow";
-    if (cell.isHighlighted) return "bg-pastel-blue/30";
+    if (selectedCell && selectedCell[0] === rowIdx && selectedCell[1] === colIdx) return "bg-pastel-yellow/70";
+    if (cell.isHighlighted) return "bg-pastel-blue/20";
     
     // Alternate 3x3 boxes with different backgrounds
     const boxRow = Math.floor(rowIdx / 3);
     const boxCol = Math.floor(colIdx / 3);
-    return (boxRow + boxCol) % 2 === 0 ? "bg-white" : "bg-pastel-gray/30";
+    return (boxRow + boxCol) % 2 === 0 ? "bg-white" : "bg-pastel-gray/20";
   };
 
   return (
     <div className="space-y-6">
       {isComplete && !hasErrors && (
-        <div className="bg-pastel-green/50 p-4 rounded-lg flex items-center gap-3 mb-6">
-          <Check className="h-5 w-5 text-green-600" />
-          <p className="font-medium text-green-800">Congratulations! You've completed the puzzle!</p>
+        <div className={cn(
+          "bg-gradient-to-r from-pastel-green/50 to-pastel-blue/50 p-6 rounded-xl flex items-center gap-4 mb-6 shadow-md",
+          animateSuccess ? "animate-scale-in" : ""
+        )}>
+          <Trophy className="h-10 w-10 text-yellow-500" />
+          <div>
+            <h3 className="text-xl font-bold text-green-800">Congratulations!</h3>
+            <p className="text-green-700">You've completed the puzzle successfully!</p>
+          </div>
         </div>
       )}
       
       {hasErrors && (
-        <div className="bg-pastel-pink/50 p-4 rounded-lg flex items-center gap-3 mb-6">
-          <AlertTriangle className="h-5 w-5 text-red-600" />
-          <p className="font-medium text-red-800">There are errors in your solution. Keep trying!</p>
+        <div className="bg-gradient-to-r from-pastel-pink/50 to-pastel-orange/50 p-4 rounded-xl flex items-center gap-3 mb-6 shadow-md">
+          <AlertTriangle className="h-6 w-6 text-red-600" />
+          <div>
+            <p className="font-medium text-red-700">There are errors in your solution</p>
+            <p className="text-sm text-red-600">Review your answers and try again</p>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-9 gap-0 border-2 border-gray-400 rounded-lg overflow-hidden max-w-[500px] mx-auto shadow-md">
+      <div className="grid grid-cols-9 gap-0 border-2 border-primary/30 rounded-lg overflow-hidden max-w-[500px] mx-auto shadow-lg bg-white">
         {board.map((row, rowIndex) => (
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
-              className={`aspect-square flex items-center justify-center text-lg font-medium cursor-pointer border border-gray-200
-                ${getBackgroundColor(rowIndex, colIndex, cell)}
-                ${cell.isFixed ? 'text-gray-900 font-bold' : 'text-blue-600'}
-                ${cell.isError ? 'text-red-600' : ''}
-                hover:bg-pastel-yellow/70 transition-colors`}
               onClick={() => handleCellClick(rowIndex, colIndex)}
+              className={cn(
+                "aspect-square flex items-center justify-center text-lg font-medium cursor-pointer border border-gray-200 transition-colors",
+                getBackgroundColor(rowIndex, colIndex, cell),
+                cell.isFixed ? 'text-gray-900 font-bold' : 'text-blue-600',
+                cell.isError ? 'text-red-600' : '',
+                !cell.isFixed && 'hover:bg-pastel-yellow/50'
+              )}
             >
               {cell.value || ''}
             </div>
@@ -219,35 +234,41 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
         ))}
       </div>
 
-      <div className="flex justify-center gap-2 flex-wrap max-w-[500px] mx-auto">
+      <div className="flex justify-center gap-2 flex-wrap max-w-[500px] mx-auto mt-4">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => (
           <Button
             key={number}
             variant="outline"
-            className="w-12 h-12 text-lg font-bold hover:bg-pastel-blue transition-colors"
+            className={cn(
+              "w-12 h-12 text-lg font-bold transition-all",
+              "hover:bg-pastel-blue/50 hover:scale-105",
+              selectedCell ? "opacity-100" : "opacity-70"
+            )}
             onClick={() => handleNumberInput(number)}
           >
             {number}
           </Button>
         ))}
         
-        <Button 
-          variant="ghost" 
-          className="bg-pastel-orange/30 hover:bg-pastel-orange/50 ml-2" 
-          onClick={initializeBoard}
-        >
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Reset
-        </Button>
-        
-        <Button 
-          variant="ghost" 
-          className="bg-pastel-purple/30 hover:bg-pastel-purple/50" 
-          onClick={checkForErrors}
-        >
-          <Check className="h-4 w-4 mr-2" />
-          Check
-        </Button>
+        <div className="flex gap-2 mt-4 w-full">
+          <Button 
+            variant="outline" 
+            className="flex-1 bg-pastel-orange/30 hover:bg-pastel-orange/50 border-pastel-orange" 
+            onClick={initializeBoard}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            className="flex-1 bg-pastel-purple/30 hover:bg-pastel-purple/50 border-pastel-purple" 
+            onClick={checkForErrors}
+          >
+            <Check className="h-4 w-4 mr-2" />
+            Check
+          </Button>
+        </div>
       </div>
     </div>
   );
