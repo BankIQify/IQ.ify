@@ -6,9 +6,12 @@ import { CrosswordGame } from "@/components/games/CrosswordGame";
 import { TimesTablesGame } from "@/components/games/TimesTablesGame";
 import { SudokuGame } from "@/components/games/SudokuGame";
 import { TwentyFourGame } from "@/components/games/TwentyFourGame";
+import { MemoryGame } from "@/components/games/MemoryGame";
+import { GeographyGame } from "@/components/games/GeographyGame";
+import IQTestGame from "@/components/games/IQTestGame";
 import { useState } from "react";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Puzzle, BookOpen, Grid, Calculator, Hash } from "lucide-react";
+import { Puzzle, BookOpen, Grid, Calculator, Hash, Brain, Globe, Lightbulb } from "lucide-react";
 
 export default function BrainTraining() {
   const defaultDifficulty: Difficulty = "easy";
@@ -22,11 +25,17 @@ export default function BrainTraining() {
       case "crossword":
         return <CrosswordGame difficulty={defaultDifficulty} />;
       case "times-tables":
-        return <TimesTablesGame difficulty={defaultDifficulty} />;
+        return <TimesTablesGame />;
       case "sudoku":
         return <SudokuGame difficulty={defaultDifficulty} />;
       case "twenty-four":
         return <TwentyFourGame difficulty={defaultDifficulty} />;
+      case "memory":
+        return <MemoryGame difficulty={defaultDifficulty} />;
+      case "geography":
+        return <GeographyGame difficulty={defaultDifficulty} />;
+      case "iq-test":
+        return <IQTestGame difficulty={defaultDifficulty} />;
       default:
         return null;
     }
@@ -68,6 +77,24 @@ export default function BrainTraining() {
       title: "24 Game",
       description: "Use four numbers and arithmetic operations to make 24",
       icon: <Hash className="h-8 w-8 text-pink-500" />,
+    },
+    {
+      id: "memory",
+      title: "Memory Game",
+      description: "Test your memory by matching pairs of cards",
+      icon: <Brain className="h-8 w-8 text-teal-500" />,
+    },
+    {
+      id: "geography",
+      title: "Geography Quiz",
+      description: "Challenge your knowledge of world geography",
+      icon: <Globe className="h-8 w-8 text-indigo-500" />,
+    },
+    {
+      id: "iq-test",
+      title: "IQ Test",
+      description: "Challenge your logical and analytical thinking skills",
+      icon: <Lightbulb className="h-8 w-8 text-amber-500" />,
     },
   ];
   

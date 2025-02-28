@@ -1,12 +1,11 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { TwentyFourPuzzle, TwentyFourGameType } from "./types";
-import { useToast } from "@/hooks/use-toast";
+import type { TwentyFourPuzzle } from "./types";
 
 export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<TwentyFourPuzzle[]> => {
   try {
-    const gameType: TwentyFourGameType = "twenty_four";
+    const gameType = "twenty_four";
     
     const { data, error } = await supabase
       .from("game_puzzles")
