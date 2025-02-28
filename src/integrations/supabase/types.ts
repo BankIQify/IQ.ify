@@ -408,6 +408,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_puzzle_counts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          game_type: string
+          difficulty: string
+          count: number
+        }[]
+      }
       is_admin: {
         Args: {
           user_id: string

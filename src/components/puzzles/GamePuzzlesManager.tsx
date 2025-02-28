@@ -14,7 +14,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Puzzle, BookOpen } from "lucide-react";
+import { Puzzle, BookOpen, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface PuzzleTheme {
   id: string;
@@ -32,6 +36,9 @@ export const GamePuzzlesManager = () => {
   const [themes, setThemes] = useState<PuzzleTheme[]>([]);
   const [puzzleCounts, setPuzzleCounts] = useState<PuzzleCount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddThemeDialog, setShowAddThemeDialog] = useState(false);
+  const [newThemeName, setNewThemeName] = useState("");
+  const [newThemeDescription, setNewThemeDescription] = useState("");
 
   useEffect(() => {
     fetchThemes();
@@ -102,6 +109,47 @@ export const GamePuzzlesManager = () => {
       toast({
         title: "Error",
         description: "Failed to load puzzle counts. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addNewTheme = async () => {
+    if (!newThemeName.trim()) {
+      toast({
+        title: "Error",
+        description: "Theme name is required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("game_themes")
+        .insert([{ 
+          name: newThemeName.trim(), 
+          description: newThemeDescription.trim() || null 
+        }])
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Theme added successfully",
+      });
+
+      // Reset form and refresh themes
+      setNewThemeName("");
+      setNewThemeDescription("");
+      setShowAddThemeDialog(false);
+      fetchThemes();
+    } catch (error) {
+      console.error("Error adding theme:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add theme. Please try again.",
         variant: "destructive",
       });
     }
@@ -205,6 +253,50 @@ export const GamePuzzlesManager = () => {
         <TabsContent value="themes">
           <Card>
             <CardContent className="pt-6">
+              <div className="flex justify-end mb-4">
+                <Dialog open={showAddThemeDialog} onOpenChange={setShowAddThemeDialog}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" /> Add Theme
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Add New Theme</DialogTitle>
+                      <DialogDescription>
+                        Create a new theme for puzzle games. Themes are used to categorize puzzles.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="themeName" className="text-right">
+                          Name
+                        </Label>
+                        <Input
+                          id="themeName"
+                          value={newThemeName}
+                          onChange={(e) => setNewThemeName(e.target.value)}
+                          className="col-span-3"
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="themeDescription" className="text-right">
+                          Description
+                        </Label>
+                        <Textarea
+                          id="themeDescription"
+                          value={newThemeDescription}
+                          onChange={(e) => setNewThemeDescription(e.target.value)}
+                          className="col-span-3"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" onClick={addNewTheme}>Save Theme</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
               <Table>
                 <TableCaption>Available themes for puzzle games</TableCaption>
                 <TableHeader>
