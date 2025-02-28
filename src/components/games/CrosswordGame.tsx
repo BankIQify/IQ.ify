@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import type { Difficulty } from "@/components/games/GameSettings";
 import type { Json } from "@/integrations/supabase/types";
+import { useGameState } from "@/hooks/use-game-state";
 
 interface CrosswordCell {
   letter: string;
@@ -57,6 +58,13 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [puzzles, setPuzzles] = useState<CrosswordPuzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<CrosswordPuzzle | null>(null);
   const [loading, setLoading] = useState(true);
+  const [correctAnswers, setCorrectAnswers] = useState(0);
+  const [totalAnswers, setTotalAnswers] = useState(0);
+  
+  const { updateScore, startGame, pauseGame, isActive } = useGameState({
+    gameType: 'crossword',
+    initialTimer: 600, // 10 minutes
+  });
 
   useEffect(() => {
     fetchThemes();
@@ -110,6 +118,39 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
     }
   };
 
+  const getDifficultyConfig = () => {
+    switch (difficulty) {
+      case "easy":
+        return { 
+          minWordLength: 3, 
+          maxWordLength: 5,
+          minWordCount: 5,
+          maxWordCount: 8
+        };
+      case "medium":
+        return { 
+          minWordLength: 4, 
+          maxWordLength: 6,
+          minWordCount: 6,
+          maxWordCount: 10
+        };
+      case "hard":
+        return { 
+          minWordLength: 5, 
+          maxWordLength: 10,
+          minWordCount: 8,
+          maxWordCount: 15
+        };
+      default:
+        return { 
+          minWordLength: 4, 
+          maxWordLength: 6,
+          minWordCount: 6,
+          maxWordCount: 10
+        };
+    }
+  };
+
   const fetchPuzzlesByTheme = async (themeId: string, difficulty: Difficulty) => {
     try {
       const { data, error } = await supabase
@@ -139,7 +180,26 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
         };
       });
       
-      setPuzzles(formattedPuzzles);
+      // Filter puzzles based on word count and word length according to difficulty
+      const { minWordLength, maxWordLength, minWordCount, maxWordCount } = getDifficultyConfig();
+      
+      const filteredPuzzles = formattedPuzzles.filter(puzzle => {
+        if (!puzzle.puzzle_data || !puzzle.puzzle_data.clues) return false;
+        
+        const wordCount = puzzle.puzzle_data.clues.length;
+        const wordsInRange = puzzle.puzzle_data.clues.filter(clue => {
+          const wordLength = clue.answer.length;
+          return wordLength >= minWordLength && wordLength <= maxWordLength;
+        }).length;
+        
+        // Check if word count is within range and most words match length requirements
+        return wordCount >= minWordCount && 
+               wordCount <= maxWordCount && 
+               wordsInRange >= wordCount * 0.7; // At least 70% of words should match length criteria
+      });
+      
+      // If we have filtered puzzles, use them; otherwise fallback to all puzzles
+      setPuzzles(filteredPuzzles.length > 0 ? filteredPuzzles : formattedPuzzles);
       
       // Reset current puzzle when theme or difficulty changes
       setCurrentPuzzle(null);
@@ -157,12 +217,24 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
     setGrid(puzzle.puzzle_data.grid);
     setClues(puzzle.puzzle_data.clues);
     setSelectedCell(null);
+    setCorrectAnswers(0);
+    setTotalAnswers(puzzle.puzzle_data.clues.length);
+    
+    // Start the game timer when puzzle is loaded
+    if (!isActive) {
+      startGame();
+    }
   };
 
   const initializeDummyGame = () => {
+    // Create dummy game based on difficulty
+    const { minWordLength, maxWordLength, minWordCount } = getDifficultyConfig();
+    const wordCount = minWordCount;
+    
     // Example 5x5 crossword
-    const exampleGrid: CrosswordCell[][] = Array(5).fill(null).map(() =>
-      Array(5).fill(null).map(() => ({
+    const gridSize = Math.max(5, Math.min(8, Math.floor(minWordLength * 1.5)));
+    const exampleGrid: CrosswordCell[][] = Array(gridSize).fill(null).map(() =>
+      Array(gridSize).fill(null).map(() => ({
         letter: '',
         isBlack: false,
         userInput: ''
@@ -172,24 +244,47 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
     // Add some black cells and numbers
     exampleGrid[0][2].isBlack = true;
     exampleGrid[2][2].isBlack = true;
-    exampleGrid[4][2].isBlack = true;
+    exampleGrid[4 % gridSize][2].isBlack = true;
 
     // Add numbers to cells
     exampleGrid[0][0].number = 1;
     exampleGrid[0][3].number = 2;
     exampleGrid[1][0].number = 3;
-    exampleGrid[3][0].number = 4;
+    exampleGrid[3 % gridSize][0].number = 4;
 
-    const exampleClues: CrosswordClue[] = [
-      { number: 1, clue: "Feline friend", answer: "CAT", direction: "across" },
-      { number: 2, clue: "Color of the sky", answer: "BLUE", direction: "across" },
-      { number: 1, clue: "Writing tool", answer: "PEN", direction: "down" },
-      { number: 3, clue: "Ocean", answer: "SEA", direction: "down" }
-    ];
+    // Generate word lengths appropriate for difficulty
+    const generateWord = (len: number) => 
+      Array(len).fill(0).map(() => 
+        String.fromCharCode(65 + Math.floor(Math.random() * 26))).join('');
+    
+    const exampleClues: CrosswordClue[] = [];
+    
+    // Generate appropriate number of clues based on difficulty
+    for (let i = 1; i <= wordCount; i++) {
+      const wordLen = Math.floor(Math.random() * 
+        (maxWordLength - minWordLength + 1)) + minWordLength;
+      
+      const direction = i % 2 === 0 ? 'across' : 'down';
+      const word = generateWord(wordLen);
+      
+      exampleClues.push({
+        number: i,
+        clue: `Example clue ${i} (${wordLen} letters)`,
+        answer: word,
+        direction
+      });
+    }
 
     setGrid(exampleGrid);
     setClues(exampleClues);
     setSelectedCell(null);
+    setCorrectAnswers(0);
+    setTotalAnswers(exampleClues.length);
+    
+    // Start the game timer
+    if (!isActive) {
+      startGame();
+    }
   };
 
   const handleCellClick = (row: number, col: number) => {
@@ -214,11 +309,34 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
 
   const updateCell = (row: number, col: number, value: string) => {
     const newGrid = [...grid];
+    const prevValue = newGrid[row][col].userInput;
     newGrid[row][col] = { ...newGrid[row][col], userInput: value };
     setGrid(newGrid);
     
-    // Check if puzzle is solved
+    // Check if the cell is now correct and it was previously incorrect or empty
+    const isCorrect = value !== '' && value === newGrid[row][col].letter;
+    const wasPreviouslyCorrect = prevValue !== '' && prevValue === newGrid[row][col].letter;
+    
+    if (isCorrect && !wasPreviouslyCorrect) {
+      // Increment score
+      updateScore(1);
+      setCorrectAnswers(prev => prev + 1);
+      
+      // Check if this completes a word
+      checkWordCompletion(row, col);
+    } else if (!isCorrect && wasPreviouslyCorrect) {
+      // Decrement score if cell was correct and now is incorrect
+      updateScore(-1);
+      setCorrectAnswers(prev => prev - 1);
+    }
+    
+    // Check if puzzle is complete
     checkPuzzleCompletion();
+  };
+
+  const checkWordCompletion = (row: number, col: number) => {
+    // This would be a more complex function to check if an entire word is now complete
+    // For simplicity, we're just checking cell by cell
   };
 
   const moveToNextCell = (row: number, col: number, isBackspace = false) => {
@@ -251,6 +369,9 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
     }
     
     if (isComplete) {
+      // Pause the game and show completion message
+      pauseGame();
+      
       toast({
         title: "Congratulations!",
         description: "You've solved the crossword puzzle!",
@@ -332,10 +453,16 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
           </Button>
         </div>
         
-        <div className="font-medium">
-          {currentPuzzle?.theme?.name && (
-            <span>Theme: <span className="text-primary">{currentPuzzle.theme.name}</span></span>
-          )}
+        <div className="flex items-center gap-4">
+          <div className="font-medium">
+            {currentPuzzle?.theme?.name && (
+              <span>Theme: <span className="text-primary">{currentPuzzle.theme.name}</span></span>
+            )}
+          </div>
+          
+          <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+            {correctAnswers}/{totalAnswers} Filled
+          </div>
         </div>
       </div>
       
