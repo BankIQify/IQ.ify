@@ -28,10 +28,34 @@ export const TwentyFourPuzzlesManager = () => {
 
       if (data?.success) {
         setGeneratedPuzzles(data.puzzles);
-        toast({
-          title: "Success",
-          description: `Generated ${data.puzzles.length} new 24 Game puzzles`,
-        });
+        
+        // Insert the generated puzzles to the challenges table
+        const formattedPuzzles = data.puzzles.map((puzzle: any) => ({
+          number1: puzzle.numbers[0],
+          number2: puzzle.numbers[1],
+          number3: puzzle.numbers[2],
+          number4: puzzle.numbers[3],
+          solution: puzzle.solution
+        }));
+        
+        // Insert into challenges table
+        const { error: insertError } = await supabase
+          .from('challenges')
+          .insert(formattedPuzzles);
+          
+        if (insertError) {
+          console.error("Error inserting puzzles:", insertError);
+          toast({
+            title: "Error",
+            description: "Generated puzzles but failed to save them to the database.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: `Generated and saved ${data.puzzles.length} new 24 Game puzzles`,
+          });
+        }
       } else {
         throw new Error(data?.error || "Unknown error");
       }

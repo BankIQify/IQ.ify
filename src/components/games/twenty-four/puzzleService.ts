@@ -5,34 +5,56 @@ import type { TwentyFourPuzzle } from "./types";
 
 export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<TwentyFourPuzzle[]> => {
   try {
-    const gameType = "twenty_four";
+    // Define the limit based on difficulty
+    const limitMap = {
+      easy: 5,
+      medium: 8,
+      hard: 10
+    };
     
+    const limit = limitMap[difficulty] || 5;
+    
+    // Use the new challenges table instead of game_puzzles
     const { data, error } = await supabase
-      .from("game_puzzles")
-      .select("id, puzzle_data")
-      .eq("game_type", gameType)
-      .eq("difficulty", difficulty)
-      .limit(10);
+      .from("challenges")
+      .select("*")
+      .limit(limit);
 
     if (error) throw error;
 
     if (data && data.length > 0) {
       return data.map((item) => {
-        const puzzleData = typeof item.puzzle_data === 'string' ? 
-          JSON.parse(item.puzzle_data) : item.puzzle_data;
-          
+        // Map from challenges table format to our app's format
         return {
-          id: item.id,
-          numbers: puzzleData.numbers || [],
-          solution: puzzleData.solution,
+          id: item.id.toString(),
+          numbers: [item.number1, item.number2, item.number3, item.number4],
+          solution: item.solution,
         };
       });
     } else {
-      console.log("No puzzles found for difficulty:", difficulty);
+      console.log("No puzzles found");
       return [];
     }
   } catch (error) {
     console.error("Error fetching puzzles:", error);
     return [];
+  }
+};
+
+// Function to record a completed game session
+export const recordGameSession = async (score: number, durationSeconds: number): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from("game_sessions")
+      .insert({
+        game_type: "twenty_four",
+        score,
+        duration_seconds: durationSeconds,
+        completed_at: new Date().toISOString()
+      });
+      
+    if (error) throw error;
+  } catch (error) {
+    console.error("Error recording game session:", error);
   }
 };

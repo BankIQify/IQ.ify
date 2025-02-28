@@ -7,7 +7,7 @@ import { GameInstructions } from "./twenty-four/GameInstructions";
 import { PuzzleDisplay } from "./twenty-four/PuzzleDisplay";
 import { GameControls } from "./twenty-four/GameControls";
 import { GameCompletedModal } from "./twenty-four/GameCompletedModal";
-import { fetchTwentyFourPuzzles } from "./twenty-four/puzzleService";
+import { fetchTwentyFourPuzzles, recordGameSession } from "./twenty-four/puzzleService";
 import { evaluateExpression } from "./twenty-four/GameLogic";
 import type { Difficulty } from "@/components/games/GameSettings";
 import type { TwentyFourPuzzle, TwentyFourGameType } from "./twenty-four/types";
@@ -115,9 +115,19 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
       setShowSolution(false);
     } else {
       // All puzzles completed
-      setShowGameCompleted(true);
-      gameState.pauseGame();
+      finishGame();
     }
+  };
+
+  const finishGame = () => {
+    setShowGameCompleted(true);
+    gameState.pauseGame();
+    
+    // Record the game session in the database
+    recordGameSession(
+      gameState.score,
+      gameState.elapsedTime
+    );
   };
 
   const handleShowSolution = () => {
