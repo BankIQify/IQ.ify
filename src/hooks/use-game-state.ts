@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
+import type { Database } from "@/integrations/supabase/types";
 
 export interface GameState {
   score: number;
@@ -11,9 +12,11 @@ export interface GameState {
   difficulty: Difficulty;
 }
 
+type GameType = Database["public"]["Enums"]["game_type"] | "twenty_four";
+
 interface UseGameStateProps {
   initialTimer?: number;
-  gameType: 'word_search' | 'crossword' | 'sudoku' | 'times_tables' | 'twenty_four';
+  gameType: GameType;
   onGameOver?: () => void;
 }
 
@@ -97,8 +100,12 @@ export const useGameState = ({
 
     try {
       // Save game session to database
+      // For "twenty_four" we'll map it to "word_scramble" in the database
+      // since "twenty_four" is not a valid enum value
+      const dbGameType = gameType === "twenty_four" ? "word_scramble" : gameType;
+      
       const { error } = await supabase.from("game_sessions").insert({
-        game_type: gameType,
+        game_type: dbGameType,
         score: state.score,
         duration_seconds: initialTimer - state.timer,
       });
