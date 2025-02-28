@@ -48,7 +48,17 @@ export const wordLists: Record<string, WordClue[]> = {
     { word: "FROG", clue: "Amphibian that croaks" },
     { word: "WHALE", clue: "Largest marine mammal" },
     { word: "OWL", clue: "Nocturnal bird of prey" },
-    { word: "FOX", clue: "Small wild canine with bushy tail" }
+    { word: "FOX", clue: "Small wild canine with bushy tail" },
+    { word: "CAT", clue: "Domestic feline that purrs" },
+    { word: "DOG", clue: "Canine pet that barks" },
+    { word: "WOLF", clue: "Wild canine that hunts in packs" },
+    { word: "EAGLE", clue: "Large bird of prey with sharp vision" },
+    { word: "HORSE", clue: "Domesticated equine used for riding" },
+    { word: "COW", clue: "Farm animal that produces milk" },
+    { word: "PIG", clue: "Farm animal with a curly tail" },
+    { word: "DUCK", clue: "Waterfowl that quacks" },
+    { word: "SHARK", clue: "Predatory fish with multiple rows of teeth" },
+    { word: "ANT", clue: "Small insect that lives in colonies" }
   ],
   science: [
     { word: "ATOM", clue: "Smallest unit of an element" },
@@ -65,7 +75,17 @@ export const wordLists: Record<string, WordClue[]> = {
     { word: "CARBON", clue: "Element found in all organic compounds" },
     { word: "QUANTUM", clue: "Smallest discrete unit of a physical property" },
     { word: "THEORY", clue: "Well-substantiated explanation" },
-    { word: "BIOLOGY", clue: "Study of living organisms" }
+    { word: "BIOLOGY", clue: "Study of living organisms" },
+    { word: "PHYSICS", clue: "Study of matter and energy" },
+    { word: "CHEMISTRY", clue: "Study of substances and their interactions" },
+    { word: "LASER", clue: "Device that emits coherent light" },
+    { word: "MAGNET", clue: "Object that produces a magnetic field" },
+    { word: "ACID", clue: "Substance with pH less than 7" },
+    { word: "BASE", clue: "Substance that neutralizes an acid" },
+    { word: "FOSSIL", clue: "Preserved remains of ancient organisms" },
+    { word: "CHEMICAL", clue: "Substance formed by chemical reactions" },
+    { word: "SPACE", clue: "Region beyond Earth's atmosphere" },
+    { word: "MATTER", clue: "Anything that has mass and volume" }
   ],
   food: [
     { word: "PIZZA", clue: "Italian dish with cheese and toppings" },
@@ -82,7 +102,17 @@ export const wordLists: Record<string, WordClue[]> = {
     { word: "CHOCOLATE", clue: "Sweet food made from cacao beans" },
     { word: "COFFEE", clue: "Caffeinated beverage from roasted beans" },
     { word: "FRUIT", clue: "Edible plant product with seeds" },
-    { word: "VEGETABLE", clue: "Plant or part of a plant used as food" }
+    { word: "VEGETABLE", clue: "Plant or part of a plant used as food" },
+    { word: "COOKIE", clue: "Sweet baked snack" },
+    { word: "PIE", clue: "Baked dish with filling and pastry crust" },
+    { word: "STEAK", clue: "Cut of meat typically from beef" },
+    { word: "APPLE", clue: "Common fruit, often red or green" },
+    { word: "BANANA", clue: "Yellow curved fruit" },
+    { word: "ORANGE", clue: "Citrus fruit with same-colored name" },
+    { word: "EGG", clue: "Oval food laid by birds and some reptiles" },
+    { word: "MILK", clue: "White liquid produced by mammals" },
+    { word: "WATER", clue: "Essential liquid for all life" },
+    { word: "TOAST", clue: "Browned bread slice" }
   ],
   geography: [
     { word: "MOUNTAIN", clue: "Large landform that rises steeply" },
@@ -99,6 +129,16 @@ export const wordLists: Record<string, WordClue[]> = {
     { word: "GLACIER", clue: "Slowly moving mass of ice" },
     { word: "PENINSULA", clue: "Land area mostly surrounded by water" },
     { word: "PLAIN", clue: "Flat or gently rolling land" },
-    { word: "FOREST", clue: "Large area covered with trees" }
+    { word: "FOREST", clue: "Large area covered with trees" },
+    { word: "LAKE", clue: "Body of water surrounded by land" },
+    { word: "COAST", clue: "Land adjacent to the sea" },
+    { word: "BEACH", clue: "Sandy or pebbly shore by water" },
+    { word: "VOLCANO", clue: "Mountain that can erupt lava" },
+    { word: "SWAMP", clue: "Wetland with trees and shrubs" },
+    { word: "MAP", clue: "Visual representation of an area" },
+    { word: "AFRICA", clue: "Second-largest continent" },
+    { word: "ASIA", clue: "Earth's largest continent" },
+    { word: "EUROPE", clue: "Continent west of Asia" },
+    { word: "AMERICA", clue: "Continents in Western Hemisphere" }
   ]
 };

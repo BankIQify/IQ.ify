@@ -60,30 +60,38 @@ export const generateDummyCrossword = (difficulty: Difficulty, themeId: string =
     const currentWord = selectedWords[i].word;
     let placed = false;
     
-    // Try to find intersections with already placed words
-    const intersection = findIntersection(wordPlacements, currentWord);
+    // Try to find intersections with already placed words - try more aggressively
+    for (let attempt = 0; attempt < 3 && !placed; attempt++) {
+      const intersection = findIntersection(wordPlacements, currentWord);
+      
+      if (intersection && canPlaceWord(grid, currentWord, intersection.row, intersection.col, intersection.isAcross)) {
+        placeWord(grid, currentWord, intersection.row, intersection.col, intersection.isAcross);
+        wordPlacements.push({ 
+          word: currentWord, 
+          row: intersection.row, 
+          col: intersection.col, 
+          isAcross: intersection.isAcross,
+          clue: selectedWords[i].clue
+        });
+        placed = true;
+        break;
+      }
+    }
     
-    if (intersection && canPlaceWord(grid, currentWord, intersection.row, intersection.col, intersection.isAcross)) {
-      placeWord(grid, currentWord, intersection.row, intersection.col, intersection.isAcross);
-      wordPlacements.push({ 
-        word: currentWord, 
-        row: intersection.row, 
-        col: intersection.col, 
-        isAcross: intersection.isAcross,
-        clue: selectedWords[i].clue
-      });
-      placed = true;
-    } else {
-      // If no intersection, try random placement
-      const maxAttempts = 30;
+    if (!placed) {
+      // If no intersection, try random placement with many attempts
+      const maxAttempts = 50; // Increased from 30
       
       for (let attempt = 0; attempt < maxAttempts && !placed; attempt++) {
         const isAcross = Math.random() > 0.5;
         const maxRow = isAcross ? gridSize - 1 : gridSize - currentWord.length;
         const maxCol = isAcross ? gridSize - currentWord.length : gridSize - 1;
         
-        const row = Math.floor(Math.random() * (maxRow + 1));
-        const col = Math.floor(Math.random() * (maxCol + 1));
+        // Try to place words closer to the center for better connectivity
+        const rowOffset = Math.floor(gridSize / 4);
+        const colOffset = Math.floor(gridSize / 4);
+        const row = Math.max(0, Math.min(maxRow, Math.floor(gridSize / 2) - rowOffset + Math.floor(Math.random() * (rowOffset * 2))));
+        const col = Math.max(0, Math.min(maxCol, Math.floor(gridSize / 2) - colOffset + Math.floor(Math.random() * (colOffset * 2))));
         
         if (canPlaceWord(grid, currentWord, row, col, isAcross)) {
           placeWord(grid, currentWord, row, col, isAcross);
@@ -111,8 +119,40 @@ export const generateDummyCrossword = (difficulty: Difficulty, themeId: string =
   // Create clues
   const clues = createClues(wordPlacements);
   
-  // Fill remaining empty cells with black
-  fillEmptyCellsWithBlack(grid);
+  // Only fill empty cells with black if they are isolated
+  // This reduces the number of black squares significantly
+  const fillEmptyStrategy = (grid) => {
+    const gridSize = grid.length;
+    
+    for (let row = 0; row < gridSize; row++) {
+      for (let col = 0; col < gridSize; col++) {
+        if (grid[row][col].letter === '') {
+          // Check if cell is isolated (not part of any potential word)
+          let isIsolated = true;
+          
+          // Check horizontal adjacency
+          if ((col > 0 && grid[row][col-1].letter !== '') || 
+              (col < gridSize-1 && grid[row][col+1].letter !== '')) {
+            isIsolated = false;
+          }
+          
+          // Check vertical adjacency
+          if ((row > 0 && grid[row-1][col].letter !== '') || 
+              (row < gridSize-1 && grid[row+1][col].letter !== '')) {
+            isIsolated = false;
+          }
+          
+          // Only mark as black if isolated
+          grid[row][col].isBlack = isIsolated;
+        }
+      }
+    }
+    
+    return grid;
+  };
+  
+  // Use our custom strategy instead of filling all empty cells
+  fillEmptyStrategy(grid);
   
   return {
     grid,

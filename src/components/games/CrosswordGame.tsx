@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useGameState } from "@/hooks/use-game-state";
@@ -50,6 +49,7 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
 
   useEffect(() => {
     if (selectedTheme) {
+      // First try to fetch from database
       fetchPuzzlesByTheme(selectedTheme, difficulty).then(puzzlesData => {
         setPuzzles(puzzlesData);
         setCurrentPuzzle(null);
@@ -89,7 +89,30 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const initializeDummyGame = () => {
-    const dummyPuzzleData = generateDummyCrossword(difficulty, selectedTheme);
+    // Convert theme name to a valid key for wordLists in puzzleGenerator
+    // This ensures themed words are used when generating puzzles
+    let themeKey = "general";
+    
+    // Find the theme name from the selected theme ID
+    const selectedThemeObj = themes.find(t => t.id === selectedTheme);
+    if (selectedThemeObj) {
+      const themeName = selectedThemeObj.name.toLowerCase();
+      
+      // Map theme names to keys in our wordLists object
+      if (themeName.includes("animal")) themeKey = "animals";
+      else if (themeName.includes("food")) themeKey = "food";
+      else if (themeName.includes("science")) themeKey = "science";
+      else if (themeName.includes("nature")) themeKey = "geography";
+      else if (themeName.includes("countr")) themeKey = "geography";
+      else if (themeName.includes("technolog")) themeKey = "science";
+      else if (themeName.includes("music")) themeKey = "general";
+      else if (themeName.includes("movie")) themeKey = "general";
+      else if (themeName.includes("history")) themeKey = "general";
+      
+      console.log(`Using word list for theme: ${themeKey} (original theme: ${themeName})`);
+    }
+    
+    const dummyPuzzleData = generateDummyCrossword(difficulty, themeKey);
     
     setGrid(dummyPuzzleData.grid);
     setClues(dummyPuzzleData.clues);
