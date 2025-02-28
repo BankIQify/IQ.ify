@@ -437,6 +437,11 @@ export type Database = {
         | "crossword"
         | "new_value_1"
         | "new_value_2"
+        | "sudoku"
+        | "memory"
+        | "geography"
+        | "times_tables"
+        | "iq_test"
       game_type:
         | "times_tables"
         | "memory_cards"
