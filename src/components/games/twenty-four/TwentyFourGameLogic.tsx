@@ -23,6 +23,7 @@ export const useTwentyFourGameLogic = ({
   const [solvedPuzzles, setSolvedPuzzles] = useState<string[]>([]);
   const [showSolution, setShowSolution] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   const { toast } = useToast();
 
   // Fetch puzzles when the component mounts or difficulty changes
@@ -35,21 +36,47 @@ export const useTwentyFourGameLogic = ({
   const loadPuzzles = async () => {
     setLoading(true);
     try {
+      console.log(`Fetching puzzles with difficulty: ${difficulty}`);
       // Fetch puzzles with the current difficulty setting
       const loadedPuzzles = await fetchTwentyFourPuzzles(difficulty);
+      console.log(`Fetched ${loadedPuzzles.length} puzzles`);
       
-      // Shuffle the puzzles to make the game more interesting
-      const shuffledPuzzles = [...loadedPuzzles].sort(() => Math.random() - 0.5);
-      
-      setPuzzles(shuffledPuzzles);
-      
-      if (shuffledPuzzles.length === 0) {
+      if (loadedPuzzles.length === 0) {
+        // If no puzzles found and we haven't retried too many times, try generating sample puzzles
+        if (retryCount === 0) {
+          toast({
+            title: "Generating puzzles",
+            description: "No puzzles found. Generating sample puzzles...",
+          });
+          
+          try {
+            // This will add sample puzzles to the database
+            await import("./puzzleService").then(module => module.generateSamplePuzzles());
+            setRetryCount(prev => prev + 1);
+            
+            // Try fetching again after generating samples
+            setTimeout(() => loadPuzzles(), 1000);
+            return;
+          } catch (genError) {
+            console.error("Error generating sample puzzles:", genError);
+          }
+        }
+        
         toast({
           title: "No puzzles found",
           description: `No puzzles available for ${difficulty} difficulty. Try generating some puzzles first.`,
           variant: "destructive",
         });
+        setLoading(false);
+        return;
       }
+      
+      // Shuffle the puzzles to make the game more interesting
+      const shuffledPuzzles = [...loadedPuzzles].sort(() => Math.random() - 0.5);
+      
+      setPuzzles(shuffledPuzzles);
+      setLoading(false);
+      
     } catch (error) {
       console.error("Error loading puzzles:", error);
       toast({
@@ -57,7 +84,6 @@ export const useTwentyFourGameLogic = ({
         description: "Failed to load puzzles. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };

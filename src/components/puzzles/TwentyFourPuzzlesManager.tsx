@@ -19,47 +19,61 @@ export const TwentyFourPuzzlesManager = () => {
   const handleGeneratePuzzles = async () => {
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-24-puzzles", {
-        body: {
-          count: puzzleCount,
-          difficulty,
-        },
-      });
+      // First try to call the edge function
+      try {
+        const { data, error } = await supabase.functions.invoke("generate-24-puzzles", {
+          body: {
+            count: puzzleCount,
+            difficulty,
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (data?.success) {
-        setGeneratedPuzzles(data.puzzles);
-        
-        // Insert the generated puzzles to the challenges table
-        const formattedPuzzles = data.puzzles.map((puzzle: any) => ({
-          number1: puzzle.numbers[0],
-          number2: puzzle.numbers[1],
-          number3: puzzle.numbers[2],
-          number4: puzzle.numbers[3],
-          solution: puzzle.solution
-        }));
-        
-        // Insert into challenges table
-        const { error: insertError } = await supabase
-          .from('challenges')
-          .insert(formattedPuzzles);
+        if (data?.success) {
+          setGeneratedPuzzles(data.puzzles);
           
-        if (insertError) {
-          console.error("Error inserting puzzles:", insertError);
-          toast({
-            title: "Error",
-            description: "Generated puzzles but failed to save them to the database.",
-            variant: "destructive",
-          });
+          // Insert the generated puzzles to the challenges table
+          const formattedPuzzles = data.puzzles.map((puzzle: any) => ({
+            number1: puzzle.numbers[0],
+            number2: puzzle.numbers[1],
+            number3: puzzle.numbers[2],
+            number4: puzzle.numbers[3],
+            solution: puzzle.solution
+          }));
+          
+          // Insert into challenges table
+          const { error: insertError } = await supabase
+            .from('challenges')
+            .insert(formattedPuzzles);
+            
+          if (insertError) {
+            console.error("Error inserting puzzles:", insertError);
+            toast({
+              title: "Error",
+              description: "Generated puzzles but failed to save them to the database.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Success",
+              description: `Generated and saved ${data.puzzles.length} new 24 Game puzzles`,
+            });
+          }
         } else {
-          toast({
-            title: "Success",
-            description: `Generated and saved ${data.puzzles.length} new 24 Game puzzles`,
-          });
+          throw new Error(data?.error || "Unknown error");
         }
-      } else {
-        throw new Error(data?.error || "Unknown error");
+      } catch (edgeFunctionError) {
+        console.error("Edge function error:", edgeFunctionError);
+        // If the edge function fails, fall back to generating sample puzzles
+        toast({
+          title: "Edge Function Error",
+          description: "Failed to generate puzzles using the edge function. Falling back to sample puzzles.",
+          variant: "destructive",
+        });
+        
+        // Generate sample puzzles as a fallback
+        await handleGenerateSamplePuzzlesInternal();
       }
     } catch (error) {
       console.error("Error generating puzzles:", error);
@@ -73,14 +87,14 @@ export const TwentyFourPuzzlesManager = () => {
     }
   };
 
-  const handleGenerateSamplePuzzles = async () => {
-    setIsGeneratingSamples(true);
+  const handleGenerateSamplePuzzlesInternal = async () => {
     try {
-      await generateSamplePuzzles();
+      const samplePuzzles = await generateSamplePuzzles();
       toast({
         title: "Success",
         description: "Sample puzzles have been generated and added to the database",
       });
+      return samplePuzzles;
     } catch (error) {
       console.error("Error generating sample puzzles:", error);
       toast({
@@ -88,6 +102,14 @@ export const TwentyFourPuzzlesManager = () => {
         description: "Failed to generate sample puzzles. Please try again.",
         variant: "destructive",
       });
+      throw error;
+    }
+  };
+
+  const handleGenerateSamplePuzzles = async () => {
+    setIsGeneratingSamples(true);
+    try {
+      await handleGenerateSamplePuzzlesInternal();
     } finally {
       setIsGeneratingSamples(false);
     }

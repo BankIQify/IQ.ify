@@ -6,6 +6,8 @@ import type { Database } from "@/integrations/supabase/types";
 
 export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<TwentyFourPuzzle[]> => {
   try {
+    console.log(`Fetching twenty-four puzzles with difficulty: ${difficulty}`);
+    
     // Define the limit based on difficulty
     const limitMap = {
       easy: 5,
@@ -37,7 +39,12 @@ export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<Tw
       .or(`number1.lte.${maxNumber},number2.lte.${maxNumber},number3.lte.${maxNumber},number4.lte.${maxNumber}`)
       .limit(limit);
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase error fetching puzzles:", error);
+      throw error;
+    }
+
+    console.log(`Received ${data?.length || 0} puzzles from database`);
 
     if (data && data.length > 0) {
       // Process the puzzle data and assign an appropriate difficulty
@@ -80,7 +87,7 @@ export const recordGameSession = async (score: number, durationSeconds: number):
 };
 
 // Add a function to generate sample puzzle data
-export const generateSamplePuzzles = async (): Promise<void> => {
+export const generateSamplePuzzles = async (): Promise<any[]> => {
   try {
     // Sample puzzles for different difficulty levels
     const samplePuzzles = [
@@ -112,15 +119,38 @@ export const generateSamplePuzzles = async (): Promise<void> => {
       { number1: 4, number2: 7, number3: 11, number4: 12, solution: "(12-7)*(11-4) = 24" },
     ];
     
-    // Insert the sample puzzles into the challenges table
-    const { error } = await supabase
-      .from("challenges")
-      .insert(samplePuzzles);
-      
-    if (error) throw error;
+    console.log("Attempting to insert sample puzzles into the database");
     
-    console.log("Sample puzzles generated successfully");
+    // Check if there are already puzzles in the challenges table
+    const { data: existingPuzzles, error: countError } = await supabase
+      .from("challenges")
+      .select("id", { count: 'exact' });
+      
+    if (countError) {
+      console.error("Error checking existing puzzles:", countError);
+      throw countError;
+    }
+    
+    if (existingPuzzles && existingPuzzles.length > 0) {
+      console.log(`Found ${existingPuzzles.length} existing puzzles, skipping sample generation`);
+      return existingPuzzles;
+    }
+    
+    // Insert the sample puzzles into the challenges table
+    const { data, error } = await supabase
+      .from("challenges")
+      .insert(samplePuzzles)
+      .select();
+      
+    if (error) {
+      console.error("Error inserting sample puzzles:", error);
+      throw error;
+    }
+    
+    console.log("Sample puzzles generated successfully:", data?.length || 0);
+    return data || [];
   } catch (error) {
     console.error("Error generating sample puzzles:", error);
+    throw error;
   }
 };
