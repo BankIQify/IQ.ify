@@ -27,7 +27,7 @@ export const TwentyFourGame = () => {
   const { toast } = useToast();
 
   const gameState = useGameState({
-    gameType: "times_tables", // We're reusing the existing game type closest to this
+    gameType: "times_tables", // Using an existing game type as a workaround
     initialTimer: 300, // 5 minutes
     onGameOver: () => setShowGameCompleted(true),
   });
@@ -49,11 +49,16 @@ export const TwentyFourGame = () => {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const mappedPuzzles = data.map((item) => ({
-          id: item.id,
-          numbers: item.puzzle_data.numbers,
-          solution: item.puzzle_data.solution,
-        }));
+        const mappedPuzzles = data.map((item) => {
+          const puzzleData = typeof item.puzzle_data === 'string' ? 
+            JSON.parse(item.puzzle_data) : item.puzzle_data;
+            
+          return {
+            id: item.id,
+            numbers: puzzleData.numbers || [],
+            solution: puzzleData.solution,
+          };
+        });
         setPuzzles(mappedPuzzles);
       } else {
         toast({
@@ -192,7 +197,6 @@ export const TwentyFourGame = () => {
         description="Use four numbers and arithmetic operations to reach 24."
         score={gameState.score}
         timer={gameState.timer}
-        isActive={gameState.isActive}
         difficulty={gameState.difficulty}
         onStart={fetchPuzzles}
         onPause={gameState.pauseGame}
@@ -212,7 +216,6 @@ export const TwentyFourGame = () => {
       description="Use four numbers and arithmetic operations to reach 24."
       score={gameState.score}
       timer={gameState.timer}
-      isActive={gameState.isActive}
       difficulty={gameState.difficulty}
       onStart={handleStartGame}
       onPause={gameState.pauseGame}
@@ -327,5 +330,3 @@ export const TwentyFourGame = () => {
     </GameLayout>
   );
 };
-
-export default TwentyFourGame;

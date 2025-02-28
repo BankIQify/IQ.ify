@@ -1,10 +1,10 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import WordSearchGame from "@/components/games/WordSearchGame";
-import CrosswordGame from "@/components/games/CrosswordGame";
-import TimesTablesGame from "@/components/games/TimesTablesGame";
-import SudokuGame from "@/components/games/SudokuGame";
-import TwentyFourGame from "@/components/games/TwentyFourGame";
+import { WordSearchGame } from "@/components/games/WordSearchGame";
+import { CrosswordGame } from "@/components/games/CrosswordGame";
+import { TimesTablesGame } from "@/components/games/TimesTablesGame";
+import { SudokuGame } from "@/components/games/SudokuGame";
+import { TwentyFourGame } from "@/components/games/TwentyFourGame";
 
 export default function BrainTraining() {
   return (
