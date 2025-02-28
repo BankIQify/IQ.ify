@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ManualQuestionUpload } from "@/components/questions/ManualQuestionUpload";
 import { CategoryManager } from "@/components/questions/CategoryManager";
@@ -12,7 +12,6 @@ import { HomepageEditor } from "@/components/homepage/HomepageEditor";
 import { CategoriesTable } from "@/components/questions/sections/CategoriesTable";
 import { GamePuzzlesManager } from "@/components/puzzles/GamePuzzlesManager";
 import type { QuestionCategory } from "@/types/questions";
-import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const ManageQuestions = () => {
@@ -100,7 +99,7 @@ const ManageQuestions = () => {
         </TabsContent>
 
         <TabsContent value="manual">
-          <ManualQuestionUpload subTopicId={subTopicId} />
+          <ManualQuestionUpload />
         </TabsContent>
 
         <TabsContent value="puzzles">

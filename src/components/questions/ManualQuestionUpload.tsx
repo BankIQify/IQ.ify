@@ -1,22 +1,26 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
-import type { Database } from "@/integrations/supabase/types";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionTypeSelector } from "./upload/QuestionTypeSelector";
 import { QuestionText } from "./upload/QuestionText";
 import { ImageUpload } from "./upload/ImageUpload";
 import { MultipleChoiceOptions } from "./upload/MultipleChoiceOptions";
 import { TextAnswer } from "./upload/TextAnswer";
 import { useManualQuestionUpload } from "./hooks/useManualQuestionUpload";
+import { useQuestionData } from "@/hooks/useQuestionData";
+import type { QuestionCategory } from "@/types/questions";
+import type { Database } from "@/integrations/supabase/types";
 
 export type QuestionType = Database["public"]["Enums"]["question_type"];
 
-interface ManualQuestionUploadProps {
-  subTopicId: string;
-}
-
-export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) => {
+export const ManualQuestionUpload = () => {
+  const [category, setCategory] = useState<QuestionCategory>("verbal");
+  const [subTopicId, setSubTopicId] = useState<string>("");
+  
+  const { subTopics, isLoadingSubTopics } = useQuestionData(category, subTopicId);
+  
   const {
     questionType,
     manualQuestion,
@@ -38,6 +42,48 @@ export const ManualQuestionUpload = ({ subTopicId }: ManualQuestionUploadProps) 
 
   return (
     <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <Select
+            value={category}
+            onValueChange={(value: QuestionCategory) => {
+              setCategory(value);
+              setSubTopicId("");
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="verbal">Verbal Reasoning</SelectItem>
+              <SelectItem value="non_verbal">Non-Verbal Reasoning</SelectItem>
+              <SelectItem value="brain_training">Brain Training</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div>
+          <Label htmlFor="subTopic">Sub-topic</Label>
+          <Select
+            value={subTopicId}
+            onValueChange={setSubTopicId}
+            disabled={isLoadingSubTopics}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={isLoadingSubTopics ? "Loading..." : "Select sub-topic"} />
+            </SelectTrigger>
+            <SelectContent>
+              {subTopics?.map((subTopic) => (
+                <SelectItem key={subTopic.id} value={subTopic.id}>
+                  {subTopic.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
       <QuestionTypeSelector 
         value={questionType}
         onChange={(value) => setQuestionType(value)}
