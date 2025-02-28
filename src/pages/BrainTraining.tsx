@@ -37,7 +37,7 @@ export default function BrainTraining() {
         </TabsContent>
         
         <TabsContent value="twenty-four">
-          <TwentyFourGame />
+          <TwentyFourGame difficulty="easy" />
         </TabsContent>
       </Tabs>
     </div>

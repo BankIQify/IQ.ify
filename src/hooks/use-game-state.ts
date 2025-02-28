@@ -12,7 +12,7 @@ export interface GameState {
   difficulty: Difficulty;
 }
 
-type GameType = Database["public"]["Enums"]["game_type"] | "twenty_four";
+export type GameType = Database["public"]["Enums"]["game_type"] | "twenty_four";
 
 interface UseGameStateProps {
   initialTimer?: number;
