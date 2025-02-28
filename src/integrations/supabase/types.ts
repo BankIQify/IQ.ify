@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      challenges: {
+        Row: {
+          created_at: string | null
+          id: number
+          number1: number
+          number2: number
+          number3: number
+          number4: number
+          solution: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          number1: number
+          number2: number
+          number3: number
+          number4: number
+          solution: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          number1?: number
+          number2?: number
+          number3?: number
+          number4?: number
+          solution?: string
+        }
+        Relationships: []
+      }
       exam_results: {
         Row: {
           created_at: string
@@ -229,6 +259,24 @@ export type Database = {
         }
         Relationships: []
       }
+      players: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -421,6 +469,13 @@ export type Database = {
           user_id: string
         }
         Returns: boolean
+      }
+      start_game_session: {
+        Args: {
+          p_user_id: number
+          p_challenge_id: number
+        }
+        Returns: undefined
       }
     }
     Enums: {
