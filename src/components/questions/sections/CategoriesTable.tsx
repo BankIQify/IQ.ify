@@ -43,7 +43,6 @@ export const CategoriesTable = ({ sections }: CategoriesTableProps) => {
 
   const fetchPuzzleCounts = async () => {
     try {
-      // Use a raw SQL query to count and group data for puzzle games
       const { data, error } = await supabase
         .rpc('get_puzzle_counts');
 
@@ -103,6 +102,28 @@ export const CategoriesTable = ({ sections }: CategoriesTableProps) => {
     "iq_test"
   ];
 
+  // Generate description for each game type
+  const getDescription = (gameType: string) => {
+    switch(gameType) {
+      case "word_search": 
+        return "Find hidden words in a grid of letters.";
+      case "crossword": 
+        return "Solve word puzzles with interconnected clues.";
+      case "sudoku": 
+        return "Fill a 9x9 grid with numbers following logical rules.";
+      case "memory": 
+        return "Match pairs of cards to test your memory.";
+      case "geography": 
+        return "Test knowledge of countries and flags.";
+      case "times_tables": 
+        return "Practice multiplication with rapid-fire questions.";
+      case "iq_test": 
+        return "Test logical reasoning and pattern recognition.";
+      default: 
+        return "Brain training game.";
+    }
+  };
+
   return (
     <Card className="p-4">
       <h3 className="text-lg font-semibold mb-4">Game Categories & Puzzles</h3>
@@ -147,73 +168,57 @@ export const CategoriesTable = ({ sections }: CategoriesTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allGameTypes.map((gameType) => {
-            // Get counts for this game type across all difficulties
-            const countsForType = puzzleCounts.filter(item => item.game_type === gameType);
-            const totalCount = countsForType.reduce((sum, item) => sum + item.count, 0);
-            
-            // Generate description for each game type
-            const getDescription = () => {
-              switch(gameType) {
-                case "word_search": 
-                  return "Find hidden words in a grid of letters.";
-                case "crossword": 
-                  return "Solve word puzzles with interconnected clues.";
-                case "sudoku": 
-                  return "Fill a 9x9 grid with numbers following logical rules.";
-                case "memory": 
-                  return "Match pairs of cards to test your memory.";
-                case "geography": 
-                  return "Test knowledge of countries and flags.";
-                case "times_tables": 
-                  return "Practice multiplication with rapid-fire questions.";
-                case "iq_test": 
-                  return "Test logical reasoning and pattern recognition.";
-                default: 
-                  return "Brain training game.";
-              }
-            };
-            
-            return (
-              <TableRow key={gameType}>
-                <TableCell className="flex items-center gap-2">
-                  {getGameIcon(gameType)}
-                  <span className="font-medium">{getGameTypeDisplay(gameType)}</span>
-                </TableCell>
-                <TableCell className="max-w-[300px]">{getDescription()}</TableCell>
-                <TableCell>
-                  <div className="flex flex-wrap gap-1">
-                    {["easy", "medium", "hard"].map((difficulty) => {
-                      const count = countsForType.find(item => item.difficulty === difficulty)?.count || 0;
-                      
-                      return (
-                        <Badge key={difficulty} variant="outline" className={getDifficultyColor(difficulty)}>
-                          {difficulty}: {count}
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={4} className="text-center py-8">Loading game data...</TableCell>
+            </TableRow>
+          ) : (
+            allGameTypes.map((gameType) => {
+              // Get counts for this game type across all difficulties
+              const countsForType = puzzleCounts.filter(item => item.game_type === gameType);
+              const totalCount = countsForType.reduce((sum, item) => sum + item.count, 0);
+              
+              return (
+                <TableRow key={gameType}>
+                  <TableCell className="flex items-center gap-2">
+                    {getGameIcon(gameType)}
+                    <span className="font-medium">{getGameTypeDisplay(gameType)}</span>
+                  </TableCell>
+                  <TableCell className="max-w-[300px]">{getDescription(gameType)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {["easy", "medium", "hard"].map((difficulty) => {
+                        const count = countsForType.find(item => item.difficulty === difficulty)?.count || 0;
+                        
+                        return (
+                          <Badge key={difficulty} variant="outline" className={getDifficultyColor(difficulty)}>
+                            {difficulty}: {count}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {(gameType === "word_search" || gameType === "crossword") ? (
+                      totalCount > 0 ? (
+                        <Badge className="bg-green-100 text-green-800">
+                          {totalCount} puzzles available
                         </Badge>
-                      );
-                    })}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  {(gameType === "word_search" || gameType === "crossword") ? (
-                    totalCount > 0 ? (
-                      <Badge className="bg-green-100 text-green-800">
-                        {totalCount} puzzles available
-                      </Badge>
+                      ) : (
+                        <Badge variant="outline" className="bg-amber-100 text-amber-800">
+                          No puzzles yet
+                        </Badge>
+                      )
                     ) : (
-                      <Badge variant="outline" className="bg-amber-100 text-amber-800">
-                        No puzzles yet
+                      <Badge className="bg-blue-100 text-blue-800">
+                        Ready to play
                       </Badge>
-                    )
-                  ) : (
-                    <Badge className="bg-blue-100 text-blue-800">
-                      Ready to play
-                    </Badge>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
         </TableBody>
       </Table>
     </Card>
