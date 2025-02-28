@@ -25,40 +25,36 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    // Enhanced system prompt that emphasizes theme adherence
-    const systemPrompt = `You are an expert educational content creator specializing in ${category} questions. You must create exactly 5 questions that strictly follow any theme or requirements specified in the user's prompt.
+    // More detailed and structured system prompt
+    const systemPrompt = `You are an expert educational content creator specializing in ${category} questions. Create exactly 5 multiple-choice questions that strictly adhere to educational standards.
 
-CRITICAL REQUIREMENTS:
-1. Return ONLY a raw JSON array with 5 questions, no markdown or extra text
-2. STRICTLY FOLLOW the user's theme/requirements if provided
-3. If no specific theme is given, create age-appropriate questions for the ${category} category
-4. Questions should be challenging but solvable
-5. Match the explanation's complexity to the question's difficulty level
+CRITICAL FORMAT REQUIREMENTS:
+1. Return a valid JSON array with exactly 5 questions
+2. Each question must have 4 options labeled A), B), C), D)
+3. Options must be formatted as "A) Option text", "B) Option text", etc.
+4. The correctAnswer must match exactly one of the options (including the label)
+5. Every question needs a clear, educational explanation
 
-Each question MUST follow this exact format:
+IMPORTANT THEME INSTRUCTIONS:
+- If a specific theme is provided in the prompt, all questions MUST relate directly to that theme
+- If no specific theme is given, create age-appropriate questions for the ${category} category
+
+Each question MUST follow this exact JSON structure:
 {
-  "question": "Question text here",
+  "question": "The question text here?",
   "options": ["A) First option", "B) Second option", "C) Third option", "D) Fourth option"],
   "correctAnswer": "A) First option",
-  "explanation": "Brief explanation here"
+  "explanation": "Clear educational explanation here"
 }
 
-Additional requirements:
-- Each question must have exactly 4 options labeled A), B), C), D)
-- Only ONE option can be correct
-- Options should be plausible but clearly distinguishable
-- Explanations should be clear and educational
-- Format must be a plain JSON array without any markdown formatting`;
+Double-check that your response is valid JSON with no markdown formatting, extra text, or code blocks.`;
 
     // Enhanced user prompt handling
     const basePrompt = prompt?.trim() 
-      ? `Create 5 ${category} questions with these specific requirements: ${prompt}. Make sure each question clearly relates to this theme/requirement.` 
-      : `Create 5 ${category} questions suitable for school students. Mix of easy and moderate difficulty.`;
+      ? `Create 5 ${category} questions specifically about: ${prompt}. Every question MUST relate directly to this theme.` 
+      : `Create 5 ${category} questions suitable for students. Mix of easy and moderate difficulty.`;
 
-    console.log('Sending request to OpenAI with:', {
-      systemPrompt,
-      basePrompt
-    });
+    console.log('Sending request to OpenAI with prompt:', basePrompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -72,7 +68,8 @@ Additional requirements:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: basePrompt }
         ],
-        temperature: 0.7, // Slightly reduced for more focused responses
+        temperature: 0.5, // Lower temperature for more consistent outputs
+        max_tokens: 2000,
       }),
     });
 
@@ -83,7 +80,7 @@ Additional requirements:
     }
 
     const data = await response.json();
-    console.log('OpenAI response:', data);
+    console.log('OpenAI response received');
 
     if (!data.choices?.[0]?.message?.content) {
       console.error('Invalid response format from OpenAI:', data);
@@ -92,31 +89,46 @@ Additional requirements:
 
     let questions;
     try {
+      // Clean up the response to ensure it's valid JSON
       const content = data.choices[0].message.content.trim()
-        // Remove any markdown formatting
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
       
-      console.log('Cleaned content before parsing:', content);
+      console.log('Cleaned content before parsing:', content.substring(0, 100) + '...');
       questions = JSON.parse(content);
       
-      // Validate questions structure
-      if (!Array.isArray(questions) || questions.length !== 5) {
+      // Validate questions structure and format
+      if (!Array.isArray(questions)) {
+        console.error('Response is not an array:', questions);
+        throw new Error('Expected an array of questions');
+      }
+      
+      if (questions.length !== 5) {
+        console.error(`Got ${questions.length} questions instead of 5`);
         throw new Error('Expected exactly 5 questions in response');
       }
 
+      // Validate each question
       questions.forEach((q, index) => {
         if (!q.question || !Array.isArray(q.options) || q.options.length !== 4 
             || !q.correctAnswer || !q.explanation) {
+          console.error(`Question ${index + 1} has invalid format:`, q);
           throw new Error(`Question ${index + 1} has invalid format`);
+        }
+        
+        // Ensure correctAnswer matches one of the options exactly
+        if (!q.options.includes(q.correctAnswer)) {
+          console.error(`Question ${index + 1} has correctAnswer that doesn't match any option:`, 
+            { correctAnswer: q.correctAnswer, options: q.options });
+          throw new Error(`Question ${index + 1} has correctAnswer that doesn't match any option`);
         }
       });
 
     } catch (error) {
-      console.error('Error parsing OpenAI response:', error);
+      console.error('Error parsing or validating OpenAI response:', error);
       console.error('Raw content:', data.choices[0].message.content);
-      throw new Error(`Failed to parse OpenAI response: ${error.message}`);
+      throw new Error(`Failed to process OpenAI response: ${error.message}`);
     }
 
     return new Response(JSON.stringify(questions), {
