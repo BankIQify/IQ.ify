@@ -1,14 +1,16 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { generateSamplePuzzles } from "@/components/games/twenty-four/puzzleService";
 
 export const TwentyFourPuzzlesManager = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingSamples, setIsGeneratingSamples] = useState(false);
   const [difficulty, setDifficulty] = useState("easy");
   const [puzzleCount, setPuzzleCount] = useState(10);
   const [generatedPuzzles, setGeneratedPuzzles] = useState<any[]>([]);
@@ -71,6 +73,26 @@ export const TwentyFourPuzzlesManager = () => {
     }
   };
 
+  const handleGenerateSamplePuzzles = async () => {
+    setIsGeneratingSamples(true);
+    try {
+      await generateSamplePuzzles();
+      toast({
+        title: "Success",
+        description: "Sample puzzles have been generated and added to the database",
+      });
+    } catch (error) {
+      console.error("Error generating sample puzzles:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate sample puzzles. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingSamples(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -125,6 +147,24 @@ export const TwentyFourPuzzlesManager = () => {
             className="w-full"
           >
             {isGenerating ? "Generating Puzzles..." : "Generate Puzzles"}
+          </Button>
+          
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t"></span>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">Or</span>
+            </div>
+          </div>
+          
+          <Button 
+            onClick={handleGenerateSamplePuzzles} 
+            disabled={isGeneratingSamples}
+            variant="outline"
+            className="w-full"
+          >
+            {isGeneratingSamples ? "Generating Sample Puzzles..." : "Generate Sample Puzzles"}
           </Button>
         </CardContent>
       </Card>

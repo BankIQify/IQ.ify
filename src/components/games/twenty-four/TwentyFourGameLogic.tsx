@@ -27,19 +27,26 @@ export const useTwentyFourGameLogic = ({
 
   // Fetch puzzles when the component mounts or difficulty changes
   useEffect(() => {
-    loadPuzzles();
-  }, [difficulty]);
+    if (gameState.isActive) {
+      loadPuzzles();
+    }
+  }, [difficulty, gameState.isActive]);
 
   const loadPuzzles = async () => {
     setLoading(true);
     try {
+      // Fetch puzzles with the current difficulty setting
       const loadedPuzzles = await fetchTwentyFourPuzzles(difficulty);
-      setPuzzles(loadedPuzzles);
       
-      if (loadedPuzzles.length === 0) {
+      // Shuffle the puzzles to make the game more interesting
+      const shuffledPuzzles = [...loadedPuzzles].sort(() => Math.random() - 0.5);
+      
+      setPuzzles(shuffledPuzzles);
+      
+      if (shuffledPuzzles.length === 0) {
         toast({
           title: "No puzzles found",
-          description: "Try a different difficulty level or check back later.",
+          description: `No puzzles available for ${difficulty} difficulty. Try generating some puzzles first.`,
           variant: "destructive",
         });
       }
@@ -87,8 +94,14 @@ export const useTwentyFourGameLogic = ({
         // Mark this puzzle as solved
         setSolvedPuzzles((prev) => [...prev, puzzles[currentPuzzleIndex].id]);
         
-        // Award points
-        gameState.updateScore(10);
+        // Award points based on difficulty
+        const difficultyPoints = {
+          easy: 10,
+          medium: 15,
+          hard: 20
+        };
+        
+        gameState.updateScore(difficultyPoints[difficulty] || 10);
         
         // Move to the next puzzle
         moveToNextPuzzle();
