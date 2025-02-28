@@ -33,7 +33,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
   const { toast } = useToast();
 
   const gameState = useGameState({
-    gameType: "twenty_four", 
+    gameType: "word_search", // Using an existing valid game type from the database enum
     initialTimer: 300, // 5 minutes
     onGameOver: () => setShowGameCompleted(true),
   });

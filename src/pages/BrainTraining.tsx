@@ -5,8 +5,11 @@ import { CrosswordGame } from "@/components/games/CrosswordGame";
 import { TimesTablesGame } from "@/components/games/TimesTablesGame";
 import { SudokuGame } from "@/components/games/SudokuGame";
 import { TwentyFourGame } from "@/components/games/TwentyFourGame";
+import type { Difficulty } from "@/components/games/GameSettings";
 
 export default function BrainTraining() {
+  const defaultDifficulty: Difficulty = "easy";
+  
   return (
     <div className="page-container">
       <h1 className="section-title mb-6">Brain Training Games</h1>
@@ -21,23 +24,23 @@ export default function BrainTraining() {
         </TabsList>
         
         <TabsContent value="word-search">
-          <WordSearchGame difficulty="easy" />
+          <WordSearchGame difficulty={defaultDifficulty} />
         </TabsContent>
         
         <TabsContent value="crossword">
-          <CrosswordGame difficulty="easy" />
+          <CrosswordGame difficulty={defaultDifficulty} />
         </TabsContent>
         
         <TabsContent value="times-tables">
-          <TimesTablesGame difficulty="easy" />
+          <TimesTablesGame difficulty={defaultDifficulty} />
         </TabsContent>
         
         <TabsContent value="sudoku">
-          <SudokuGame difficulty="easy" />
+          <SudokuGame difficulty={defaultDifficulty} />
         </TabsContent>
         
         <TabsContent value="twenty-four">
-          <TwentyFourGame difficulty="easy" />
+          <TwentyFourGame difficulty={defaultDifficulty} />
         </TabsContent>
       </Tabs>
     </div>
