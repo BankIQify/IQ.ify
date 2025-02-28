@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { GameLayout } from "@/components/games/GameLayout";
-import { Button } from "@/components/ui/button";
 import { useGameState } from "@/hooks/use-game-state";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -9,14 +8,9 @@ import { GameInstructions } from "./twenty-four/GameInstructions";
 import { PuzzleDisplay } from "./twenty-four/PuzzleDisplay";
 import { GameControls } from "./twenty-four/GameControls";
 import { GameCompletedModal } from "./twenty-four/GameCompletedModal";
-import { evaluateExpression } from "./twenty-four/GameLogic";
+import { fetchTwentyFourPuzzles } from "./twenty-four/puzzleService";
 import type { Difficulty } from "@/components/games/GameSettings";
-
-export interface TwentyFourPuzzle {
-  id: string;
-  numbers: number[];
-  solution?: string;
-}
+import type { TwentyFourPuzzle } from "./twenty-four/types";
 
 // Define props interface for the component
 export interface TwentyFourGameProps {
@@ -38,43 +32,17 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
     onGameOver: () => setShowGameCompleted(true),
   });
 
-  // Fetch puzzles when the component mounts
+  // Fetch puzzles when the component mounts or difficulty changes
   useEffect(() => {
-    fetchPuzzles();
-  }, []);
+    loadPuzzles();
+  }, [gameState.difficulty]);
 
-  const fetchPuzzles = async () => {
+  const loadPuzzles = async () => {
     try {
-      const { data, error } = await supabase
-        .from("game_puzzles")
-        .select("id, puzzle_data")
-        .eq("game_type", "twenty_four")
-        .eq("difficulty", gameState.difficulty)
-        .limit(10);
-
-      if (error) throw error;
-
-      if (data && data.length > 0) {
-        const mappedPuzzles = data.map((item) => {
-          const puzzleData = typeof item.puzzle_data === 'string' ? 
-            JSON.parse(item.puzzle_data) : item.puzzle_data;
-            
-          return {
-            id: item.id,
-            numbers: puzzleData.numbers || [],
-            solution: puzzleData.solution,
-          };
-        });
-        setPuzzles(mappedPuzzles);
-      } else {
-        toast({
-          title: "No puzzles found",
-          description: "Try a different difficulty level or check back later.",
-          variant: "destructive",
-        });
-      }
+      const loadedPuzzles = await fetchTwentyFourPuzzles(gameState.difficulty);
+      setPuzzles(loadedPuzzles);
     } catch (error) {
-      console.error("Error fetching puzzles:", error);
+      console.error("Error loading puzzles:", error);
       toast({
         title: "Error",
         description: "Failed to load puzzles. Please try again.",
@@ -93,6 +61,9 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
 
   const handleSubmitAnswer = () => {
     try {
+      // Import here to avoid circular dependencies
+      const { evaluateExpression } = require("./twenty-four/GameLogic");
+      
       // Evaluate the user's expression
       const result = evaluateExpression(userAnswer, puzzles[currentPuzzleIndex].numbers);
       
@@ -163,7 +134,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
         score={gameState.score}
         timer={gameState.timer}
         difficulty={gameState.difficulty}
-        onStart={fetchPuzzles}
+        onStart={loadPuzzles}
         onPause={gameState.pauseGame}
         onReset={gameState.resetGame}
         onDifficultyChange={gameState.setDifficulty}
