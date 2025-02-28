@@ -21,19 +21,19 @@ export default function BrainTraining() {
         </TabsList>
         
         <TabsContent value="word-search">
-          <WordSearchGame />
+          <WordSearchGame difficulty="easy" />
         </TabsContent>
         
         <TabsContent value="crossword">
-          <CrosswordGame />
+          <CrosswordGame difficulty="easy" />
         </TabsContent>
         
         <TabsContent value="times-tables">
-          <TimesTablesGame />
+          <TimesTablesGame difficulty="easy" />
         </TabsContent>
         
         <TabsContent value="sudoku">
-          <SudokuGame />
+          <SudokuGame difficulty="easy" />
         </TabsContent>
         
         <TabsContent value="twenty-four">

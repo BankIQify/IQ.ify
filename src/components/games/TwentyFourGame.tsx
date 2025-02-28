@@ -27,7 +27,7 @@ export const TwentyFourGame = () => {
   const { toast } = useToast();
 
   const gameState = useGameState({
-    gameType: "times_tables", // Using an existing game type as a workaround
+    gameType: "twenty_four", 
     initialTimer: 300, // 5 minutes
     onGameOver: () => setShowGameCompleted(true),
   });

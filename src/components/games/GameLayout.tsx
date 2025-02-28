@@ -13,7 +13,10 @@ interface GameLayoutProps {
   timer?: number;
   showSettings?: boolean;
   difficulty: Difficulty;
+  onStart?: () => void;
+  onPause?: () => void;
   onReset?: () => void;
+  onDifficultyChange?: (difficulty: Difficulty) => void;
   settingsContent?: ReactNode;
   children: ReactNode;
 }
@@ -25,7 +28,10 @@ export const GameLayout = ({
   timer,
   showSettings = true,
   difficulty,
+  onStart,
+  onPause,
   onReset,
+  onDifficultyChange,
   settingsContent,
   children,
 }: GameLayoutProps) => {
