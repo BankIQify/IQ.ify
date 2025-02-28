@@ -15,10 +15,16 @@ export const CrosswordGrid = ({
   handleCellClick,
   handleKeyPress
 }: CrosswordGridProps) => {
+  // Calculate grid columns dynamically
+  const gridCols = grid[0]?.length || 5;
+  
   return (
     <Card>
       <CardContent className="p-4">
-        <div className={`grid grid-cols-${grid[0]?.length || 5} gap-0.5 bg-gray-200 p-0.5`}>
+        <div 
+          className="grid gap-0.5 bg-gray-200 p-0.5"
+          style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+        >
           {grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => (
               <div
@@ -30,7 +36,7 @@ export const CrosswordGrid = ({
                     ? 'bg-blue-100'
                     : ''
                 }`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
+                onClick={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
               >
                 {cell.number && (
                   <span className="absolute top-0 left-0 text-xs pl-0.5">
@@ -41,10 +47,17 @@ export const CrosswordGrid = ({
                   <input
                     type="text"
                     maxLength={1}
-                    value={cell.userInput}
+                    value={cell.userInput || ''}
                     className="w-full h-full text-center text-lg font-medium bg-transparent focus:outline-none uppercase"
                     onKeyDown={(e) => handleKeyPress(e, rowIndex, colIndex)}
-                    readOnly
+                    onChange={(e) => {
+                      // This allows typing directly into the input
+                      const event = {
+                        key: e.target.value.slice(-1),
+                        preventDefault: () => {}
+                      } as React.KeyboardEvent;
+                      handleKeyPress(event, rowIndex, colIndex);
+                    }}
                   />
                 )}
               </div>
