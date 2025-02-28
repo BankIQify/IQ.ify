@@ -1,10 +1,14 @@
 
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WebhookKeyManager } from "./WebhookKeyManager";
 import { WebhookInfoCard } from "./WebhookInfoCard";
 import { ChatConversationList } from "./ChatConversationList";
+import { ChatMessageViewer } from "./ChatMessageViewer";
 
 export function AIIntegrationPanel() {
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+
   return (
     <div className="container py-10">
       <h1 className="text-3xl font-bold mb-6">OpenAI Integration</h1>
@@ -17,7 +21,16 @@ export function AIIntegrationPanel() {
         </TabsList>
         
         <TabsContent value="conversations" className="mt-6">
-          <ChatConversationList />
+          {selectedConversationId ? (
+            <ChatMessageViewer 
+              conversationId={selectedConversationId}
+              onBack={() => setSelectedConversationId(null)}
+            />
+          ) : (
+            <ChatConversationList 
+              onSelectConversation={(id) => setSelectedConversationId(id)}
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="setup" className="mt-6">

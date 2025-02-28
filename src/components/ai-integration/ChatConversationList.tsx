@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -21,26 +21,30 @@ interface Conversation {
   message_count?: number;
 }
 
-export function ChatConversationList() {
+interface ChatConversationListProps {
+  onSelectConversation?: (conversationId: string) => void;
+}
+
+export function ChatConversationList({ onSelectConversation }: ChatConversationListProps = {}) {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
 
   const { data: conversations, isLoading, error, refetch } = useQuery({
     queryKey: ['ai-conversations'],
     queryFn: async () => {
-      // First get all conversations
+      // First get all conversations using a raw query
       const { data: conversationsData, error: conversationsError } = await supabase
         .from('ai_conversations')
-        .select('id, title, created_at, updated_at')
+        .select('*')
         .order('updated_at', { ascending: false });
       
       if (conversationsError) throw conversationsError;
       
-      // Then get message counts for each conversation
+      // Then get message counts for each conversation using raw counts
       const conversationsWithCounts = await Promise.all(
         conversationsData.map(async (conversation) => {
           const { count, error: countError } = await supabase
             .from('ai_messages')
-            .select('id', { count: 'exact', head: true })
+            .select('*', { count: 'exact', head: true })
             .eq('conversation_id', conversation.id);
           
           return {
@@ -50,7 +54,7 @@ export function ChatConversationList() {
         })
       );
       
-      return conversationsWithCounts;
+      return conversationsWithCounts as Conversation[];
     },
   });
 
@@ -64,7 +68,9 @@ export function ChatConversationList() {
 
   const handleSelectConversation = (conversationId: string) => {
     setSelectedConversation(conversationId);
-    // You could navigate to a conversation detail view here
+    if (onSelectConversation) {
+      onSelectConversation(conversationId);
+    }
   };
 
   if (error) {
