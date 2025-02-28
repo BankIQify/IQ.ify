@@ -23,7 +23,7 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   const [isAcross, setIsAcross] = useState(true);
   const [themes, setThemes] = useState<{ id: string; name: string }[]>([]);
-  const [selectedTheme, setSelectedTheme] = useState<string>("general");
+  const [selectedTheme, setSelectedTheme] = useState<string>("");
   const [puzzles, setPuzzles] = useState<CrosswordPuzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<CrosswordPuzzle | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,6 +41,7 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
       setThemes(themesData);
       
       if (themesData.length > 0) {
+        // Use the first real theme instead of hardcoded "general"
         setSelectedTheme(themesData[0].id);
       }
       setLoading(false);
@@ -61,15 +62,15 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
       // Select a random puzzle from available ones
       const randomIndex = Math.floor(Math.random() * puzzles.length);
       setCurrentPuzzle(puzzles[randomIndex]);
+    } else if (puzzles.length === 0 && !currentPuzzle && selectedTheme) {
+      // If no puzzles available, fallback to generating one
+      initializeDummyGame();
     }
-  }, [puzzles, currentPuzzle]);
+  }, [puzzles, currentPuzzle, selectedTheme]);
 
   useEffect(() => {
     if (currentPuzzle) {
       initializeGameFromPuzzle(currentPuzzle);
-    } else {
-      // Fallback to dummy data if no puzzles are available
-      initializeDummyGame();
     }
   }, [currentPuzzle]);
 
@@ -202,7 +203,10 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const handleNewPuzzle = () => {
-    if (puzzles.length <= 1) return;
+    if (puzzles.length <= 1) {
+      initializeDummyGame();
+      return;
+    }
     
     // Select a different puzzle
     let newPuzzle;

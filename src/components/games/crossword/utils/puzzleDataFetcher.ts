@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
 import type { CrosswordPuzzle, CrosswordPuzzleData, RawPuzzleData } from "../types";
 import { toast } from "@/components/ui/use-toast";
+import { getDifficultyConfig } from "./difficultyConfig";
 
 export const fetchThemes = async (): Promise<{ id: string; name: string }[]> => {
   try {
@@ -31,44 +32,18 @@ export const fetchThemes = async (): Promise<{ id: string; name: string }[]> => 
   }
 };
 
-export const getDifficultyConfig = (difficulty: Difficulty) => {
-  switch (difficulty) {
-    case "easy":
-      return { 
-        minWordLength: 3, 
-        maxWordLength: 5,
-        minWordCount: 5,
-        maxWordCount: 8
-      };
-    case "medium":
-      return { 
-        minWordLength: 4, 
-        maxWordLength: 6,
-        minWordCount: 6,
-        maxWordCount: 10
-      };
-    case "hard":
-      return { 
-        minWordLength: 5, 
-        maxWordLength: 10,
-        minWordCount: 8,
-        maxWordCount: 15
-      };
-    default:
-      return { 
-        minWordLength: 4, 
-        maxWordLength: 6,
-        minWordCount: 6,
-        maxWordCount: 10
-      };
-  }
-};
-
 export const fetchPuzzlesByTheme = async (
   themeId: string, 
   difficulty: Difficulty
 ): Promise<CrosswordPuzzle[]> => {
   try {
+    // Check if themeId is a valid UUID
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(themeId)) {
+      console.log(`Theme ID "${themeId}" is not a valid UUID. Using fallback to generate puzzles.`);
+      return [];
+    }
+
     // Add timeout for fetch operations
     const timeoutPromise = new Promise<never>((_, reject) => {
       setTimeout(() => reject(new Error("Request timeout")), 10000);
