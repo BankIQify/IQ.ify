@@ -23,7 +23,7 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
   const [isAcross, setIsAcross] = useState(true);
   const [themes, setThemes] = useState<{ id: string; name: string }[]>([]);
-  const [selectedTheme, setSelectedTheme] = useState<string>("");
+  const [selectedTheme, setSelectedTheme] = useState<string>("general");
   const [puzzles, setPuzzles] = useState<CrosswordPuzzle[]>([]);
   const [currentPuzzle, setCurrentPuzzle] = useState<CrosswordPuzzle | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,7 +88,7 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const initializeDummyGame = () => {
-    const dummyPuzzleData = generateDummyCrossword(difficulty);
+    const dummyPuzzleData = generateDummyCrossword(difficulty, selectedTheme);
     
     setGrid(dummyPuzzleData.grid);
     setClues(dummyPuzzleData.clues);
