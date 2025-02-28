@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { TwentyFourPuzzle, GameType } from "./types";
+import type { TwentyFourPuzzle } from "./types";
 import { toast } from "@/hooks/use-toast";
 
 export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<TwentyFourPuzzle[]> => {
@@ -9,7 +9,7 @@ export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<Tw
     const { data, error } = await supabase
       .from("game_puzzles")
       .select("id, puzzle_data")
-      .eq("game_type", "twenty_four" as GameType)
+      .eq("game_type", "twenty_four") // Use the string literal directly
       .eq("difficulty", difficulty)
       .limit(10);
 

@@ -1,6 +1,5 @@
 
-import { useState } from "react";
-import { TwentyFourPuzzle } from "../twenty-four/types";
+import { TwentyFourPuzzle } from "./types";
 
 interface PuzzleDisplayProps {
   puzzle: TwentyFourPuzzle;

@@ -11,7 +11,7 @@ import { GameCompletedModal } from "./twenty-four/GameCompletedModal";
 import { fetchTwentyFourPuzzles } from "./twenty-four/puzzleService";
 import { evaluateExpression } from "./twenty-four/GameLogic";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { TwentyFourPuzzle, GameType } from "./twenty-four/types";
+import type { TwentyFourPuzzle } from "./twenty-four/types";
 
 // Define props interface for the component
 export interface TwentyFourGameProps {
@@ -28,7 +28,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
   const { toast } = useToast();
 
   const gameState = useGameState({
-    gameType: "twenty_four" as GameType, // Cast to the extended GameType
+    gameType: "twenty_four", // Use the string literal directly
     initialTimer: 300, // 5 minutes
     onGameOver: () => setShowGameCompleted(true),
   });
