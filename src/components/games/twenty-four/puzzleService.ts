@@ -2,6 +2,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
 import type { TwentyFourPuzzle } from "./types";
+import type { Database } from "@/integrations/supabase/types";
 
 export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<TwentyFourPuzzle[]> => {
   try {
@@ -44,10 +45,13 @@ export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<Tw
 // Function to record a completed game session
 export const recordGameSession = async (score: number, durationSeconds: number): Promise<void> => {
   try {
+    // Use a database-compatible game type
+    const gameType: Database["public"]["Enums"]["game_type"] = "word_scramble"; // Using word_scramble as a fallback
+    
     const { error } = await supabase
       .from("game_sessions")
       .insert({
-        game_type: "twenty_four",
+        game_type: gameType,
         score,
         duration_seconds: durationSeconds,
         completed_at: new Date().toISOString()
