@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { GameLayout } from "@/components/games/GameLayout";
 import { GameSettings } from "@/components/games/GameSettings";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Puzzle, Grid, BookOpen, LayoutGrid, Globe2, Calculator, Brain } from "lucide-react";
+import { Puzzle, Grid, BookOpen, LayoutGrid, Globe2, Calculator, Brain, Sparkles } from "lucide-react";
 import { MemoryGame } from "@/components/games/MemoryGame";
 import { SudokuGame } from "@/components/games/SudokuGame";
 import { WordSearchGame } from "@/components/games/WordSearchGame";
@@ -37,9 +38,9 @@ const BrainTraining = () => {
       <div className="page-container">
         <button 
           onClick={() => setSelectedGame(null)}
-          className="mb-4 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center gap-2 mb-6 px-4 py-2 bg-pastel-purple/30 hover:bg-pastel-purple/50 transition-colors rounded-full text-sm"
         >
-          ← Back to games
+          <span>← Back to games</span>
         </button>
         <GameLayout
           title={selectedGame === "word_search" ? "Word Search" : 
@@ -84,11 +85,21 @@ const BrainTraining = () => {
 
   return (
     <div className="page-container">
-      <h1 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-pastel-purple to-pastel-blue bg-clip-text text-transparent">
-        Brain Training Games
-      </h1>
+      <div className="relative mb-12 text-center">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 via-blue-500 to-pink-500 bg-clip-text text-transparent">
+          Brain Training Games
+        </h1>
+        <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+          Enhance your cognitive abilities with our collection of brain training games designed to challenge your mind.
+        </p>
+        <div className="absolute -z-10 top-0 left-1/2 -translate-x-1/2 w-1/2 h-32 bg-pastel-purple/30 rounded-full blur-3xl opacity-70"></div>
+      </div>
 
-      <Card className="p-6 mb-8">
+      <Card className="p-6 mb-12 border border-pastel-purple/30 bg-white/80 backdrop-blur-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <Sparkles className="h-5 w-5 text-purple-500" />
+          <h2 className="text-lg font-semibold">Difficulty Settings</h2>
+        </div>
         <GameSettings
           difficulty={difficulty}
           onDifficultyChange={setDifficulty}
@@ -96,112 +107,111 @@ const BrainTraining = () => {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+        <GameCard
+          icon={<BookOpen className="w-12 h-12 text-blue-500" />}
+          title="Word Search"
+          color="blue"
+          description="Challenge your vocabulary and attention to detail by finding hidden words in a grid of letters."
           onClick={() => setSelectedGame("word_search")}
-        >
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <BookOpen className="w-12 h-12 text-pastel-blue" />
-            </div>
-            <CardTitle>Word Search</CardTitle>
-            <CardDescription>
-              Challenge your vocabulary and attention to detail by finding hidden words in a grid of letters.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        />
 
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+        <GameCard
+          icon={<Puzzle className="w-12 h-12 text-purple-500" />}
+          title="Crossword"
+          color="purple"
+          description="Test your knowledge and problem-solving skills with interconnected word puzzles and clever clues."
           onClick={() => setSelectedGame("crossword")}
-        >
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <Puzzle className="w-12 h-12 text-pastel-purple" />
-            </div>
-            <CardTitle>Crossword</CardTitle>
-            <CardDescription>
-              Test your knowledge and problem-solving skills with interconnected word puzzles and clever clues.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        />
 
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+        <GameCard
+          icon={<Grid className="w-12 h-12 text-green-500" />}
+          title="Sudoku"
+          color="green"
+          description="Exercise your logical thinking by filling a 9x9 grid with numbers following specific rules."
           onClick={() => setSelectedGame("sudoku")}
-        >
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <Grid className="w-12 h-12 text-pastel-green" />
-            </div>
-            <CardTitle>Sudoku</CardTitle>
-            <CardDescription>
-              Exercise your logical thinking by filling a 9x9 grid with numbers following specific rules.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        />
 
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+        <GameCard
+          icon={<LayoutGrid className="w-12 h-12 text-orange-500" />}
+          title="Memory Game"
+          color="orange"
+          description="Test your memory by matching pairs of cards in this classic concentration game."
           onClick={() => setSelectedGame("memory")}
-        >
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <LayoutGrid className="w-12 h-12 text-pastel-orange" />
-            </div>
-            <CardTitle>Memory Game</CardTitle>
-            <CardDescription>
-              Test your memory by matching pairs of cards in this classic concentration game.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        />
 
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+        <GameCard
+          icon={<Globe2 className="w-12 h-12 text-green-500" />}
+          title="Geography Quiz"
+          color="teal"
+          description="Test your knowledge of countries and their capitals by identifying flags from around the world."
           onClick={() => setSelectedGame("geography")}
-        >
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <Globe2 className="w-12 h-12 text-pastel-green" />
-            </div>
-            <CardTitle>Geography Quiz</CardTitle>
-            <CardDescription>
-              Test your knowledge of countries and their capitals by identifying flags from around the world.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        />
 
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+        <GameCard
+          icon={<Calculator className="w-12 h-12 text-blue-500" />}
+          title="Times Tables Test"
+          color="blue"
+          description="Practice multiplication and division with a rapid-fire times tables test."
           onClick={() => setSelectedGame("times_tables")}
-        >
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <Calculator className="w-12 h-12 text-pastel-blue" />
-            </div>
-            <CardTitle>Times Tables Test</CardTitle>
-            <CardDescription>
-              Practice multiplication and division with a rapid-fire times tables test.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        />
 
-        <Card 
-          className="cursor-pointer hover:shadow-lg transition-shadow"
+        <GameCard
+          icon={<Brain className="w-12 h-12 text-purple-500" />}
+          title="IQ Test"
+          color="pink"
+          description="Challenge your intelligence with pattern recognition, logical reasoning, and numerical sequence puzzles."
           onClick={() => setSelectedGame("iq_test")}
-        >
-          <CardHeader>
-            <div className="flex justify-center mb-4">
-              <Brain className="w-12 h-12 text-pastel-purple" />
-            </div>
-            <CardTitle>IQ Test</CardTitle>
-            <CardDescription>
-              Challenge your intelligence with pattern recognition, logical reasoning, and numerical sequence puzzles.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        />
       </div>
     </div>
+  );
+};
+
+interface GameCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  color: "blue" | "purple" | "green" | "orange" | "teal" | "pink";
+  onClick: () => void;
+}
+
+const GameCard = ({ icon, title, description, color, onClick }: GameCardProps) => {
+  const getGradient = () => {
+    switch (color) {
+      case "blue":
+        return "from-pastel-blue/50 to-pastel-blue/10";
+      case "purple":
+        return "from-pastel-purple/50 to-pastel-purple/10";
+      case "green":
+        return "from-pastel-green/50 to-pastel-green/10";
+      case "orange":
+        return "from-pastel-orange/50 to-pastel-orange/10";
+      case "teal":
+        return "from-pastel-green/50 to-pastel-blue/10";
+      case "pink":
+        return "from-pastel-pink/50 to-pastel-pink/10";
+      default:
+        return "from-pastel-blue/50 to-pastel-blue/10";
+    }
+  };
+
+  return (
+    <Card 
+      className={`overflow-hidden group cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-gradient-to-br ${getGradient()} border-none`}
+      onClick={onClick}
+    >
+      <CardHeader>
+        <div className="flex flex-col items-center text-center">
+          <div className="rounded-full p-4 bg-white shadow-sm mb-4 group-hover:scale-110 transition-transform duration-300">
+            {icon}
+          </div>
+          <CardTitle className="text-xl">{title}</CardTitle>
+          <CardDescription className="mt-2 leading-relaxed">
+            {description}
+          </CardDescription>
+        </div>
+      </CardHeader>
+    </Card>
   );
 };
 

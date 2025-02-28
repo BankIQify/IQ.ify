@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import { AddThemeDialog } from "./AddThemeDialog";
+import { Palette, Loader2 } from "lucide-react";
 
 interface PuzzleTheme {
   id: string;
@@ -49,43 +50,54 @@ export const ThemesManagerTab = () => {
     }
   };
 
+  const getThemeBackground = (index: number) => {
+    const colors = ['bg-pastel-blue/40', 'bg-pastel-purple/40', 'bg-pastel-green/40', 'bg-pastel-yellow/40', 'bg-pastel-peach/40'];
+    return colors[index % colors.length];
+  };
+
   return (
-    <Card>
+    <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-white to-pastel-gray/50">
       <CardContent className="pt-6">
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <Palette className="h-5 w-5 text-purple-500" />
+            <h3 className="text-lg font-semibold">Available Themes</h3>
+          </div>
           <AddThemeDialog onThemeAdded={fetchThemes} />
         </div>
-        <Table>
-          <TableCaption>Available themes for puzzle games</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Theme Name</TableHead>
-              <TableHead>Description</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={2} className="text-center py-4">
-                  Loading themes...
-                </TableCell>
-              </TableRow>
-            ) : themes.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={2} className="text-center py-4">
-                  No themes available.
-                </TableCell>
-              </TableRow>
-            ) : (
-              themes.map((theme) => (
-                <TableRow key={theme.id}>
-                  <TableCell className="font-medium">{theme.name}</TableCell>
-                  <TableCell>{theme.description || "No description"}</TableCell>
+        
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+            <span className="ml-2 text-muted-foreground">Loading themes...</span>
+          </div>
+        ) : themes.length === 0 ? (
+          <div className="text-center py-12 bg-pastel-gray/30 rounded-lg">
+            <Palette className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+            <p className="text-muted-foreground">No themes available yet.</p>
+            <p className="text-sm text-muted-foreground mt-1">Create your first theme to get started!</p>
+          </div>
+        ) : (
+          <div className="rounded-lg overflow-hidden">
+            <Table>
+              <TableCaption>Available themes for puzzle games</TableCaption>
+              <TableHeader className="bg-pastel-purple/20">
+                <TableRow>
+                  <TableHead className="font-semibold">Theme Name</TableHead>
+                  <TableHead className="font-semibold">Description</TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              </TableHeader>
+              <TableBody>
+                {themes.map((theme, index) => (
+                  <TableRow key={theme.id} className={`${getThemeBackground(index)} hover:bg-pastel-blue/60 transition-colors`}>
+                    <TableCell className="font-medium">{theme.name}</TableCell>
+                    <TableCell>{theme.description || "No description"}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
