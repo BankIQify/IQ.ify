@@ -9,8 +9,9 @@ import { PuzzleDisplay } from "./twenty-four/PuzzleDisplay";
 import { GameControls } from "./twenty-four/GameControls";
 import { GameCompletedModal } from "./twenty-four/GameCompletedModal";
 import { fetchTwentyFourPuzzles } from "./twenty-four/puzzleService";
+import { evaluateExpression } from "./twenty-four/GameLogic";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { TwentyFourPuzzle } from "./twenty-four/types";
+import type { TwentyFourPuzzle, GameType } from "./twenty-four/types";
 
 // Define props interface for the component
 export interface TwentyFourGameProps {
@@ -27,7 +28,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
   const { toast } = useToast();
 
   const gameState = useGameState({
-    gameType: "word_search", // Using an existing valid game type from the database enum
+    gameType: "twenty_four" as GameType, // Cast to the extended GameType
     initialTimer: 300, // 5 minutes
     onGameOver: () => setShowGameCompleted(true),
   });
@@ -61,10 +62,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
 
   const handleSubmitAnswer = () => {
     try {
-      // Import here to avoid circular dependencies
-      const { evaluateExpression } = require("./twenty-four/GameLogic");
-      
-      // Evaluate the user's expression
+      // Directly use the imported evaluateExpression function
       const result = evaluateExpression(userAnswer, puzzles[currentPuzzleIndex].numbers);
       
       if (result === 24) {

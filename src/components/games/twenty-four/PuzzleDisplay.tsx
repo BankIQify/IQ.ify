@@ -1,6 +1,6 @@
 
-import { TwentyFourPuzzle } from "../TwentyFourGame";
-import { PuzzleCard } from "./PuzzleCard";
+import { useState } from "react";
+import { TwentyFourPuzzle } from "../twenty-four/types";
 
 interface PuzzleDisplayProps {
   puzzle: TwentyFourPuzzle;
@@ -8,29 +8,32 @@ interface PuzzleDisplayProps {
   totalPuzzles: number;
 }
 
-export const PuzzleDisplay = ({ 
-  puzzle, 
-  currentIndex,
-  totalPuzzles
-}: PuzzleDisplayProps) => {
+export const PuzzleDisplay = ({ puzzle, currentIndex, totalPuzzles }: PuzzleDisplayProps) => {
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-4">
-        <p className="text-sm mb-2">
+    <div className="mb-6">
+      <div className="flex justify-between mb-2">
+        <span className="text-sm text-gray-500">
           Puzzle {currentIndex + 1} of {totalPuzzles}
-        </p>
-        <h2 className="text-xl font-bold">
-          Make 24 using these four numbers
-        </h2>
-        <p className="text-sm text-gray-500 mt-1">
-          Use each number exactly once and any of +, -, *, / and parentheses.
-        </p>
+        </span>
       </div>
-
-      <div className="flex justify-center gap-4 my-8">
-        {puzzle.numbers.map((number, idx) => (
-          <PuzzleCard key={idx} number={number} />
-        ))}
+      
+      <div className="bg-white p-6 rounded-lg shadow-md">
+        <h3 className="text-xl font-bold mb-4 text-center">Make 24 using these numbers</h3>
+        
+        <div className="flex justify-center gap-4 mb-6">
+          {puzzle.numbers.map((number, index) => (
+            <div 
+              key={index} 
+              className="w-16 h-16 flex items-center justify-center bg-blue-100 rounded-lg text-2xl font-bold shadow"
+            >
+              {number}
+            </div>
+          ))}
+        </div>
+        
+        <p className="text-center text-gray-600 text-sm">
+          Use each number exactly once with any combination of +, -, ×, ÷, and parentheses.
+        </p>
       </div>
     </div>
   );
