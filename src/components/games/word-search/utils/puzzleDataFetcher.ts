@@ -46,10 +46,11 @@ export const fetchPuzzlesByTheme = async (themeId: string, difficulty: Difficult
       .eq("game_type", "word_search");
 
     // Use Promise.race to implement the timeout
+    // Need to use 'as any' to fix TypeScript error with Promise.race and Supabase response
     const { data, error } = await Promise.race([
-      fetchPromise,
+      fetchPromise as any,
       timeoutPromise
-    ]) as Awaited<ReturnType<typeof fetchPromise>>;
+    ]);
 
     if (error) throw error;
     

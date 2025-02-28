@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { CrosswordPuzzle, RawPuzzleData } from "../types";
+import type { CrosswordPuzzle, CrosswordPuzzleData, RawPuzzleData } from "../types";
 import { toast } from "@/components/ui/use-toast";
 
 export const fetchThemes = async (): Promise<{ id: string; name: string }[]> => {
@@ -82,10 +82,11 @@ export const fetchPuzzlesByTheme = async (
       .eq("game_type", "crossword");
 
     // Use Promise.race to implement the timeout
+    // Need to use 'as any' to fix TypeScript error with Promise.race and Supabase response
     const { data, error } = await Promise.race([
-      fetchPromise,
+      fetchPromise as any,
       timeoutPromise
-    ]) as Awaited<ReturnType<typeof fetchPromise>>;
+    ]);
 
     if (error) throw error;
     
