@@ -107,6 +107,44 @@ export type Database = {
         }
         Relationships: []
       }
+      game_puzzles: {
+        Row: {
+          created_at: string | null
+          difficulty: string
+          game_type: Database["public"]["Enums"]["game_puzzle_type"]
+          id: string
+          puzzle_data: Json
+          theme_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          difficulty: string
+          game_type: Database["public"]["Enums"]["game_puzzle_type"]
+          id?: string
+          puzzle_data: Json
+          theme_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          difficulty?: string
+          game_type?: Database["public"]["Enums"]["game_puzzle_type"]
+          id?: string
+          puzzle_data?: Json
+          theme_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_puzzles_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "game_themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       game_sessions: {
         Row: {
           completed_at: string | null
@@ -137,6 +175,30 @@ export type Database = {
           score?: number | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      game_themes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -362,6 +424,7 @@ export type Database = {
         | "problem_solving"
         | "time_management"
         | "confidence_building"
+      game_puzzle_type: "word_search" | "crossword"
       game_type:
         | "times_tables"
         | "memory_cards"

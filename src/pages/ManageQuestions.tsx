@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { GenerateQuestionsTab } from "@/components/questions/tabs/GenerateQuestionsTab";
 import { HomepageEditor } from "@/components/homepage/HomepageEditor";
+import { GamePuzzlesManager } from "@/components/puzzles/GamePuzzlesManager";
 import type { QuestionCategory } from "@/types/questions";
 
 const ManageQuestions = () => {
@@ -34,11 +35,12 @@ const ManageQuestions = () => {
       <h1 className="section-title">Question Management</h1>
 
       <Tabs defaultValue="generate" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="generate">Generate Questions</TabsTrigger>
           <TabsTrigger value="manual">Manual Upload</TabsTrigger>
           <TabsTrigger value="categories">Manage Categories</TabsTrigger>
           <TabsTrigger value="bank">Complete Question Bank</TabsTrigger>
+          <TabsTrigger value="puzzles">Puzzle Games</TabsTrigger>
           <TabsTrigger value="homepage">Edit Homepage</TabsTrigger>
         </TabsList>
 
@@ -61,6 +63,10 @@ const ManageQuestions = () => {
 
         <TabsContent value="manual">
           <ManualQuestionUpload subTopicId={subTopicId} />
+        </TabsContent>
+
+        <TabsContent value="puzzles">
+          <GamePuzzlesManager />
         </TabsContent>
 
         <TabsContent value="homepage">
