@@ -12,7 +12,11 @@ export interface GameState {
   difficulty: Difficulty;
 }
 
-export type GameType = Database["public"]["Enums"]["game_type"] | "twenty_four";
+// Define the allowed game types from the database schema
+type DatabaseGameType = Database["public"]["Enums"]["game_type"];
+
+// Create a union type for all valid game types including our custom types
+export type GameType = DatabaseGameType | "twenty_four";
 
 interface UseGameStateProps {
   initialTimer?: number;
@@ -105,7 +109,7 @@ export const useGameState = ({
       const dbGameType = gameType === "twenty_four" ? "word_scramble" : gameType;
       
       const { error } = await supabase.from("game_sessions").insert({
-        game_type: dbGameType,
+        game_type: dbGameType as DatabaseGameType, // Explicit cast to ensure type safety
         score: state.score,
         duration_seconds: initialTimer - state.timer,
       });

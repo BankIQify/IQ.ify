@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useGameState, GameType } from "@/hooks/use-game-state";
+import { useGameState } from "@/hooks/use-game-state";
 import { supabase } from "@/integrations/supabase/client";
 import { PuzzleCard } from "./twenty-four/PuzzleCard";
 import { GameCompletedModal } from "./twenty-four/GameCompletedModal";
@@ -18,7 +18,8 @@ export interface TwentyFourPuzzle {
   solution?: string;
 }
 
-interface TwentyFourGameProps {
+// Define props interface for the component
+export interface TwentyFourGameProps {
   difficulty?: Difficulty;
 }
 
@@ -32,7 +33,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
   const { toast } = useToast();
 
   const gameState = useGameState({
-    gameType: "twenty_four" as GameType, 
+    gameType: "twenty_four", 
     initialTimer: 300, // 5 minutes
     onGameOver: () => setShowGameCompleted(true),
   });
