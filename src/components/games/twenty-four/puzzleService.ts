@@ -29,16 +29,11 @@ export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<Tw
         };
       });
     } else {
-      const { toast } = useToast();
-      toast({
-        title: "No puzzles found",
-        description: "Try a different difficulty level or check back later.",
-        variant: "destructive",
-      });
+      console.log("No puzzles found for difficulty:", difficulty);
       return [];
     }
   } catch (error) {
     console.error("Error fetching puzzles:", error);
-    throw error;
+    return [];
   }
 };

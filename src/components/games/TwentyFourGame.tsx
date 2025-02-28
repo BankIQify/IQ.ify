@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { GameLayout } from "@/components/games/GameLayout";
 import { useGameState } from "@/hooks/use-game-state";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { GameInstructions } from "./twenty-four/GameInstructions";
 import { PuzzleDisplay } from "./twenty-four/PuzzleDisplay";
@@ -25,6 +24,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
   const [showGameCompleted, setShowGameCompleted] = useState(false);
   const [solvedPuzzles, setSolvedPuzzles] = useState<string[]>([]);
   const [showSolution, setShowSolution] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const gameType: TwentyFourGameType = "twenty_four";
@@ -41,9 +41,18 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
   }, [gameState.difficulty]);
 
   const loadPuzzles = async () => {
+    setLoading(true);
     try {
       const loadedPuzzles = await fetchTwentyFourPuzzles(gameState.difficulty);
       setPuzzles(loadedPuzzles);
+      
+      if (loadedPuzzles.length === 0) {
+        toast({
+          title: "No puzzles found",
+          description: "Try a different difficulty level or check back later.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error loading puzzles:", error);
       toast({
@@ -51,6 +60,8 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
         description: "Failed to load puzzles. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -126,7 +137,7 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
     gameState.resetGame();
   };
 
-  if (puzzles.length === 0) {
+  if (loading) {
     return (
       <GameLayout
         title="24 Game"
@@ -141,6 +152,32 @@ export const TwentyFourGame = ({ difficulty = "easy" }: TwentyFourGameProps) => 
       >
         <div className="flex items-center justify-center h-full">
           <p>Loading puzzles...</p>
+        </div>
+      </GameLayout>
+    );
+  }
+
+  if (puzzles.length === 0 && !loading) {
+    return (
+      <GameLayout
+        title="24 Game"
+        description="Use four numbers and arithmetic operations to reach 24."
+        score={gameState.score}
+        timer={gameState.timer}
+        difficulty={gameState.difficulty}
+        onStart={loadPuzzles}
+        onPause={gameState.pauseGame}
+        onReset={gameState.resetGame}
+        onDifficultyChange={gameState.setDifficulty}
+      >
+        <div className="flex flex-col items-center justify-center h-full space-y-4">
+          <p>No puzzles available for the selected difficulty.</p>
+          <button 
+            onClick={loadPuzzles} 
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Try Again
+          </button>
         </div>
       </GameLayout>
     );
