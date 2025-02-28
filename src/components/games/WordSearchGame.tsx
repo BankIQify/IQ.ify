@@ -52,6 +52,7 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [currentPuzzle, setCurrentPuzzle] = useState<WordSearchPuzzle | null>(null);
   const [loading, setLoading] = useState(true);
   const [isGameComplete, setIsGameComplete] = useState(false);
+  const [gridDimensions, setGridDimensions] = useState({ rows: 8, cols: 8 });
   
   const gameState = useGameState({
     initialTimer: 300,
@@ -80,10 +81,10 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
     if (currentPuzzle) {
       initializeGameFromPuzzle(currentPuzzle);
     } else {
-      // Fallback to dummy data if no puzzles are available
-      initializeDummyGame();
+      // Fallback to dynamically generated puzzle based on difficulty
+      generateDynamicPuzzle(difficulty);
     }
-  }, [currentPuzzle]);
+  }, [currentPuzzle, difficulty]);
 
   useEffect(() => {
     // Check if game is complete
@@ -110,9 +111,9 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
       console.error("Error fetching themes:", error);
       toast({
         title: "Error",
-        description: "Failed to load puzzle themes. Using default puzzles.",
+        description: "Failed to load puzzle themes. Using generated puzzles.",
       });
-      initializeDummyGame();
+      generateDynamicPuzzle(difficulty);
     } finally {
       setLoading(false);
     }
@@ -151,13 +152,18 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
       
       // Reset current puzzle when theme or difficulty changes
       setCurrentPuzzle(null);
+      
+      // If no puzzles found, generate a dynamic one
+      if (formattedPuzzles.length === 0) {
+        generateDynamicPuzzle(difficulty);
+      }
     } catch (error) {
       console.error("Error fetching puzzles:", error);
       toast({
         title: "Error",
-        description: "Failed to load puzzles. Using default puzzles.",
+        description: "Failed to load puzzles. Using generated puzzles.",
       });
-      initializeDummyGame();
+      generateDynamicPuzzle(difficulty);
     }
   };
 
@@ -172,37 +178,203 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
     setWords(puzzleWords);
     setSelectedCells([]);
     setIsGameComplete(false);
+    
+    // Set grid dimensions based on the puzzle grid
+    setGridDimensions({
+      rows: puzzleGrid.length,
+      cols: puzzleGrid[0].length
+    });
+    
     gameState.startGame();
   };
 
-  const initializeDummyGame = () => {
-    // For now, using a simple example grid and words
-    const exampleGrid = [
-      ['C', 'A', 'T', 'D', 'O', 'G', 'H', 'I'],
-      ['H', 'P', 'E', 'N', 'M', 'L', 'K', 'J'],
-      ['I', 'Q', 'R', 'S', 'B', 'I', 'R', 'D'],
-      ['C', 'W', 'X', 'Y', 'Z', 'A', 'B', 'C'],
-      ['K', 'D', 'E', 'F', 'G', 'H', 'I', 'J'],
-      ['E', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'],
-      ['N', 'R', 'S', 'T', 'U', 'V', 'W', 'X'],
-      ['Y', 'Z', 'A', 'B', 'C', 'D', 'E', 'F']
+  const generateDynamicPuzzle = (difficulty: Difficulty) => {
+    // Define difficulty-specific parameters
+    let minWordLength: number;
+    let maxWordLength: number;
+    let minWordCount: number;
+    let maxWordCount: number;
+    let blankPercentage: number;
+    let rows: number;
+    let cols: number;
+
+    switch (difficulty) {
+      case "easy":
+        minWordLength = 3;
+        maxWordLength = 5;
+        minWordCount = 5;
+        maxWordCount = 8;
+        blankPercentage = 0.05; // 5% of cells will be blank
+        rows = 8;
+        cols = 10; // Non-square grid
+        break;
+      case "medium":
+        minWordLength = 4;
+        maxWordLength = 6;
+        minWordCount = 6;
+        maxWordCount = 10;
+        blankPercentage = 0.1; // 10% of cells will be blank
+        rows = 10;
+        cols = 12; // Non-square grid
+        break;
+      case "hard":
+        minWordLength = 5;
+        maxWordLength = 10;
+        minWordCount = 8;
+        maxWordCount = 15;
+        blankPercentage = 0.15; // 15% of cells will be blank
+        rows = 12;
+        cols = 14; // Non-square grid
+        break;
+      default:
+        minWordLength = 3;
+        maxWordLength = 5;
+        minWordCount = 5;
+        maxWordCount = 8;
+        blankPercentage = 0.05;
+        rows = 8;
+        cols = 10;
+    }
+
+    // Sample words based on difficulty
+    const sampleWords = [
+      // 3-letter words
+      "CAT", "DOG", "BAT", "RUN", "SUN", "FUN", "PEN", "HAT", "MAP", "BUG",
+      // 4-letter words
+      "BEAR", "FISH", "BIRD", "DUCK", "FROG", "LION", "WOLF", "GOAT", "DEER", "HAWK",
+      // 5-letter words
+      "TIGER", "EAGLE", "SNAKE", "SHARK", "WHALE", "ZEBRA", "PANDA", "KOALA", "MOUSE", "CAMEL",
+      // 6-letter words
+      "MONKEY", "BEAVER", "JAGUAR", "LIZARD", "TOUCAN", "TURTLE", "RABBIT", "COUGAR", "WALRUS", "PUFFIN",
+      // 7+ letter words
+      "ELEPHANT", "ALLIGATOR", "CROCODILE", "BUTTERFLY", "FLAMINGO", "KANGAROO", "SQUIRREL", "PENGUIN", "HEDGEHOG", "CHIMPANZEE",
+      "HIPPOPOTAMUS", "RHINOCEROS", "ORANGUTAN"
     ];
 
-    const exampleWords = [
-      { word: 'CAT', found: false },
-      { word: 'DOG', found: false },
-      { word: 'BIRD', found: false },
-      { word: 'CHICKEN', found: false }
-    ];
+    // Filter words based on length requirements
+    const eligibleWords = sampleWords.filter(word => 
+      word.length >= minWordLength && word.length <= maxWordLength
+    );
 
-    setGrid(exampleGrid);
-    setWords(exampleWords);
+    // Randomly select number of words to include
+    const wordCount = Math.floor(Math.random() * (maxWordCount - minWordCount + 1)) + minWordCount;
+    
+    // Randomly pick words
+    const shuffledWords = [...eligibleWords].sort(() => Math.random() - 0.5);
+    const selectedWords = shuffledWords.slice(0, wordCount);
+    
+    // Create empty grid with dimensions
+    const dynamicGrid: string[][] = Array(rows).fill(null).map(() => 
+      Array(cols).fill('')
+    );
+    
+    // Set grid dimensions state
+    setGridDimensions({ rows, cols });
+    
+    // Place words in the grid
+    const directions = [
+      [0, 1],   // right
+      [1, 0],   // down
+      [1, 1],   // diagonal down-right
+      [0, -1],  // left
+      [-1, 0],  // up
+      [-1, -1], // diagonal up-left
+      [1, -1],  // diagonal down-left
+      [-1, 1]   // diagonal up-right
+    ];
+    
+    // Function to check if a word can be placed
+    const canPlaceWord = (word: string, row: number, col: number, dRow: number, dCol: number): boolean => {
+      for (let i = 0; i < word.length; i++) {
+        const newRow = row + i * dRow;
+        const newCol = col + i * dCol;
+        
+        // Check if out of bounds
+        if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols) {
+          return false;
+        }
+        
+        // Check if cell is occupied with a different letter
+        if (dynamicGrid[newRow][newCol] !== '' && dynamicGrid[newRow][newCol] !== word[i]) {
+          return false;
+        }
+      }
+      return true;
+    };
+    
+    // Place words in the grid
+    selectedWords.forEach(word => {
+      let placed = false;
+      let attempts = 0;
+      const maxAttempts = 100;
+      
+      while (!placed && attempts < maxAttempts) {
+        attempts++;
+        
+        // Pick a random direction
+        const dirIndex = Math.floor(Math.random() * directions.length);
+        const [dRow, dCol] = directions[dirIndex];
+        
+        // Pick a random starting position
+        const row = Math.floor(Math.random() * rows);
+        const col = Math.floor(Math.random() * cols);
+        
+        if (canPlaceWord(word, row, col, dRow, dCol)) {
+          // Place the word
+          for (let i = 0; i < word.length; i++) {
+            const newRow = row + i * dRow;
+            const newCol = col + i * dCol;
+            dynamicGrid[newRow][newCol] = word[i];
+          }
+          placed = true;
+        }
+      }
+      
+      // If couldn't place the word after max attempts, skip it
+      if (!placed) {
+        console.log(`Couldn't place word: ${word}`);
+      }
+    });
+    
+    // Add blank spaces (represented by null)
+    const totalCells = rows * cols;
+    const numBlankCells = Math.floor(totalCells * blankPercentage);
+    
+    let blanksAdded = 0;
+    while (blanksAdded < numBlankCells) {
+      const row = Math.floor(Math.random() * rows);
+      const col = Math.floor(Math.random() * cols);
+      
+      // Only make cells blank if they don't contain a word letter
+      if (dynamicGrid[row][col] === '') {
+        dynamicGrid[row][col] = ' '; // Using space to represent blank
+        blanksAdded++;
+      }
+    }
+    
+    // Fill remaining empty cells with random letters
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        if (dynamicGrid[row][col] === '') {
+          const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+          dynamicGrid[row][col] = randomLetter;
+        }
+      }
+    }
+    
+    // Set the grid and words states
+    setGrid(dynamicGrid);
+    setWords(selectedWords.map(word => ({ word, found: false })));
     setSelectedCells([]);
     setIsGameComplete(false);
     gameState.startGame();
   };
 
   const handleCellClick = (row: number, col: number) => {
+    // Skip blank cells
+    if (grid[row][col] === ' ') return;
+    
     if (!gameState.isActive) {
       gameState.startGame();
     }
@@ -260,16 +432,20 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const handleNewPuzzle = () => {
-    if (puzzles.length <= 1) return;
+    if (puzzles.length > 1) {
+      // Select a different puzzle
+      let newPuzzle;
+      do {
+        const randomIndex = Math.floor(Math.random() * puzzles.length);
+        newPuzzle = puzzles[randomIndex];
+      } while (newPuzzle.id === currentPuzzle?.id);
+      
+      setCurrentPuzzle(newPuzzle);
+    } else {
+      // Generate a new dynamic puzzle
+      generateDynamicPuzzle(difficulty);
+    }
     
-    // Select a different puzzle
-    let newPuzzle;
-    do {
-      const randomIndex = Math.floor(Math.random() * puzzles.length);
-      newPuzzle = puzzles[randomIndex];
-    } while (newPuzzle.id === currentPuzzle?.id);
-    
-    setCurrentPuzzle(newPuzzle);
     gameState.resetGame();
   };
 
@@ -278,6 +454,25 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
   }
 
   const wordsFoundPercentage = (words.filter(w => w.found).length / words.length) * 100;
+
+  // Function to determine cell color based on various conditions
+  const getCellColor = (rowIndex: number, colIndex: number) => {
+    const isSelected = selectedCells.some(([r, c]) => r === rowIndex && c === colIndex);
+    const isBlank = grid[rowIndex][colIndex] === ' ';
+    
+    if (isBlank) {
+      return "bg-slate-200 cursor-default";
+    }
+    
+    if (isSelected) {
+      return "bg-pastel-purple/70 text-white";
+    }
+    
+    // Create a checkered pattern for non-blank cells
+    return (rowIndex + colIndex) % 2 === 0 
+      ? "bg-white hover:bg-pastel-purple/10 cursor-pointer" 
+      : "bg-slate-50 hover:bg-pastel-purple/10 cursor-pointer";
+  };
 
   return (
     <div className="space-y-6">
@@ -302,7 +497,6 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
             <Button 
               onClick={handleNewPuzzle} 
               variant="outline"
-              disabled={puzzles.length <= 1}
               className="bg-white shadow-sm border-none hover:bg-white/90"
             >
               New Puzzle
@@ -330,28 +524,27 @@ export const WordSearchGame = ({ difficulty }: { difficulty: Difficulty }) => {
         <div>
           <Card className="overflow-hidden border-none shadow-lg">
             <CardContent className="p-0">
-              <div className="grid grid-cols-8 gap-0 bg-white">
+              <div 
+                className={`grid gap-0 bg-white`} 
+                style={{ 
+                  gridTemplateColumns: `repeat(${gridDimensions.cols}, minmax(0, 1fr))`,
+                  gridTemplateRows: `repeat(${gridDimensions.rows}, minmax(0, 1fr))`
+                }}
+              >
                 {grid.map((row, rowIndex) => (
-                  row.map((letter, colIndex) => {
-                    const isSelected = selectedCells.some(([r, c]) => r === rowIndex && c === colIndex);
-                    const cellColor = isSelected 
-                      ? "bg-pastel-purple/70 text-white" 
-                      : (rowIndex + colIndex) % 2 === 0 ? "bg-white hover:bg-pastel-purple/10" : "bg-slate-50 hover:bg-pastel-purple/10";
-                    
-                    return (
-                      <div
-                        key={`${rowIndex}-${colIndex}`}
-                        className={cn(
-                          "aspect-square flex items-center justify-center text-lg font-medium cursor-pointer border border-slate-100",
-                          "transition-all duration-200 transform hover:scale-105",
-                          cellColor
-                        )}
-                        onClick={() => handleCellClick(rowIndex, colIndex)}
-                      >
-                        {letter}
-                      </div>
-                    );
-                  })
+                  row.map((letter, colIndex) => (
+                    <div
+                      key={`${rowIndex}-${colIndex}`}
+                      className={cn(
+                        "aspect-square flex items-center justify-center text-lg font-medium border border-slate-100",
+                        "transition-all duration-200 transform hover:scale-105",
+                        getCellColor(rowIndex, colIndex)
+                      )}
+                      onClick={() => handleCellClick(rowIndex, colIndex)}
+                    >
+                      {letter !== ' ' ? letter : ''}
+                    </div>
+                  ))
                 ))}
               </div>
             </CardContent>
