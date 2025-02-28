@@ -61,12 +61,41 @@ export const GamePuzzlesManager = () => {
 
   const fetchPuzzleCounts = async () => {
     try {
+      // Use a raw SQL query to count and group data
       const { data, error } = await supabase
-        .from("game_puzzles")
-        .select("game_type, difficulty, count(*)")
-        .group("game_type, difficulty");
+        .rpc('get_puzzle_counts');
 
-      if (error) throw error;
+      if (error) {
+        // Fallback method if the RPC doesn't exist yet
+        console.warn("RPC not available, using alternative count method");
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from("game_puzzles")
+          .select('game_type, difficulty');
+          
+        if (fallbackError) throw fallbackError;
+        
+        // Process the data to count manually
+        const counts: PuzzleCount[] = [];
+        const countMap = new Map<string, number>();
+        
+        fallbackData?.forEach(puzzle => {
+          const key = `${puzzle.game_type}-${puzzle.difficulty}`;
+          countMap.set(key, (countMap.get(key) || 0) + 1);
+        });
+        
+        // Convert the map to our PuzzleCount format
+        countMap.forEach((count, key) => {
+          const [gameType, difficulty] = key.split('-') as [
+            "word_search" | "crossword", 
+            "easy" | "medium" | "hard"
+          ];
+          counts.push({ game_type: gameType, difficulty, count });
+        });
+        
+        setPuzzleCounts(counts);
+        return;
+      }
+      
       setPuzzleCounts(data as PuzzleCount[] || []);
     } catch (error) {
       console.error("Error fetching puzzle counts:", error);

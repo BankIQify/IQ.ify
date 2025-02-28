@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 import type { Difficulty } from "@/components/games/GameSettings";
+import type { Json } from "@/integrations/supabase/types";
 
 interface CrosswordCell {
   letter: string;
@@ -21,15 +22,27 @@ interface CrosswordClue {
   direction: 'across' | 'down';
 }
 
+interface CrosswordPuzzleData {
+  grid: CrosswordCell[][];
+  clues: CrosswordClue[];
+}
+
 interface CrosswordPuzzle {
   id: string;
   theme_id: string;
   difficulty: string;
-  puzzle_data: {
-    grid: CrosswordCell[][];
-    clues: CrosswordClue[];
-  };
+  puzzle_data: CrosswordPuzzleData;
   theme?: {
+    name: string;
+  };
+}
+
+interface RawPuzzleData {
+  id: string;
+  theme_id: string;
+  difficulty: string;
+  puzzle_data: Json;
+  game_themes: {
     name: string;
   };
 }
@@ -109,10 +122,22 @@ export const CrosswordGame = ({ difficulty }: { difficulty: Difficulty }) => {
       if (error) throw error;
       
       // Transform the data to match our expected format
-      const formattedPuzzles = data?.map(puzzle => ({
-        ...puzzle,
-        theme: puzzle.game_themes
-      })) || [];
+      const formattedPuzzles: CrosswordPuzzle[] = (data || []).map((raw: RawPuzzleData) => {
+        // Safely parse the puzzle_data which is Json type from database
+        const puzzleData = typeof raw.puzzle_data === 'string' 
+          ? JSON.parse(raw.puzzle_data) 
+          : raw.puzzle_data;
+          
+        return {
+          id: raw.id,
+          theme_id: raw.theme_id,
+          difficulty: raw.difficulty,
+          puzzle_data: puzzleData as CrosswordPuzzleData,
+          theme: {
+            name: raw.game_themes.name
+          }
+        };
+      });
       
       setPuzzles(formattedPuzzles);
       
