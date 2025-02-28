@@ -1,15 +1,17 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { TwentyFourPuzzle } from "./types";
-import { toast } from "@/hooks/use-toast";
+import type { TwentyFourPuzzle, TwentyFourGameType } from "./types";
+import { useToast } from "@/hooks/use-toast";
 
 export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<TwentyFourPuzzle[]> => {
   try {
+    const gameType: TwentyFourGameType = "twenty_four";
+    
     const { data, error } = await supabase
       .from("game_puzzles")
       .select("id, puzzle_data")
-      .eq("game_type", "twenty_four") // Use the string literal directly
+      .eq("game_type", gameType)
       .eq("difficulty", difficulty)
       .limit(10);
 
@@ -27,6 +29,7 @@ export const fetchTwentyFourPuzzles = async (difficulty: Difficulty): Promise<Tw
         };
       });
     } else {
+      const { toast } = useToast();
       toast({
         title: "No puzzles found",
         description: "Try a different difficulty level or check back later.",

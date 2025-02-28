@@ -497,6 +497,7 @@ export type Database = {
         | "geography"
         | "times_tables"
         | "iq_test"
+        | "twenty_four"
       game_type:
         | "times_tables"
         | "memory_cards"

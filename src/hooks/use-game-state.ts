@@ -14,8 +14,9 @@ export interface GameState {
 
 // Define the allowed game types from the database schema
 type DatabaseGameType = Database["public"]["Enums"]["game_type"];
+type DatabasePuzzleType = Database["public"]["Enums"]["game_puzzle_type"];
 
-// Create a union type for all valid game types including our custom types
+// Create a union type for all valid game types
 export type GameType = DatabaseGameType | "twenty_four";
 
 interface UseGameStateProps {
@@ -103,13 +104,20 @@ export const useGameState = ({
     }));
 
     try {
-      // Save game session to database
-      // For "twenty_four" we'll map it to "word_scramble" in the database
-      // since "twenty_four" is not a valid enum value
-      const dbGameType = gameType === "twenty_four" ? "word_scramble" : gameType;
+      // Map our custom game types to database types if needed
+      let dbGameType: DatabaseGameType;
+      
+      // Handle our custom game types that don't directly map to database enum
+      if (gameType === "twenty_four") {
+        // We can use word_scramble as a fallback since "twenty_four" isn't in game_type enum
+        dbGameType = "word_scramble";
+      } else {
+        // For standard game types that exist in the database enum
+        dbGameType = gameType as DatabaseGameType;
+      }
       
       const { error } = await supabase.from("game_sessions").insert({
-        game_type: dbGameType as DatabaseGameType, // Explicit cast to ensure type safety
+        game_type: dbGameType,
         score: state.score,
         duration_seconds: initialTimer - state.timer,
       });

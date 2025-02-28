@@ -10,12 +10,12 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, Puzzle } from "lucide-react";
+import { BookOpen, Puzzle, Calculator } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
 interface PuzzleCount {
-  game_type: "word_search" | "crossword";
+  game_type: "word_search" | "crossword" | "twenty_four";
   difficulty: "easy" | "medium" | "hard";
   count: number;
 }
@@ -55,7 +55,7 @@ export const PuzzleSummaryTab = () => {
         // Convert the map to our PuzzleCount format
         countMap.forEach((count, key) => {
           const [gameType, difficulty] = key.split('-') as [
-            "word_search" | "crossword", 
+            "word_search" | "crossword" | "twenty_four", 
             "easy" | "medium" | "hard"
           ];
           counts.push({ game_type: gameType, difficulty, count });
@@ -87,17 +87,18 @@ export const PuzzleSummaryTab = () => {
     }
   };
 
-  const getCountForTypeAndDifficulty = (type: "word_search" | "crossword", difficulty: "easy" | "medium" | "hard") => {
+  const getCountForTypeAndDifficulty = (type: "word_search" | "crossword" | "twenty_four", difficulty: "easy" | "medium" | "hard") => {
     const count = puzzleCounts.find(
       (item) => item.game_type === type && item.difficulty === difficulty
     );
     return count ? count.count : 0;
   };
 
-  const getGameIcon = (type: "word_search" | "crossword") => {
+  const getGameIcon = (type: "word_search" | "crossword" | "twenty_four") => {
     switch (type) {
       case "word_search": return <BookOpen className="w-5 h-5 mr-2" />;
       case "crossword": return <Puzzle className="w-5 h-5 mr-2" />;
+      case "twenty_four": return <Calculator className="w-5 h-5 mr-2" />;
       default: return null;
     }
   };
@@ -152,6 +153,25 @@ export const PuzzleSummaryTab = () => {
               <TableCell className="font-medium">
                 {puzzleCounts
                   .filter(item => item.game_type === "crossword")
+                  .reduce((acc, item) => acc + item.count, 0)}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="flex items-center">
+                {getGameIcon("twenty_four")} 24 Game
+              </TableCell>
+              <TableCell className={getDifficultyColor("easy")}>
+                {getCountForTypeAndDifficulty("twenty_four", "easy")}
+              </TableCell>
+              <TableCell className={getDifficultyColor("medium")}>
+                {getCountForTypeAndDifficulty("twenty_four", "medium")}
+              </TableCell>
+              <TableCell className={getDifficultyColor("hard")}>
+                {getCountForTypeAndDifficulty("twenty_four", "hard")}
+              </TableCell>
+              <TableCell className="font-medium">
+                {puzzleCounts
+                  .filter(item => item.game_type === "twenty_four")
                   .reduce((acc, item) => acc + item.count, 0)}
               </TableCell>
             </TableRow>
