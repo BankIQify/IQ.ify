@@ -36,6 +36,7 @@ interface GameCount {
 export const CategoriesTable = ({ sections }: CategoriesTableProps) => {
   const [puzzleCounts, setPuzzleCounts] = useState<GameCount[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPuzzleCounts();
@@ -48,9 +49,14 @@ export const CategoriesTable = ({ sections }: CategoriesTableProps) => {
 
       if (error) throw error;
       
+      // If data is null or empty, set an empty array for puzzleCounts
       setPuzzleCounts(data as GameCount[] || []);
+      
+      // For debugging purposes
+      console.log("Puzzle counts data:", data);
     } catch (error) {
       console.error("Error fetching puzzle counts:", error);
+      setError("Failed to fetch puzzle counts");
     } finally {
       setLoading(false);
     }
@@ -124,6 +130,34 @@ export const CategoriesTable = ({ sections }: CategoriesTableProps) => {
     }
   };
 
+  // Determine game status based on type and available puzzles
+  const getGameStatus = (gameType: string, totalCount: number) => {
+    // Word Search and Crossword need puzzles in the database
+    if (gameType === "word_search" || gameType === "crossword") {
+      if (totalCount > 0) {
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            {totalCount} puzzles available
+          </Badge>
+        );
+      } else {
+        return (
+          <Badge variant="outline" className="bg-amber-100 text-amber-800">
+            No puzzles yet
+          </Badge>
+        );
+      }
+    } 
+    // All other games are generated on-the-fly and don't need database puzzles
+    else {
+      return (
+        <Badge className="bg-blue-100 text-blue-800">
+          Ready to play
+        </Badge>
+      );
+    }
+  };
+
   return (
     <Card className="p-4">
       <h3 className="text-lg font-semibold mb-4">Game Categories & Puzzles</h3>
@@ -157,70 +191,67 @@ export const CategoriesTable = ({ sections }: CategoriesTableProps) => {
 
       {/* Second table: Games and puzzles */}
       <h4 className="text-md font-medium mb-2">Available Games</h4>
-      <Table>
-        <TableCaption>All brain training games in the application</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Game Type</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Difficulty Levels</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {loading ? (
+      {error ? (
+        <div className="p-4 text-red-600 bg-red-50 rounded-md">
+          {error}
+        </div>
+      ) : (
+        <Table>
+          <TableCaption>All brain training games in the application</TableCaption>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-8">Loading game data...</TableCell>
+              <TableHead>Game Type</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Difficulty Levels</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
-          ) : (
-            allGameTypes.map((gameType) => {
-              // Get counts for this game type across all difficulties
-              const countsForType = puzzleCounts.filter(item => item.game_type === gameType);
-              const totalCount = countsForType.reduce((sum, item) => sum + item.count, 0);
-              
-              return (
-                <TableRow key={gameType}>
-                  <TableCell className="flex items-center gap-2">
-                    {getGameIcon(gameType)}
-                    <span className="font-medium">{getGameTypeDisplay(gameType)}</span>
-                  </TableCell>
-                  <TableCell className="max-w-[300px]">{getDescription(gameType)}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {["easy", "medium", "hard"].map((difficulty) => {
-                        const count = countsForType.find(item => item.difficulty === difficulty)?.count || 0;
-                        
-                        return (
-                          <Badge key={difficulty} variant="outline" className={getDifficultyColor(difficulty)}>
-                            {difficulty}: {count}
-                          </Badge>
-                        );
-                      })}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {(gameType === "word_search" || gameType === "crossword") ? (
-                      totalCount > 0 ? (
-                        <Badge className="bg-green-100 text-green-800">
-                          {totalCount} puzzles available
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="bg-amber-100 text-amber-800">
-                          No puzzles yet
-                        </Badge>
-                      )
-                    ) : (
-                      <Badge className="bg-blue-100 text-blue-800">
-                        Ready to play
-                      </Badge>
-                    )}
-                  </TableCell>
-                </TableRow>
-              );
-            })
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-8">Loading game data...</TableCell>
+              </TableRow>
+            ) : (
+              allGameTypes.map((gameType) => {
+                // Get counts for this game type across all difficulties
+                const countsForType = puzzleCounts.filter(item => item.game_type === gameType);
+                const totalCount = countsForType.reduce((sum, item) => sum + item.count, 0);
+                
+                return (
+                  <TableRow key={gameType}>
+                    <TableCell className="flex items-center gap-2">
+                      {getGameIcon(gameType)}
+                      <span className="font-medium">{getGameTypeDisplay(gameType)}</span>
+                    </TableCell>
+                    <TableCell className="max-w-[300px]">{getDescription(gameType)}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {["easy", "medium", "hard"].map((difficulty) => {
+                          const count = countsForType.find(item => item.difficulty === difficulty)?.count || 0;
+                          
+                          return (
+                            <Badge key={difficulty} variant="outline" className={getDifficultyColor(difficulty)}>
+                              {difficulty}: {count}
+                            </Badge>
+                          );
+                        })}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {getGameStatus(gameType, totalCount)}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      )}
+
+      {/* Add a note to explain the game status */}
+      <div className="mt-4 text-sm text-gray-500">
+        <p>Note: Word Search and Crossword games require puzzle creation, while other games generate puzzles automatically.</p>
+      </div>
     </Card>
   );
 };
