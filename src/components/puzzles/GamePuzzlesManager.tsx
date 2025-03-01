@@ -11,9 +11,15 @@ export const GamePuzzlesManager = () => {
       
       <Tabs defaultValue="summary" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="summary">Puzzle Summary</TabsTrigger>
-          <TabsTrigger value="themes">Manage Themes</TabsTrigger>
-          <TabsTrigger value="24-game">24 Game</TabsTrigger>
+          <TabsTrigger value="summary" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Puzzle Summary
+          </TabsTrigger>
+          <TabsTrigger value="themes" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Manage Themes
+          </TabsTrigger>
+          <TabsTrigger value="24-game" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            24 Game
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="summary">

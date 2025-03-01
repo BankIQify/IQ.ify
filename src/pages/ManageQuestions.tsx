@@ -72,13 +72,27 @@ const ManageQuestions = () => {
 
       <Tabs defaultValue="generate" className="w-full">
         <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="generate">Generate Questions</TabsTrigger>
-          <TabsTrigger value="manual">Manual Upload</TabsTrigger>
-          <TabsTrigger value="categories">Manage Categories</TabsTrigger>
-          <TabsTrigger value="bank">Complete Question Bank</TabsTrigger>
-          <TabsTrigger value="puzzles">Puzzle Games</TabsTrigger>
-          <TabsTrigger value="homepage">Edit Homepage</TabsTrigger>
-          <TabsTrigger value="summary">Games Summary</TabsTrigger>
+          <TabsTrigger value="generate" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Generate Questions
+          </TabsTrigger>
+          <TabsTrigger value="manual" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Manual Upload
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Manage Categories
+          </TabsTrigger>
+          <TabsTrigger value="bank" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Complete Question Bank
+          </TabsTrigger>
+          <TabsTrigger value="puzzles" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Puzzle Games
+          </TabsTrigger>
+          <TabsTrigger value="homepage" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Edit Homepage
+          </TabsTrigger>
+          <TabsTrigger value="summary" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Games Summary
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="categories">
