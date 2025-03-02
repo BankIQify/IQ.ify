@@ -5,7 +5,7 @@ export type QuestionContent = {
   correctAnswer?: string;
   explanation: string;
   imageUrl?: string;
-  // Add dual choice properties
+  // Dual choice properties
   primaryOptions?: string[];
   secondaryOptions?: string[];
   correctPrimaryAnswer?: string;

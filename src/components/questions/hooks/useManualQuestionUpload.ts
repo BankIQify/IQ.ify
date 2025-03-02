@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -136,6 +137,7 @@ export const useManualQuestionUpload = (subTopicId: string) => {
         secondaryOptions?: string[];
         correctPrimaryAnswer?: string;
         correctSecondaryAnswer?: string;
+        explanation?: string;
       } = {
         question: manualQuestion,
         imageUrl: questionImageUrl,
