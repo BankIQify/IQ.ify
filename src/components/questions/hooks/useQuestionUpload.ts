@@ -44,7 +44,7 @@ export const useQuestionUpload = (
       const questionContent: QuestionContent = {
         question: manualQuestion,
         imageUrl: questionImageUrl,
-        explanation: "" // Initialize with empty string, will be filled by AI
+        explanation: "", // Initialize with empty string, will be filled by AI
       };
 
       if (questionType === "multiple_choice") {
