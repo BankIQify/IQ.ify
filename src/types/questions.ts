@@ -21,3 +21,6 @@ export type Question = {
     name: string;
   };
 };
+
+// Add this to ensure consistent question types
+export type QuestionType = 'multiple_choice' | 'text' | 'image' | 'dual_choice';

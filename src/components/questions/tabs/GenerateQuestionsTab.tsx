@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,7 +5,7 @@ import { QuestionGenerator } from "@/components/questions/QuestionGenerator";
 import { QuestionsList } from "@/components/questions/QuestionsList";
 import { useQuestionData } from "@/hooks/useQuestionData";
 import type { QuestionCategory } from "@/types/questions";
-import { getSubTopicLayout } from "@/components/questions/utils/subTopicAnswerLayouts";
+import { getSubTopicLayout } from "@/components/questions/utils/answer-layouts";
 
 interface GenerateQuestionsTabProps {
   category: QuestionCategory;

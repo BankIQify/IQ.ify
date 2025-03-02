@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { CustomPromptInput } from "./components/CustomPromptInput";
 import { GeneratorActions } from "./components/GeneratorActions";
 import { useQuestionMutations } from "./mutations/useQuestionMutations";
-import type { AnswerLayoutConfig } from "./utils/subTopicAnswerLayouts";
+import type { AnswerLayoutConfig } from "./utils/answer-layouts";
 
 interface QuestionGeneratorProps {
   subTopicId: string;
