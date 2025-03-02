@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,7 +14,7 @@ import { useQuestionData } from "@/hooks/useQuestionData";
 import type { QuestionCategory } from "@/types/questions";
 import type { Database } from "@/integrations/supabase/types";
 
-export type QuestionType = Database["public"]["Enums"]["question_type"];
+export type QuestionType = "multiple_choice" | "text" | "image" | "dual_choice";
 
 export const ManualQuestionUpload = () => {
   const [category, setCategory] = useState<QuestionCategory>("verbal");
