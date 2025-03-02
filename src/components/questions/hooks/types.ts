@@ -1,5 +1,5 @@
 
-import type { QuestionType } from "../ManualQuestionUpload";
+import type { QuestionType } from "@/types/questions";
 
 export interface QuestionContent {
   question: string;

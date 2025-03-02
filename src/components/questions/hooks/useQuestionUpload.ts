@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadQuestionImage } from "../utils/questionUploadUtils";
-import type { QuestionType } from "../ManualQuestionUpload";
+import type { QuestionType } from "@/types/questions";
 import type { QuestionContent } from "./types";
 
 export const useQuestionUpload = (
@@ -44,6 +44,7 @@ export const useQuestionUpload = (
       const questionContent: QuestionContent = {
         question: manualQuestion,
         imageUrl: questionImageUrl,
+        explanation: "" // Initialize with empty string, will be filled by AI
       };
 
       if (questionType === "multiple_choice") {

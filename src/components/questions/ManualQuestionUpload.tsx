@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -11,10 +10,7 @@ import { DualChoiceOptions } from "./upload/DualChoiceOptions";
 import { TextAnswer } from "./upload/TextAnswer";
 import { useManualQuestionUpload } from "./hooks/useManualQuestionUpload";
 import { useQuestionData } from "@/hooks/useQuestionData";
-import type { QuestionCategory } from "@/types/questions";
-import type { Database } from "@/integrations/supabase/types";
-
-export type QuestionType = "multiple_choice" | "text" | "image" | "dual_choice";
+import type { QuestionCategory, QuestionType } from "@/types/questions";
 
 export const ManualQuestionUpload = () => {
   const [category, setCategory] = useState<QuestionCategory>("verbal");
