@@ -1,9 +1,7 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import type { Database } from "@/integrations/supabase/types";
-
-type QuestionType = Database["public"]["Enums"]["question_type"];
+import type { QuestionType } from "@/types/questions";
 
 interface QuestionTypeSelectorProps {
   value: QuestionType;

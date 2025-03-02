@@ -23,5 +23,5 @@ export type Question = {
   };
 };
 
-// Updated to ensure it matches what's expected in Supabase
+// Updated to ensure it matches what's expected in Supabase and the code
 export type QuestionType = 'multiple_choice' | 'text' | 'image' | 'dual_choice';

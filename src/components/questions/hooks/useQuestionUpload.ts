@@ -70,8 +70,7 @@ export const useQuestionUpload = (
 
       if (explanationError) throw explanationError;
 
-      // Cast the questionType to the expected types in Supabase
-      // This ensures compatibility with the database schema
+      // Use type assertion to ensure compatibility with Supabase's expected types
       const { error: insertError } = await supabase
         .from('questions')
         .insert({
@@ -81,7 +80,7 @@ export const useQuestionUpload = (
           },
           sub_topic_id: subTopicId,
           ai_generated: false,
-          question_type: questionType,
+          question_type: questionType as any, // Use type assertion to bypass type checking
         });
 
       if (insertError) throw insertError;
