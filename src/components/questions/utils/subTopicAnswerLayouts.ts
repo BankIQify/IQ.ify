@@ -1,4 +1,3 @@
-
 import type { QuestionCategory } from "@/types/questions";
 
 // Define the different types of answer layouts we support
@@ -9,7 +8,8 @@ export type AnswerLayout =
   | "matching" 
   | "ordering" 
   | "completion" 
-  | "true_false";
+  | "true_false"
+  | "dual_choice";
 
 // This interface helps define what fields are expected for each answer layout
 export interface AnswerLayoutConfig {
@@ -17,6 +17,7 @@ export interface AnswerLayoutConfig {
   optionsCount?: number;
   requiresImage?: boolean;
   description: string;
+  secondaryOptionsCount?: number;
 }
 
 // Verbal reasoning sub-topic answer layout mappings
@@ -67,6 +68,54 @@ export const verbalReasoningLayouts: Record<string, AnswerLayoutConfig> = {
   }
 };
 
+// Non-verbal reasoning sub-topic layouts
+export const nonVerbalReasoningLayouts: Record<string, AnswerLayoutConfig> = {
+  "pattern_recognition": {
+    layout: "multiple_choice",
+    optionsCount: 4,
+    description: "Identify the pattern and select the correct next item."
+  },
+  "spatial_reasoning": {
+    layout: "multiple_choice",
+    optionsCount: 4,
+    description: "Questions testing ability to manipulate shapes mentally."
+  },
+  "matrix_problems": {
+    layout: "multiple_choice",
+    optionsCount: 4,
+    description: "Complete the matrix by identifying the correct pattern."
+  },
+  "dual_selection": {
+    layout: "dual_choice",
+    optionsCount: 4,
+    secondaryOptionsCount: 4,
+    description: "Select one option from each of the two lists to complete the pattern."
+  }
+};
+
+// Brain training sub-topic layouts
+export const brainTrainingLayouts: Record<string, AnswerLayoutConfig> = {
+  "memory_exercises": {
+    layout: "multiple_choice",
+    optionsCount: 4,
+    description: "Test your memory by recalling information."
+  },
+  "logic_puzzles": {
+    layout: "text",
+    description: "Solve logical problems and provide the answer."
+  },
+  "math_problems": {
+    layout: "text",
+    description: "Solve mathematical problems and provide the numerical answer."
+  },
+  "pattern_completion": {
+    layout: "dual_choice",
+    optionsCount: 3,
+    secondaryOptionsCount: 3,
+    description: "Select one item from each list to complete the pattern correctly."
+  }
+};
+
 // Export a function to get the answer layout for a specific sub-topic
 export const getSubTopicLayout = (
   subTopicId: string, 
@@ -83,14 +132,18 @@ export const getSubTopicLayout = (
     return null;
   }
   
-  // Handle verbal reasoning sub-topics
+  // Convert the name to lowercase and replace spaces with underscores for lookup
+  const normalizedName = subTopic.name.toLowerCase().replace(/\s+/g, '_');
+  
+  // Handle layouts based on category
   if (category === "verbal") {
-    // Convert the name to lowercase and replace spaces with underscores for lookup
-    const normalizedName = subTopic.name.toLowerCase().replace(/\s+/g, '_');
     return verbalReasoningLayouts[normalizedName] || null;
+  } else if (category === "non_verbal") {
+    return nonVerbalReasoningLayouts[normalizedName] || null;
+  } else if (category === "brain_training") {
+    return brainTrainingLayouts[normalizedName] || null;
   }
   
-  // For other categories, return null for now
   return null;
 };
 
@@ -112,6 +165,16 @@ export const generateContentStructure = (layoutConfig: AnswerLayoutConfig | null
         question: "",
         options: Array(layoutConfig.optionsCount || 4).fill(""),
         correctAnswer: "",
+        explanation: ""
+      };
+    
+    case "dual_choice":
+      return {
+        question: "",
+        primaryOptions: Array(layoutConfig.optionsCount || 4).fill(""),
+        secondaryOptions: Array(layoutConfig.secondaryOptionsCount || 4).fill(""),
+        correctPrimaryAnswer: "",
+        correctSecondaryAnswer: "",
         explanation: ""
       };
     

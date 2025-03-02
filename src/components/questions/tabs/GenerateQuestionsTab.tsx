@@ -74,7 +74,12 @@ export const GenerateQuestionsTab = ({
             <div className="p-3 bg-muted/50 rounded-md">
               <h4 className="text-sm font-medium mb-1">Answer Format: {answerLayout.layout}</h4>
               <p className="text-sm text-muted-foreground">{answerLayout.description}</p>
-              {answerLayout.optionsCount && (
+              {answerLayout.layout === "dual_choice" ? (
+                <div className="mt-1 space-y-1">
+                  <p className="text-xs text-muted-foreground">Primary Options: {answerLayout.optionsCount}</p>
+                  <p className="text-xs text-muted-foreground">Secondary Options: {answerLayout.secondaryOptionsCount}</p>
+                </div>
+              ) : answerLayout.optionsCount && (
                 <p className="text-xs text-muted-foreground mt-1">Options: {answerLayout.optionsCount}</p>
               )}
             </div>

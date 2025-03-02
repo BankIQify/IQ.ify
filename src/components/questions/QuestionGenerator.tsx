@@ -30,7 +30,15 @@ export const QuestionGenerator = ({ subTopicId, category, answerLayout }: Questi
     // Include the answer layout in the custom prompt if available
     let updatedPrompt = customPrompt;
     if (answerLayout) {
-      const layoutInfo = `Answer format: ${answerLayout.layout}. ${answerLayout.description}`;
+      let layoutInfo = `Answer format: ${answerLayout.layout}. ${answerLayout.description}`;
+      
+      // Add more specific instructions for dual choice format
+      if (answerLayout.layout === "dual_choice") {
+        layoutInfo += ` Include ${answerLayout.optionsCount} options in the first list and ${answerLayout.secondaryOptionsCount} options in the second list. The response format should include 'primaryOptions', 'secondaryOptions', 'correctPrimaryAnswer', and 'correctSecondaryAnswer' fields.`;
+      } else if (answerLayout.optionsCount) {
+        layoutInfo += ` Include ${answerLayout.optionsCount} options.`;
+      }
+      
       updatedPrompt = customPrompt ? `${customPrompt}\n\n${layoutInfo}` : layoutInfo;
     }
     
