@@ -5,6 +5,7 @@ export type QuestionContent = {
   correctAnswer?: string;
   explanation: string;
   imageUrl?: string;
+  answerImageUrl?: string;
   // Dual choice properties
   primaryOptions?: string[];
   secondaryOptions?: string[];
@@ -22,5 +23,5 @@ export type Question = {
   };
 };
 
-// Add this to ensure consistent question types
+// Updated to ensure it matches what's expected in Supabase
 export type QuestionType = 'multiple_choice' | 'text' | 'image' | 'dual_choice';

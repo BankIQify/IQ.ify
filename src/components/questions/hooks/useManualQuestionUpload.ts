@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import type { QuestionType } from "../ManualQuestionUpload";
+import type { QuestionType } from "@/types/questions";
 import { useOptionsHandlers } from "./useOptionsHandlers";
 import { useQuestionValidation } from "./useQuestionValidation";
 import { useQuestionUpload } from "./useQuestionUpload";

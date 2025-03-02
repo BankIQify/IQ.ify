@@ -70,6 +70,8 @@ export const useQuestionUpload = (
 
       if (explanationError) throw explanationError;
 
+      // Cast the questionType to the expected types in Supabase
+      // This ensures compatibility with the database schema
       const { error: insertError } = await supabase
         .from('questions')
         .insert({

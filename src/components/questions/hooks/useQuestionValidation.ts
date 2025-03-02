@@ -1,6 +1,6 @@
 
 import { toast } from "@/hooks/use-toast";
-import type { QuestionType } from "../ManualQuestionUpload";
+import type { QuestionType } from "@/types/questions";
 
 export const useQuestionValidation = () => {
   const validateQuestionData = (
