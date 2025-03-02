@@ -52,7 +52,9 @@ export const useQuestionData = (category: QuestionCategory, subTopicId: string) 
         .select(`
           id,
           content,
+          question_type,
           sub_topics (
+            id,
             name
           )
         `)
@@ -68,6 +70,7 @@ export const useQuestionData = (category: QuestionCategory, subTopicId: string) 
       return data.map(q => ({
         id: q.id,
         content: q.content as Question['content'],
+        question_type: q.question_type,
         sub_topics: q.sub_topics
       }));
     },

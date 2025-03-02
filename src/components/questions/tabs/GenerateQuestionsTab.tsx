@@ -6,6 +6,7 @@ import { QuestionGenerator } from "@/components/questions/QuestionGenerator";
 import { QuestionsList } from "@/components/questions/QuestionsList";
 import { useQuestionData } from "@/hooks/useQuestionData";
 import type { QuestionCategory } from "@/types/questions";
+import { getSubTopicLayout } from "@/components/questions/utils/subTopicAnswerLayouts";
 
 interface GenerateQuestionsTabProps {
   category: QuestionCategory;
@@ -21,6 +22,9 @@ export const GenerateQuestionsTab = ({
   onSubTopicChange
 }: GenerateQuestionsTabProps) => {
   const { subTopics, questions, isLoading, isLoadingSubTopics } = useQuestionData(category, subTopicId);
+  
+  // Get the answer layout for the selected sub-topic
+  const answerLayout = getSubTopicLayout(subTopicId, subTopics || [], category);
 
   return (
     <>
@@ -66,9 +70,20 @@ export const GenerateQuestionsTab = ({
             </Select>
           </div>
 
+          {answerLayout && (
+            <div className="p-3 bg-muted/50 rounded-md">
+              <h4 className="text-sm font-medium mb-1">Answer Format: {answerLayout.layout}</h4>
+              <p className="text-sm text-muted-foreground">{answerLayout.description}</p>
+              {answerLayout.optionsCount && (
+                <p className="text-xs text-muted-foreground mt-1">Options: {answerLayout.optionsCount}</p>
+              )}
+            </div>
+          )}
+
           <QuestionGenerator 
             subTopicId={subTopicId} 
             category={category}
+            answerLayout={answerLayout}
           />
         </div>
       </Card>
