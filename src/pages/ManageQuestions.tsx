@@ -13,6 +13,7 @@ import { CategoriesTable } from "@/components/questions/sections/CategoriesTable
 import { GamePuzzlesManager } from "@/components/puzzles/GamePuzzlesManager";
 import type { QuestionCategory } from "@/types/questions";
 import { supabase } from "@/integrations/supabase/client";
+import { WebhookManagement } from "@/components/webhooks/WebhookManagement";
 
 const ManageQuestions = () => {
   const { user, isAdmin } = useAuth();
@@ -71,7 +72,7 @@ const ManageQuestions = () => {
       <h1 className="section-title">Question Management</h1>
 
       <Tabs defaultValue="generate" className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="generate" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Generate Questions
           </TabsTrigger>
@@ -92,6 +93,9 @@ const ManageQuestions = () => {
           </TabsTrigger>
           <TabsTrigger value="summary" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Games Summary
+          </TabsTrigger>
+          <TabsTrigger value="webhooks" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            AI Webhooks
           </TabsTrigger>
         </TabsList>
 
@@ -126,6 +130,10 @@ const ManageQuestions = () => {
 
         <TabsContent value="summary">
           <CategoriesTable sections={sections} />
+        </TabsContent>
+
+        <TabsContent value="webhooks">
+          <WebhookManagement />
         </TabsContent>
       </Tabs>
     </div>
