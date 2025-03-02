@@ -35,20 +35,66 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                   className="max-w-full h-auto rounded-lg"
                 />
               )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {content.options.map((option: string, i: number) => (
-                  <div
-                    key={i}
-                    className={`p-3 rounded-lg border ${
-                      option === content.correctAnswer
-                        ? "border-green-500 bg-green-50"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    {option}
+              
+              {/* Standard multiple choice options */}
+              {content.options && content.options.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {content.options.map((option: string, i: number) => (
+                    <div
+                      key={i}
+                      className={`p-3 rounded-lg border ${
+                        option === content.correctAnswer
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      {option}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Dual choice options */}
+              {content.primaryOptions && content.secondaryOptions && (
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium mb-2">Primary Options:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {content.primaryOptions.map((option: string, i: number) => (
+                        <div
+                          key={i}
+                          className={`p-3 rounded-lg border ${
+                            option === content.correctPrimaryAnswer
+                              ? "border-green-500 bg-green-50"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                ))}
-              </div>
+                  
+                  <div>
+                    <h4 className="font-medium mb-2">Secondary Options:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {content.secondaryOptions.map((option: string, i: number) => (
+                        <div
+                          key={i}
+                          className={`p-3 rounded-lg border ${
+                            option === content.correctSecondaryAnswer
+                              ? "border-green-500 bg-green-50"
+                              : "border-gray-200"
+                          }`}
+                        >
+                          {option}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-medium mb-2">Explanation:</p>
                 <p>{content.explanation}</p>

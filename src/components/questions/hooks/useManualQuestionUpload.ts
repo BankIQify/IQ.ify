@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,11 +13,28 @@ export const useManualQuestionUpload = (subTopicId: string) => {
   const [correctAnswerIndex, setCorrectAnswerIndex] = useState(0);
   const [correctTextAnswer, setCorrectTextAnswer] = useState("");
   const [isProcessingManual, setIsProcessingManual] = useState(false);
+  
+  const [primaryOptions, setPrimaryOptions] = useState<string[]>(["", "", "", ""]);
+  const [secondaryOptions, setSecondaryOptions] = useState<string[]>(["", "", "", ""]);
+  const [correctPrimaryIndex, setCorrectPrimaryIndex] = useState(0);
+  const [correctSecondaryIndex, setCorrectSecondaryIndex] = useState(0);
 
   const handleOptionChange = (index: number, value: string) => {
     const newOptions = [...options];
     newOptions[index] = value;
     setOptions(newOptions);
+  };
+
+  const handlePrimaryOptionChange = (index: number, value: string) => {
+    const newOptions = [...primaryOptions];
+    newOptions[index] = value;
+    setPrimaryOptions(newOptions);
+  };
+
+  const handleSecondaryOptionChange = (index: number, value: string) => {
+    const newOptions = [...secondaryOptions];
+    newOptions[index] = value;
+    setSecondaryOptions(newOptions);
   };
 
   const validateQuestionData = (): boolean => {
@@ -40,11 +56,20 @@ export const useManualQuestionUpload = (subTopicId: string) => {
       return false;
     }
 
-    // Validation based on question type
     if (questionType === "multiple_choice" && options.some(opt => !opt.trim())) {
       toast({
         title: "Error",
         description: "Please fill in all options for multiple choice question",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (questionType === "dual_choice" && 
+        (primaryOptions.some(opt => !opt.trim()) || secondaryOptions.some(opt => !opt.trim()))) {
+      toast({
+        title: "Error",
+        description: "Please fill in all options for both lists in dual choice question",
         variant: "destructive"
       });
       return false;
@@ -78,6 +103,10 @@ export const useManualQuestionUpload = (subTopicId: string) => {
     setOptions(["", "", "", ""]);
     setCorrectAnswerIndex(0);
     setCorrectTextAnswer("");
+    setPrimaryOptions(["", "", "", ""]);
+    setSecondaryOptions(["", "", "", ""]);
+    setCorrectPrimaryIndex(0);
+    setCorrectSecondaryIndex(0);
   };
 
   const handleManualUpload = async () => {
@@ -97,13 +126,16 @@ export const useManualQuestionUpload = (subTopicId: string) => {
         answerImageUrl = await uploadQuestionImage(answerImage, 'answer');
       }
 
-      // Prepare question content based on type
       const questionContent: {
         question: string;
         imageUrl?: string;
         options?: string[];
         correctAnswer?: string;
         answerImageUrl?: string;
+        primaryOptions?: string[];
+        secondaryOptions?: string[];
+        correctPrimaryAnswer?: string;
+        correctSecondaryAnswer?: string;
       } = {
         question: manualQuestion,
         imageUrl: questionImageUrl,
@@ -112,13 +144,17 @@ export const useManualQuestionUpload = (subTopicId: string) => {
       if (questionType === "multiple_choice") {
         questionContent.options = options;
         questionContent.correctAnswer = options[correctAnswerIndex];
+      } else if (questionType === "dual_choice") {
+        questionContent.primaryOptions = primaryOptions;
+        questionContent.secondaryOptions = secondaryOptions;
+        questionContent.correctPrimaryAnswer = primaryOptions[correctPrimaryIndex];
+        questionContent.correctSecondaryAnswer = secondaryOptions[correctSecondaryIndex];
       } else if (questionType === "text") {
         questionContent.correctAnswer = correctTextAnswer;
       } else if (questionType === "image") {
         questionContent.answerImageUrl = answerImageUrl;
       }
 
-      // Get AI-generated explanation
       const { data: explanationData, error: explanationError } = await supabase.functions.invoke('generate-explanation', {
         body: {
           ...questionContent,
@@ -147,7 +183,6 @@ export const useManualQuestionUpload = (subTopicId: string) => {
         description: "Question uploaded successfully with AI-generated explanation.",
       });
 
-      // Reset form
       resetForm();
     } catch (error) {
       console.error('Error uploading question:', error);
@@ -170,6 +205,14 @@ export const useManualQuestionUpload = (subTopicId: string) => {
     correctAnswerIndex,
     correctTextAnswer,
     isProcessingManual,
+    primaryOptions,
+    secondaryOptions,
+    correctPrimaryIndex,
+    correctSecondaryIndex,
+    handlePrimaryOptionChange,
+    handleSecondaryOptionChange,
+    setCorrectPrimaryIndex,
+    setCorrectSecondaryIndex,
     setQuestionType,
     setManualQuestion,
     setQuestionImage,

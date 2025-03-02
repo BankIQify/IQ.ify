@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -7,6 +6,7 @@ import { QuestionTypeSelector } from "./upload/QuestionTypeSelector";
 import { QuestionText } from "./upload/QuestionText";
 import { ImageUpload } from "./upload/ImageUpload";
 import { MultipleChoiceOptions } from "./upload/MultipleChoiceOptions";
+import { DualChoiceOptions } from "./upload/DualChoiceOptions";
 import { TextAnswer } from "./upload/TextAnswer";
 import { useManualQuestionUpload } from "./hooks/useManualQuestionUpload";
 import { useQuestionData } from "@/hooks/useQuestionData";
@@ -30,6 +30,14 @@ export const ManualQuestionUpload = () => {
     correctAnswerIndex,
     correctTextAnswer,
     isProcessingManual,
+    primaryOptions,
+    secondaryOptions,
+    correctPrimaryIndex,
+    correctSecondaryIndex,
+    handlePrimaryOptionChange,
+    handleSecondaryOptionChange,
+    setCorrectPrimaryIndex,
+    setCorrectSecondaryIndex,
     setQuestionType,
     setManualQuestion,
     setQuestionImage,
@@ -107,6 +115,19 @@ export const ManualQuestionUpload = () => {
           correctAnswerIndex={correctAnswerIndex}
           onOptionChange={handleOptionChange}
           onCorrectAnswerChange={setCorrectAnswerIndex}
+        />
+      )}
+
+      {questionType === "dual_choice" && (
+        <DualChoiceOptions
+          primaryOptions={primaryOptions}
+          secondaryOptions={secondaryOptions}
+          correctPrimaryIndex={correctPrimaryIndex}
+          correctSecondaryIndex={correctSecondaryIndex}
+          onPrimaryOptionChange={handlePrimaryOptionChange}
+          onSecondaryOptionChange={handleSecondaryOptionChange}
+          onCorrectPrimaryChange={setCorrectPrimaryIndex}
+          onCorrectSecondaryChange={setCorrectSecondaryIndex}
         />
       )}
 

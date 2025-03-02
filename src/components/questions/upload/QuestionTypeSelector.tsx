@@ -22,6 +22,7 @@ export const QuestionTypeSelector = ({ value, onChange }: QuestionTypeSelectorPr
           <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
           <SelectItem value="text">Text</SelectItem>
           <SelectItem value="image">Image</SelectItem>
+          <SelectItem value="dual_choice">Dual Choice</SelectItem>
         </SelectContent>
       </Select>
     </div>
