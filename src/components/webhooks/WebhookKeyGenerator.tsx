@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +15,6 @@ export const WebhookKeyGenerator = () => {
   const [webhookUrl, setWebhookUrl] = useState("");
   const { toast } = useToast();
 
-  // Get webhook URL based on current domain
   useEffect(() => {
     const baseUrl = window.location.origin;
     setWebhookUrl(`${baseUrl}/.netlify/functions/webhook-processor`);
@@ -56,13 +54,28 @@ export const WebhookKeyGenerator = () => {
     }
   };
 
-  const copyToClipboard = (text: string, type: "key" | "url") => {
+  const copyToClipboard = (text: string, type: "key" | "url" | "json") => {
     navigator.clipboard.writeText(text);
     toast({
       title: "Copied!",
       description: `The webhook ${type} has been copied to your clipboard.`,
     });
   };
+
+  const sampleJsonPayload = {
+    event_type: "question_generated",
+    sub_topic_id: "uuid",
+    questions: [
+      {
+        question: "What is the capital of France?",
+        explanation: "Paris is the capital and most populous city of France.",
+        options: ["Berlin", "Madrid", "Paris", "Rome"],
+        correctAnswer: "Paris"
+      }
+    ]
+  };
+
+  const formattedJson = JSON.stringify(sampleJsonPayload, null, 2);
 
   return (
     <Card className="w-full max-w-xl mx-auto">
@@ -122,8 +135,16 @@ export const WebhookKeyGenerator = () => {
             <p>curl -X POST {webhookUrl}</p>
             <p>-H "Content-Type: application/json"</p>
             <p>-H "x-webhook-key: YOUR_KEY_HERE"</p>
-            <p>-d '&#123; "event_type": "question_generated", "sub_topic_id": "uuid", "questions": [...] &#125;'</p>
+            <p>-d '{formattedJson}'</p>
           </div>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="mt-2"
+            onClick={() => copyToClipboard(formattedJson, "json")}
+          >
+            <Clipboard className="h-4 w-4 mr-2" /> Copy JSON Example
+          </Button>
         </div>
       </CardContent>
       <CardFooter>
