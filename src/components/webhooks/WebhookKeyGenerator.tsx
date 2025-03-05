@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ export const WebhookKeyGenerator = () => {
   const { toast } = useToast();
 
   // Get webhook URL based on current domain
-  useState(() => {
+  useEffect(() => {
     const baseUrl = window.location.origin;
     setWebhookUrl(`${baseUrl}/.netlify/functions/webhook-processor`);
   }, []);

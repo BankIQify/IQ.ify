@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -188,7 +187,7 @@ async function handleQuestionGenerated(supabase, payload) {
 // Helper function to determine question type based on content
 function determineQuestionType(questionContent) {
   if (questionContent.primaryOptions && questionContent.secondaryOptions) {
-    return 'dual_choice';
+    return 'multiple_choice';
   } else if (questionContent.options && Array.isArray(questionContent.options)) {
     return 'multiple_choice';
   } else if (questionContent.imageUrl) {

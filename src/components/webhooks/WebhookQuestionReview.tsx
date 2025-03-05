@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ export const WebhookQuestionReview = () => {
   const [editedQuestions, setEditedQuestions] = useState<any[]>([]);
   const { toast } = useToast();
 
-  // Fetch webhook events that contain questions
   useEffect(() => {
     const fetchWebhookEvents = async () => {
       setIsLoading(true);
@@ -46,14 +44,12 @@ export const WebhookQuestionReview = () => {
 
     fetchWebhookEvents();
     
-    // Refresh data every 30 seconds
     const interval = setInterval(fetchWebhookEvents, 30000);
     return () => clearInterval(interval);
   }, [toast]);
 
   const handleSelectEvent = (event: any) => {
     setSelectedEvent(event);
-    // Initialize edited questions with the original payload
     if (event.payload && event.payload.questions) {
       setEditedQuestions(event.payload.questions);
     }
@@ -73,48 +69,44 @@ export const WebhookQuestionReview = () => {
     
     setIsLoading(true);
     try {
-      // Get the sub_topic_id from the webhook payload
       const subTopicId = selectedEvent.payload.sub_topic_id;
       
       if (!subTopicId) {
         throw new Error("No sub-topic ID provided in webhook payload");
       }
       
-      // Insert each question as a separate record
       for (const question of editedQuestions) {
         const questionContent: QuestionContent = {
           question: question.question,
           explanation: question.explanation || "No explanation provided",
         };
         
-        // Handle different question types
         if (question.options && question.correctAnswer) {
-          // Multiple choice question
           questionContent.options = question.options;
           questionContent.correctAnswer = question.correctAnswer;
         } else if (question.primaryOptions && question.secondaryOptions) {
-          // Dual choice question
           questionContent.primaryOptions = question.primaryOptions;
           questionContent.secondaryOptions = question.secondaryOptions;
           questionContent.correctPrimaryAnswer = question.correctPrimaryAnswer;
           questionContent.correctSecondaryAnswer = question.correctSecondaryAnswer;
         }
         
-        // Insert the question
+        const questionType = question.options ? "multiple_choice" : 
+                            (question.imageUrl ? "image" : "text");
+        
         const { error: insertError } = await supabase
           .from("questions")
           .insert({
             content: questionContent,
             sub_topic_id: subTopicId,
             ai_generated: true,
-            question_type: question.options ? "multiple_choice" : "dual_choice",
+            question_type: questionType,
             generation_prompt: selectedEvent.payload.prompt || null,
           });
           
         if (insertError) throw insertError;
       }
       
-      // Mark the webhook event as processed
       const { error: updateError } = await supabase
         .from("webhook_events")
         .update({ 
@@ -125,17 +117,14 @@ export const WebhookQuestionReview = () => {
         
       if (updateError) throw updateError;
       
-      // Success message and refresh
       toast({
         title: "Success",
         description: `${editedQuestions.length} questions saved successfully`,
       });
       
-      // Reset selection and fetch updated list
       setSelectedEvent(null);
       setEditedQuestions([]);
       
-      // Refresh the webhook events list
       const { data: updatedEvents, error } = await supabase
         .from("webhook_events")
         .select("*")
@@ -163,7 +152,6 @@ export const WebhookQuestionReview = () => {
     
     setIsLoading(true);
     try {
-      // Mark the webhook event as processed without saving questions
       const { error } = await supabase
         .from("webhook_events")
         .update({ 
@@ -179,11 +167,9 @@ export const WebhookQuestionReview = () => {
         description: "The webhook event has been marked as processed",
       });
       
-      // Reset selection and fetch updated list
       setSelectedEvent(null);
       setEditedQuestions([]);
       
-      // Refresh the webhook events list
       const { data: updatedEvents, error: fetchError } = await supabase
         .from("webhook_events")
         .select("*")
@@ -206,12 +192,10 @@ export const WebhookQuestionReview = () => {
     }
   };
 
-  // Format the date for display
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
 
-  // Preview mode renders the questions as they would appear in the app
   const getPreviewQuestions = () => {
     if (!selectedEvent || !editedQuestions.length) return [];
     
@@ -236,7 +220,6 @@ export const WebhookQuestionReview = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left sidebar - list of events */}
         <div className="md:col-span-1 space-y-4">
           <Card>
             <CardHeader>
@@ -282,7 +265,6 @@ export const WebhookQuestionReview = () => {
           </Card>
         </div>
 
-        {/* Right side - edit interface or empty state */}
         <div className="md:col-span-2">
           {selectedEvent ? (
             <div className="space-y-4">
@@ -332,7 +314,6 @@ export const WebhookQuestionReview = () => {
                     </div>
                   </div>
 
-                  {/* Question editor */}
                   <div className="space-y-6">
                     {editedQuestions.map((question, index) => (
                       <Card key={index} className="p-4">
@@ -348,7 +329,6 @@ export const WebhookQuestionReview = () => {
                             />
                           </div>
 
-                          {/* For multiple choice questions */}
                           {question.options && (
                             <div>
                               <Label>Options</Label>
@@ -361,7 +341,6 @@ export const WebhookQuestionReview = () => {
                                         const newOptions = [...question.options];
                                         newOptions[optionIndex] = e.target.value;
                                         
-                                        // Update the correct answer if this option was the correct one
                                         let newCorrectAnswer = question.correctAnswer;
                                         if (question.correctAnswer === question.options[optionIndex]) {
                                           newCorrectAnswer = e.target.value;
@@ -393,7 +372,6 @@ export const WebhookQuestionReview = () => {
                             </div>
                           )}
 
-                          {/* For dual choice questions */}
                           {question.primaryOptions && question.secondaryOptions && (
                             <div className="space-y-4">
                               <div>
@@ -407,7 +385,6 @@ export const WebhookQuestionReview = () => {
                                           const newOptions = [...question.primaryOptions];
                                           newOptions[optionIndex] = e.target.value;
                                           
-                                          // Update correct primary answer if needed
                                           let newCorrectPrimary = question.correctPrimaryAnswer;
                                           if (question.correctPrimaryAnswer === question.primaryOptions[optionIndex]) {
                                             newCorrectPrimary = e.target.value;
@@ -449,7 +426,6 @@ export const WebhookQuestionReview = () => {
                                           const newOptions = [...question.secondaryOptions];
                                           newOptions[optionIndex] = e.target.value;
                                           
-                                          // Update correct secondary answer if needed
                                           let newCorrectSecondary = question.correctSecondaryAnswer;
                                           if (question.correctSecondaryAnswer === question.secondaryOptions[optionIndex]) {
                                             newCorrectSecondary = e.target.value;
@@ -499,7 +475,6 @@ export const WebhookQuestionReview = () => {
                 </CardContent>
               </Card>
 
-              {/* Preview section */}
               <Card>
                 <CardHeader>
                   <CardTitle>Preview</CardTitle>
