@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { WebhookKeyGenerator } from "./WebhookKeyGenerator";
+import { WebhookQuestionReview } from "./WebhookQuestionReview";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,31 @@ import { Button } from "@/components/ui/button";
 
 export const WebhookManagement = () => {
   const [testingConnection, setTestingConnection] = useState(false);
+  const [pendingQuestions, setPendingQuestions] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for pending questions
+    const fetchPendingQuestions = async () => {
+      try {
+        const { count, error } = await supabase
+          .from("webhook_events")
+          .select("*", { count: 'exact', head: true })
+          .eq("event_type", "question_generated")
+          .eq("processed", false);
+        
+        if (error) throw error;
+        setPendingQuestions(count || 0);
+      } catch (error) {
+        console.error("Error checking pending questions:", error);
+      }
+    };
+
+    fetchPendingQuestions();
+    // Set up an interval to check every 30 seconds
+    const interval = setInterval(fetchPendingQuestions, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const testWebhookFunction = async () => {
     setTestingConnection(true);
@@ -48,13 +73,25 @@ export const WebhookManagement = () => {
       </div>
       
       <Tabs defaultValue="generate" className="w-full">
-        <TabsList className="grid grid-cols-2 w-full max-w-md">
+        <TabsList className="grid grid-cols-3 w-full max-w-md">
           <TabsTrigger value="generate">Generate Key</TabsTrigger>
+          <TabsTrigger value="review">
+            Review Questions
+            {pendingQuestions > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-medium bg-primary text-primary-foreground rounded-full">
+                {pendingQuestions}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="guide">Integration Guide</TabsTrigger>
         </TabsList>
         
         <TabsContent value="generate">
           <WebhookKeyGenerator />
+        </TabsContent>
+        
+        <TabsContent value="review">
+          <WebhookQuestionReview />
         </TabsContent>
         
         <TabsContent value="guide">
