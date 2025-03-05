@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { WebhookEvent, QuestionItem } from "./types";
+import { WebhookEvent, QuestionItem, WebhookEventPayload } from "./types";
 import type { QuestionType } from "@/types/questions";
 
 export const useWebhookQuestions = () => {
@@ -24,7 +24,14 @@ export const useWebhookQuestions = () => {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setWebhookEvents(data || []);
+        
+        // Type cast the data to ensure it matches our WebhookEvent type
+        const typedEvents: WebhookEvent[] = data?.map(event => ({
+          ...event,
+          payload: event.payload as unknown as WebhookEventPayload
+        })) || [];
+        
+        setWebhookEvents(typedEvents);
       } catch (error) {
         console.error("Error fetching webhook events:", error);
         toast({
@@ -68,26 +75,35 @@ export const useWebhookQuestions = () => {
       }
       
       for (const question of editedQuestions) {
-        const questionContent = {
+        // Base question content that all question types have
+        const questionContent: any = {
           question: question.question,
           explanation: question.explanation || "No explanation provided",
         };
         
-        if (question.options && question.correctAnswer) {
+        // Add type-specific properties
+        if ('options' in question && question.options && 'correctAnswer' in question && question.correctAnswer) {
           questionContent.options = question.options;
           questionContent.correctAnswer = question.correctAnswer;
-        } else if (question.primaryOptions && question.secondaryOptions) {
+        } else if ('primaryOptions' in question && question.primaryOptions && 
+                  'secondaryOptions' in question && question.secondaryOptions &&
+                  'correctPrimaryAnswer' in question && question.correctPrimaryAnswer &&
+                  'correctSecondaryAnswer' in question && question.correctSecondaryAnswer) {
           questionContent.primaryOptions = question.primaryOptions;
           questionContent.secondaryOptions = question.secondaryOptions;
           questionContent.correctPrimaryAnswer = question.correctPrimaryAnswer;
           questionContent.correctSecondaryAnswer = question.correctSecondaryAnswer;
         }
         
-        let questionType: QuestionType = question.options ? "multiple_choice" : 
-                          (question.imageUrl ? "image" : "text");
-                          
-        // Map dual_choice to multiple_choice for database compatibility
-        if (question.primaryOptions && question.secondaryOptions) {
+        // Determine question type
+        let questionType: QuestionType = 'text';
+        if ('options' in question && question.options) {
+          questionType = "multiple_choice";
+        } else if ('imageUrl' in question && question.imageUrl) {
+          questionType = "image";
+        } else if ('primaryOptions' in question && question.primaryOptions && 
+                   'secondaryOptions' in question && question.secondaryOptions) {
+          // Map dual_choice to multiple_choice for database compatibility
           questionType = "multiple_choice";
         }
         
@@ -130,7 +146,14 @@ export const useWebhookQuestions = () => {
         .order("created_at", { ascending: false });
         
       if (error) throw error;
-      setWebhookEvents(updatedEvents || []);
+      
+      // Type cast the updated events
+      const typedUpdatedEvents: WebhookEvent[] = updatedEvents?.map(event => ({
+        ...event,
+        payload: event.payload as unknown as WebhookEventPayload
+      })) || [];
+      
+      setWebhookEvents(typedUpdatedEvents);
       
     } catch (error) {
       console.error("Error saving questions:", error);
@@ -175,7 +198,14 @@ export const useWebhookQuestions = () => {
         .order("created_at", { ascending: false });
         
       if (fetchError) throw fetchError;
-      setWebhookEvents(updatedEvents || []);
+      
+      // Type cast the updated events
+      const typedUpdatedEvents: WebhookEvent[] = updatedEvents?.map(event => ({
+        ...event,
+        payload: event.payload as unknown as WebhookEventPayload
+      })) || [];
+      
+      setWebhookEvents(typedUpdatedEvents);
       
     } catch (error) {
       console.error("Error discarding event:", error);
