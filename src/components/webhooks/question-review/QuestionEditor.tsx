@@ -1,5 +1,5 @@
 
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EventDetails } from "./EventDetails";
 import { QuestionEditCard } from "./QuestionEditCard";
@@ -56,7 +56,7 @@ export const QuestionEditor = ({
               key={index}
               question={question}
               index={index}
-              onUpdateQuestion={onUpdateQuestion}
+              onUpdateQuestion={(updatedQuestion) => onUpdateQuestion(index, updatedQuestion)}
             />
           ))}
         </div>

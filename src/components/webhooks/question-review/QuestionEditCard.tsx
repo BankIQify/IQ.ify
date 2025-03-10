@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,16 +11,16 @@ import { QuestionItem } from "./types";
 interface QuestionEditCardProps {
   question: QuestionItem;
   index: number;
-  onQuestionChange: (updatedQuestion: QuestionItem) => void;
+  onUpdateQuestion: (updatedQuestion: QuestionItem) => void;
 }
 
-export const QuestionEditCard = ({ question, index, onQuestionChange }: QuestionEditCardProps) => {
+export const QuestionEditCard = ({ question, index, onUpdateQuestion }: QuestionEditCardProps) => {
   const [editedQuestion, setEditedQuestion] = useState<QuestionItem>(question);
 
   const handleChange = (field: keyof QuestionItem, value: string) => {
     setEditedQuestion((prev) => {
       const updated = { ...prev, [field]: value };
-      onQuestionChange(updated);
+      onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -33,7 +33,7 @@ export const QuestionEditCard = ({ question, index, onQuestionChange }: Question
     
     setEditedQuestion((prev) => {
       const updated = { ...prev, options: newOptions };
-      onQuestionChange(updated);
+      onUpdateQuestion(updated);
       return updated;
     });
   };
