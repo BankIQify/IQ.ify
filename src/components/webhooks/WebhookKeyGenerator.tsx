@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,7 +71,8 @@ export const WebhookKeyGenerator = () => {
         question: "What is the capital of France?",
         explanation: "Paris is the capital and most populous city of France.",
         options: ["Berlin", "Madrid", "Paris", "Rome"],
-        correctAnswer: "Paris"
+        correctAnswer: "Paris",
+        difficulty: "medium"
       }
     ]
   };

@@ -68,6 +68,7 @@ export const saveQuestion = async (
       ai_generated: true,
       question_type: questionType,
       generation_prompt: generationPrompt,
+      difficulty: question.difficulty || 'medium', // Add difficulty with default
     });
     
   if (error) throw error;

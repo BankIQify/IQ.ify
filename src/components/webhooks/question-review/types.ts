@@ -8,6 +8,7 @@ export interface QuestionItem {
   secondaryOptions?: string[];
   correctPrimaryAnswer?: string;
   correctSecondaryAnswer?: string;
+  difficulty?: string;
   [key: string]: any;
 }
 

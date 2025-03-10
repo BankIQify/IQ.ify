@@ -392,6 +392,7 @@ export type Database = {
           ai_generated: boolean | null
           content: Json
           created_at: string | null
+          difficulty: string | null
           generation_prompt: string | null
           id: string
           question_type: Database["public"]["Enums"]["question_type"]
@@ -402,6 +403,7 @@ export type Database = {
           ai_generated?: boolean | null
           content: Json
           created_at?: string | null
+          difficulty?: string | null
           generation_prompt?: string | null
           id?: string
           question_type?: Database["public"]["Enums"]["question_type"]
@@ -412,6 +414,7 @@ export type Database = {
           ai_generated?: boolean | null
           content?: Json
           created_at?: string | null
+          difficulty?: string | null
           generation_prompt?: string | null
           id?: string
           question_type?: Database["public"]["Enums"]["question_type"]

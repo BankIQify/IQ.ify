@@ -1,169 +1,121 @@
 
 import { useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionItem } from "./types";
 
 interface QuestionEditCardProps {
   question: QuestionItem;
   index: number;
-  onUpdateQuestion: (index: number, updatedQuestion: QuestionItem) => void;
+  onQuestionChange: (updatedQuestion: QuestionItem) => void;
 }
 
-export const QuestionEditCard = ({ 
-  question, 
-  index, 
-  onUpdateQuestion 
-}: QuestionEditCardProps) => {
-  const handleTextChange = (field: string, value: string) => {
-    onUpdateQuestion(index, { ...question, [field]: value });
-  };
+export const QuestionEditCard = ({ question, index, onQuestionChange }: QuestionEditCardProps) => {
+  const [editedQuestion, setEditedQuestion] = useState<QuestionItem>(question);
 
-  const handleOptionChange = (optionIndex: number, value: string, optionsField: string) => {
-    const options = [...(question[optionsField] as string[])];
-    options[optionIndex] = value;
-    
-    let correctAnswerField: string;
-    let correctAnswer: string;
-    
-    if (optionsField === 'options') {
-      correctAnswerField = 'correctAnswer';
-      correctAnswer = question.correctAnswer as string;
-      
-      // If the changed option was the correct answer, update the correctAnswer as well
-      if (question.options && question.correctAnswer === question.options[optionIndex]) {
-        correctAnswer = value;
-      }
-    } else if (optionsField === 'primaryOptions') {
-      correctAnswerField = 'correctPrimaryAnswer';
-      correctAnswer = question.correctPrimaryAnswer as string;
-      
-      if (question.primaryOptions && question.correctPrimaryAnswer === question.primaryOptions[optionIndex]) {
-        correctAnswer = value;
-      }
-    } else { // secondaryOptions
-      correctAnswerField = 'correctSecondaryAnswer';
-      correctAnswer = question.correctSecondaryAnswer as string;
-      
-      if (question.secondaryOptions && question.correctSecondaryAnswer === question.secondaryOptions[optionIndex]) {
-        correctAnswer = value;
-      }
-    }
-    
-    onUpdateQuestion(index, { 
-      ...question, 
-      [optionsField]: options,
-      [correctAnswerField]: correctAnswer
+  const handleChange = (field: keyof QuestionItem, value: string) => {
+    setEditedQuestion((prev) => {
+      const updated = { ...prev, [field]: value };
+      onQuestionChange(updated);
+      return updated;
     });
   };
 
-  const handleSetCorrectAnswer = (optionValue: string, correctAnswerField: string) => {
-    onUpdateQuestion(index, { ...question, [correctAnswerField]: optionValue });
+  const handleOptionChange = (optionIndex: number, value: string) => {
+    if (!editedQuestion.options) return;
+    
+    const newOptions = [...editedQuestion.options];
+    newOptions[optionIndex] = value;
+    
+    setEditedQuestion((prev) => {
+      const updated = { ...prev, options: newOptions };
+      onQuestionChange(updated);
+      return updated;
+    });
   };
 
   return (
-    <Card key={index} className="p-4">
-      <div className="space-y-4">
+    <Card className="w-full">
+      <CardContent className="pt-6 space-y-4">
         <div>
-          <Label htmlFor={`question-${index}`}>Question {index + 1}</Label>
+          <Label htmlFor={`question-${index}`}>Question</Label>
           <Textarea
             id={`question-${index}`}
-            value={question.question}
-            onChange={(e) => handleTextChange('question', e.target.value)}
+            value={editedQuestion.question}
+            onChange={(e) => handleChange("question", e.target.value)}
+            rows={2}
             className="mt-1"
-            rows={3}
           />
         </div>
-
-        {question.options && (
-          <div>
-            <Label>Options</Label>
-            <div className="space-y-2 mt-1">
-              {question.options.map((option: string, optionIndex: number) => (
-                <div key={optionIndex} className="flex items-center space-x-2">
-                  <Input
-                    value={option}
-                    onChange={(e) => handleOptionChange(optionIndex, e.target.value, 'options')}
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant={option === question.correctAnswer ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleSetCorrectAnswer(option, 'correctAnswer')}
-                  >
-                    {option === question.correctAnswer ? "Correct" : "Set as correct"}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {question.primaryOptions && question.secondaryOptions && (
-          <div className="space-y-4">
-            <div>
-              <Label>Primary Options</Label>
-              <div className="space-y-2 mt-1">
-                {question.primaryOptions.map((option: string, optionIndex: number) => (
-                  <div key={optionIndex} className="flex items-center space-x-2">
-                    <Input
-                      value={option}
-                      onChange={(e) => handleOptionChange(optionIndex, e.target.value, 'primaryOptions')}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant={option === question.correctPrimaryAnswer ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleSetCorrectAnswer(option, 'correctPrimaryAnswer')}
-                    >
-                      {option === question.correctPrimaryAnswer ? "Correct" : "Set as correct"}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <Label>Secondary Options</Label>
-              <div className="space-y-2 mt-1">
-                {question.secondaryOptions.map((option: string, optionIndex: number) => (
-                  <div key={optionIndex} className="flex items-center space-x-2">
-                    <Input
-                      value={option}
-                      onChange={(e) => handleOptionChange(optionIndex, e.target.value, 'secondaryOptions')}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      variant={option === question.correctSecondaryAnswer ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleSetCorrectAnswer(option, 'correctSecondaryAnswer')}
-                    >
-                      {option === question.correctSecondaryAnswer ? "Correct" : "Set as correct"}
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
+        
         <div>
           <Label htmlFor={`explanation-${index}`}>Explanation</Label>
           <Textarea
             id={`explanation-${index}`}
-            value={question.explanation}
-            onChange={(e) => handleTextChange('explanation', e.target.value)}
-            className="mt-1"
+            value={editedQuestion.explanation}
+            onChange={(e) => handleChange("explanation", e.target.value)}
             rows={3}
+            className="mt-1"
           />
         </div>
-      </div>
+
+        {/* Options for multiple choice */}
+        {editedQuestion.options && (
+          <div className="space-y-2">
+            <Label>Options</Label>
+            {editedQuestion.options.map((option, i) => (
+              <div key={i} className="flex items-center space-x-2">
+                <Input
+                  value={option}
+                  onChange={(e) => handleOptionChange(i, e.target.value)}
+                  className={
+                    option === editedQuestion.correctAnswer
+                      ? "border-green-500"
+                      : ""
+                  }
+                />
+                <Button
+                  type="button"
+                  variant={
+                    option === editedQuestion.correctAnswer
+                      ? "default"
+                      : "outline"
+                  }
+                  onClick={() => handleChange("correctAnswer", option)}
+                  className="whitespace-nowrap"
+                >
+                  {option === editedQuestion.correctAnswer
+                    ? "Correct ✓"
+                    : "Set as Correct"}
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Difficulty selector */}
+        <div>
+          <Label htmlFor={`difficulty-${index}`}>Difficulty</Label>
+          <Select
+            value={editedQuestion.difficulty || "medium"}
+            onValueChange={(value) => handleChange("difficulty", value)}
+          >
+            <SelectTrigger id={`difficulty-${index}`}>
+              <SelectValue placeholder="Select difficulty" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="easy">Easy</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="hard">Hard</SelectItem>
+              <SelectItem value="expert">Expert</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </CardContent>
     </Card>
   );
 };
