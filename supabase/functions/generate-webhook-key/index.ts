@@ -92,7 +92,7 @@ serve(async (req) => {
     }
 
     // Insert the webhook key into the database
-    console.log("Inserting key into database");
+    console.log("Inserting key into database with params:", { keyName, key, userId });
     try {
       const { data, error } = await supabase
         .from('webhook_keys')
@@ -112,7 +112,7 @@ serve(async (req) => {
         );
       }
 
-      console.log("Key created successfully with ID:", data.id);
+      console.log("Key created successfully with ID:", data?.id);
       
       return new Response(
         JSON.stringify({ success: true, key }),
