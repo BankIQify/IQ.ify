@@ -8,30 +8,32 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log("Webhook key generation function started");
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log("Handling CORS preflight request");
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log("Starting webhook key generation function");
-    
-    // Get request body
-    let keyName;
+    // Parse request body
+    let body;
     try {
-      const body = await req.json();
-      keyName = body.keyName;
-      console.log("Request body parsed successfully:", { keyName });
+      body = await req.json();
+      console.log("Request body:", body);
     } catch (e) {
-      console.error("Error parsing request body:", e);
+      console.error("Failed to parse request body:", e);
       return new Response(
         JSON.stringify({ error: 'Invalid request body' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
+    const keyName = body.keyName;
+    
     if (!keyName) {
-      console.log("Error: Missing key name in request");
+      console.error("Missing keyName in request");
       return new Response(
         JSON.stringify({ error: 'Key name is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -42,30 +44,29 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    console.log("Supabase URL available:", !!supabaseUrl);
-    console.log("Supabase key available:", !!supabaseKey);
-    
     if (!supabaseUrl || !supabaseKey) {
       console.error("Missing environment variables:", { 
         hasUrl: !!supabaseUrl, 
         hasKey: !!supabaseKey 
       });
       return new Response(
-        JSON.stringify({ error: 'Server configuration error: Missing environment variables' }),
+        JSON.stringify({ 
+          error: 'Server configuration error: Missing environment variables',
+          details: { hasUrl: !!supabaseUrl, hasKey: !!supabaseKey }
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
-    
-    console.log("Creating Supabase client");
+
+    console.log("Creating Supabase client with URL:", supabaseUrl);
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Generate a random key
-    console.log("Generating random key");
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     const key = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
     
-    console.log("Key generated successfully");
+    console.log("Generated random key");
     
     // Extract user ID from auth header
     const authHeader = req.headers.get('Authorization');
@@ -73,7 +74,6 @@ serve(async (req) => {
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
-      console.log("Attempting to get user from token");
       
       try {
         const { data: { user }, error } = await supabase.auth.getUser(token);
@@ -82,18 +82,67 @@ serve(async (req) => {
           userId = user.id;
           console.log("Authenticated user ID:", userId);
         } else if (error) {
-          console.error("Auth error:", error);
+          console.error("Authentication error:", error);
         }
       } catch (authError) {
         console.error("Error during authentication:", authError);
       }
     } else {
-      console.log("No valid auth header found, proceeding without user authentication");
+      console.log("No valid auth header found");
     }
 
-    // Insert the webhook key into the database
-    console.log("Inserting key into database with params:", { keyName, key, userId });
+    console.log("Checking if webhook_keys table exists");
+    
     try {
+      // First, let's check if the webhook_keys table exists
+      const { error: tableCheckError } = await supabase
+        .from('webhook_keys')
+        .select('id')
+        .limit(1);
+      
+      if (tableCheckError) {
+        console.error("Table check error:", tableCheckError);
+        if (tableCheckError.message.includes("relation") && tableCheckError.message.includes("does not exist")) {
+          // Create the webhook_keys table if it doesn't exist
+          console.log("webhook_keys table does not exist, creating it");
+          
+          const createTableQuery = `
+            CREATE TABLE IF NOT EXISTS public.webhook_keys (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              key_name TEXT NOT NULL,
+              api_key TEXT NOT NULL,
+              created_by UUID,
+              created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+              last_used_at TIMESTAMP WITH TIME ZONE
+            );
+          `;
+          
+          const { error: createTableError } = await supabase.rpc('exec_sql', { query: createTableQuery });
+          
+          if (createTableError) {
+            console.error("Error creating webhook_keys table:", createTableError);
+            return new Response(
+              JSON.stringify({ error: `Failed to set up webhook keys system: ${createTableError.message}` }),
+              { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+          }
+          
+          console.log("Successfully created webhook_keys table");
+        } else {
+          return new Response(
+            JSON.stringify({ error: `Database error: ${tableCheckError.message}` }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
+      
+      // Now proceed with inserting the key
+      console.log("Inserting key into database with params:", { 
+        key_name: keyName, 
+        api_key: key,
+        created_by: userId
+      });
+
       const { data, error } = await supabase
         .from('webhook_keys')
         .insert({

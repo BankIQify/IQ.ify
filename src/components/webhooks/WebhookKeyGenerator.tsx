@@ -38,6 +38,7 @@ export const WebhookKeyGenerator = () => {
     try {
       console.log('Generating webhook key with name:', keyName);
       
+      // Make sure we're sending the correct parameter name (keyName)
       const { data, error } = await supabase.functions.invoke("generate-webhook-key", {
         body: { keyName: keyName.trim() }
       });

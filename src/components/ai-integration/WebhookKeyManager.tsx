@@ -21,6 +21,7 @@ export function WebhookKeyManager() {
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showKey, setShowKey] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerateKey = async () => {
     if (!keyName.trim()) {
@@ -33,25 +34,27 @@ export function WebhookKeyManager() {
     }
 
     setIsLoading(true);
+    setError(null);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-webhook-key', {
-        body: { key_name: keyName.trim() }
+        body: { keyName: keyName.trim() }
       });
 
       if (error) throw error;
 
-      if (data.success && data.key) {
-        setGeneratedKey(data.key.value);
+      if (data?.success && data?.key) {
+        setGeneratedKey(data.key);
         toast({
           title: "Success",
           description: "Webhook key generated successfully",
         });
       } else {
-        throw new Error("Failed to generate key");
+        throw new Error(data?.error || "Failed to generate key");
       }
     } catch (error) {
       console.error("Error generating webhook key:", error);
+      setError(error.message || "Failed to generate webhook key");
       toast({
         title: "Error",
         description: error.message || "Failed to generate webhook key",
@@ -90,6 +93,14 @@ export function WebhookKeyManager() {
       </CardHeader>
       <CardContent>
         <div className="grid w-full items-center gap-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
           <div className="flex flex-col space-y-1.5">
             <Label htmlFor="keyName">Key Name</Label>
             <Input
