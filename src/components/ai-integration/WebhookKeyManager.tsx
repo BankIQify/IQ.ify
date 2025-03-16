@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Copy, AlertCircle } from "lucide-react";
+import { Copy, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export function WebhookKeyManager() {
   const [keyName, setKeyName] = useState("");
@@ -37,9 +37,13 @@ export function WebhookKeyManager() {
     setError(null);
 
     try {
+      console.log('Generating webhook key with name:', keyName);
+      
       const { data, error } = await supabase.functions.invoke('generate-webhook-key', {
         body: { keyName: keyName.trim() }
       });
+      
+      console.log('Response from generate-webhook-key:', { data, error });
 
       if (error) throw error;
 
@@ -49,8 +53,10 @@ export function WebhookKeyManager() {
           title: "Success",
           description: "Webhook key generated successfully",
         });
+      } else if (data?.error) {
+        throw new Error(data.error);
       } else {
-        throw new Error(data?.error || "Failed to generate key");
+        throw new Error("Failed to generate key");
       }
     } catch (error) {
       console.error("Error generating webhook key:", error);
@@ -140,6 +146,7 @@ export function WebhookKeyManager() {
                 className="mt-2"
                 onClick={() => setShowKey(!showKey)}
               >
+                {showKey ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
                 {showKey ? "Hide" : "Show"} Key
               </Button>
             </Alert>

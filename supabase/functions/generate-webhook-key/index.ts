@@ -1,11 +1,8 @@
 
+// Import from the _shared/cors.ts file to maintain consistency
+import { corsHeaders } from "../_shared/cors.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
 
 serve(async (req) => {
   console.log("Webhook key generation function started");
@@ -21,7 +18,7 @@ serve(async (req) => {
     let body;
     try {
       body = await req.json();
-      console.log("Request body:", body);
+      console.log("Request body:", JSON.stringify(body));
     } catch (e) {
       console.error("Failed to parse request body:", e);
       return new Response(
@@ -30,12 +27,13 @@ serve(async (req) => {
       );
     }
     
-    const keyName = body.keyName;
+    // Ensure key name exists and is properly extracted
+    const keyName = body?.keyName;
     
     if (!keyName) {
-      console.error("Missing keyName in request");
+      console.error("Missing keyName in request:", body);
       return new Response(
-        JSON.stringify({ error: 'Key name is required' }),
+        JSON.stringify({ error: 'Key name is required', receivedData: body }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -88,7 +86,7 @@ serve(async (req) => {
         console.error("Error during authentication:", authError);
       }
     } else {
-      console.log("No valid auth header found");
+      console.log("No valid auth header found, continuing without user authentication");
     }
 
     console.log("Checking if webhook_keys table exists");

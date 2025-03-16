@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Clipboard, RefreshCcw, AlertCircle } from "lucide-react";
+import { Clipboard, RefreshCcw, AlertCircle, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const WebhookKeyGenerator = () => {
@@ -15,11 +15,14 @@ export const WebhookKeyGenerator = () => {
   const [webhookKey, setWebhookKey] = useState<string | null>(null);
   const [webhookUrl, setWebhookUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [showKey, setShowKey] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    // Set the webhook URL based on the current environment
     const baseUrl = window.location.origin;
-    setWebhookUrl(`${baseUrl}/.netlify/functions/webhook-processor`);
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://dqaihawavxlacegykwqu.supabase.co";
+    setWebhookUrl(`${supabaseUrl}/functions/v1/webhook-processor`);
   }, []);
 
   const generateKey = async () => {
@@ -38,7 +41,7 @@ export const WebhookKeyGenerator = () => {
     try {
       console.log('Generating webhook key with name:', keyName);
       
-      // Make sure we're sending the correct parameter name (keyName)
+      // Call the function with the correct parameter name
       const { data, error } = await supabase.functions.invoke("generate-webhook-key", {
         body: { keyName: keyName.trim() }
       });
@@ -54,8 +57,12 @@ export const WebhookKeyGenerator = () => {
         throw new Error('No data returned from the server');
       }
       
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
       if (!data.key && !data.success) {
-        throw new Error(data.error || 'Server returned an invalid response');
+        throw new Error('Server returned an invalid response');
       }
       
       setWebhookKey(data.key);
@@ -132,13 +139,25 @@ export const WebhookKeyGenerator = () => {
           <div className="space-y-2">
             <Label>Your Webhook Key</Label>
             <div className="flex items-center space-x-2">
-              <Input value={webhookKey} readOnly className="font-mono text-sm" />
+              <Input 
+                value={webhookKey} 
+                readOnly 
+                className="font-mono text-sm" 
+                type={showKey ? "text" : "password"}
+              />
               <Button 
                 size="icon" 
                 variant="outline" 
                 onClick={() => copyToClipboard(webhookKey, "key")}
               >
                 <Clipboard className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => setShowKey(!showKey)}
+              >
+                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
