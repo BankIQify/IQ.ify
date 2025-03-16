@@ -6,13 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Clipboard, RefreshCcw } from "lucide-react";
+import { Clipboard, RefreshCcw, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const WebhookKeyGenerator = () => {
   const [keyName, setKeyName] = useState("");
   const [generatingKey, setGeneratingKey] = useState(false);
   const [webhookKey, setWebhookKey] = useState<string | null>(null);
   const [webhookUrl, setWebhookUrl] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export const WebhookKeyGenerator = () => {
     }
 
     setGeneratingKey(true);
+    setError(null);
+    
     try {
       console.log('Generating webhook key with name:', keyName);
       
@@ -40,10 +44,17 @@ export const WebhookKeyGenerator = () => {
       
       console.log('Response from generate-webhook-key:', { data, error });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase functions error:", error);
+        throw new Error(error.message || "Failed to connect to the server");
+      }
       
-      if (!data || !data.key) {
-        throw new Error('No key returned from the server');
+      if (!data) {
+        throw new Error('No data returned from the server');
+      }
+      
+      if (!data.key && !data.success) {
+        throw new Error(data.error || 'Server returned an invalid response');
       }
       
       setWebhookKey(data.key);
@@ -53,9 +64,10 @@ export const WebhookKeyGenerator = () => {
       });
     } catch (error) {
       console.error("Error generating webhook key:", error);
+      setError(error.message || "Failed to generate webhook key. Please try again.");
       toast({
         title: "Error",
-        description: "Failed to generate webhook key. Please try again.",
+        description: error.message || "Failed to generate webhook key. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -96,6 +108,15 @@ export const WebhookKeyGenerator = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="space-y-2">
           <Label htmlFor="keyName">Key Name</Label>
           <Input
