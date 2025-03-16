@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Clipboard, RefreshCcw } from "lucide-react";
@@ -33,11 +32,20 @@ export const WebhookKeyGenerator = () => {
 
     setGeneratingKey(true);
     try {
+      console.log('Generating webhook key with name:', keyName);
+      
       const { data, error } = await supabase.functions.invoke("generate-webhook-key", {
-        body: { keyName },
+        body: { keyName: keyName.trim() }
       });
-
+      
+      console.log('Response from generate-webhook-key:', { data, error });
+      
       if (error) throw error;
+      
+      if (!data || !data.key) {
+        throw new Error('No key returned from the server');
+      }
+      
       setWebhookKey(data.key);
       toast({
         title: "Success",

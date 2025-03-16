@@ -17,7 +17,10 @@ serve(async (req) => {
     // Get request body
     const { keyName } = await req.json();
     
+    console.log("Processing webhook key generation request for key name:", keyName);
+    
     if (!keyName) {
+      console.log("Error: Missing key name in request");
       return new Response(
         JSON.stringify({ error: 'Key name is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -27,12 +30,23 @@ serve(async (req) => {
     // Create supabase client with service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.log("Error: Missing Supabase credentials");
+      return new Response(
+        JSON.stringify({ error: 'Server configuration error' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Generate a random key
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
     const key = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    
+    console.log("Generated key successfully");
     
     // Extract user ID from auth header
     const authHeader = req.headers.get('Authorization');
@@ -44,10 +58,16 @@ serve(async (req) => {
       
       if (!error && user) {
         userId = user.id;
+        console.log("Authenticated user ID:", userId);
+      } else if (error) {
+        console.log("Auth error:", error);
       }
+    } else {
+      console.log("No valid auth header found");
     }
 
     // Insert the webhook key into the database
+    console.log("Inserting key into database");
     const { data, error } = await supabase
       .from('webhook_keys')
       .insert({
@@ -66,6 +86,8 @@ serve(async (req) => {
       );
     }
 
+    console.log("Key created successfully with ID:", data.id);
+    
     return new Response(
       JSON.stringify({ success: true, key }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
