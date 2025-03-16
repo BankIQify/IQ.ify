@@ -38,6 +38,35 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
     });
   };
 
+  const handlePrimaryOptionChange = (optionIndex: number, value: string) => {
+    if (!editedQuestion.primaryOptions) return;
+    
+    const newOptions = [...editedQuestion.primaryOptions];
+    newOptions[optionIndex] = value;
+    
+    setEditedQuestion((prev) => {
+      const updated = { ...prev, primaryOptions: newOptions };
+      onUpdateQuestion(updated);
+      return updated;
+    });
+  };
+
+  const handleSecondaryOptionChange = (optionIndex: number, value: string) => {
+    if (!editedQuestion.secondaryOptions) return;
+    
+    const newOptions = [...editedQuestion.secondaryOptions];
+    newOptions[optionIndex] = value;
+    
+    setEditedQuestion((prev) => {
+      const updated = { ...prev, secondaryOptions: newOptions };
+      onUpdateQuestion(updated);
+      return updated;
+    });
+  };
+
+  // Determine if this is a dual choice question
+  const isDualChoice = !!editedQuestion.primaryOptions && !!editedQuestion.secondaryOptions;
+  
   return (
     <Card className="w-full">
       <CardContent className="pt-6 space-y-4">
@@ -64,7 +93,7 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
         </div>
 
         {/* Options for multiple choice */}
-        {editedQuestion.options && (
+        {editedQuestion.options && !isDualChoice && (
           <div className="space-y-2">
             <Label>Options</Label>
             {editedQuestion.options.map((option, i) => (
@@ -94,6 +123,86 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
                 </Button>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Primary and Secondary Options for dual choice */}
+        {isDualChoice && (
+          <>
+            <div className="space-y-2">
+              <Label>Primary Options</Label>
+              {editedQuestion.primaryOptions?.map((option, i) => (
+                <div key={i} className="flex items-center space-x-2">
+                  <Input
+                    value={option}
+                    onChange={(e) => handlePrimaryOptionChange(i, e.target.value)}
+                    className={
+                      option === editedQuestion.correctPrimaryAnswer
+                        ? "border-green-500"
+                        : ""
+                    }
+                  />
+                  <Button
+                    type="button"
+                    variant={
+                      option === editedQuestion.correctPrimaryAnswer
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() => handleChange("correctPrimaryAnswer", option)}
+                    className="whitespace-nowrap"
+                  >
+                    {option === editedQuestion.correctPrimaryAnswer
+                      ? "Correct ✓"
+                      : "Set as Correct"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <Label>Secondary Options</Label>
+              {editedQuestion.secondaryOptions?.map((option, i) => (
+                <div key={i} className="flex items-center space-x-2">
+                  <Input
+                    value={option}
+                    onChange={(e) => handleSecondaryOptionChange(i, e.target.value)}
+                    className={
+                      option === editedQuestion.correctSecondaryAnswer
+                        ? "border-green-500"
+                        : ""
+                    }
+                  />
+                  <Button
+                    type="button"
+                    variant={
+                      option === editedQuestion.correctSecondaryAnswer
+                        ? "default"
+                        : "outline"
+                    }
+                    onClick={() => handleChange("correctSecondaryAnswer", option)}
+                    className="whitespace-nowrap"
+                  >
+                    {option === editedQuestion.correctSecondaryAnswer
+                      ? "Correct ✓"
+                      : "Set as Correct"}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Text answer input for non-multiple choice questions */}
+        {!editedQuestion.options && !isDualChoice && (
+          <div>
+            <Label htmlFor={`correctAnswer-${index}`}>Correct Answer</Label>
+            <Input
+              id={`correctAnswer-${index}`}
+              value={editedQuestion.correctAnswer || ""}
+              onChange={(e) => handleChange("correctAnswer", e.target.value)}
+              className="mt-1"
+            />
           </div>
         )}
 
