@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { WebhookEvent } from "./types";
+import { WebhookEvent, QuestionItem } from "./types";
 import { useEventSelection } from "./hooks/useEventSelection";
 import { useQuestionEditing } from "./hooks/useQuestionEditing";
 import { 
@@ -119,6 +119,10 @@ export const useWebhookQuestions = () => {
     }
   };
 
+  const handleSetQuestions = (questions: QuestionItem[]) => {
+    setEditedQuestions(questions);
+  };
+
   return {
     webhookEvents,
     isLoading,
@@ -128,5 +132,6 @@ export const useWebhookQuestions = () => {
     handleUpdateQuestion,
     handleSaveQuestions,
     handleDiscardEvent,
+    handleSetQuestions,
   };
 };

@@ -72,6 +72,51 @@ serve(async (req) => {
     const payload = await req.json();
     console.log('Received webhook payload:', JSON.stringify(payload));
 
+    // Check if this is a raw text submission
+    if (payload.raw_text && payload.sub_topic_id) {
+      console.log('Received raw text submission');
+      // Store the event but don't process it automatically - let the user edit it in the UI
+      const { data: eventData, error: eventError } = await supabaseAdmin
+        .from('webhook_events')
+        .insert({
+          source: payload.source || 'external_ai',
+          event_type: 'question_generated',
+          payload: {
+            sub_topic_id: payload.sub_topic_id,
+            sub_topic_name: payload.sub_topic_name || null,
+            prompt: payload.prompt || null,
+            raw_text: payload.raw_text,
+            questions: [] // Empty array to be filled after editing
+          },
+          processed: false
+        })
+        .select('id')
+        .single();
+
+      if (eventError) {
+        console.error('Error recording webhook event with raw text:', eventError);
+        return new Response(
+          JSON.stringify({ error: 'Failed to record webhook event with raw text' }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Raw text questions received and stored for editing', 
+          event_id: eventData.id
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     // Record the webhook event
     const { data: eventData, error: eventError } = await supabaseAdmin
       .from('webhook_events')
@@ -98,7 +143,27 @@ serve(async (req) => {
     let result;
     switch (payload.event_type) {
       case 'question_generated':
-        result = await handleQuestionGenerated(supabaseAdmin, payload);
+        // Only process immediately if we have structured questions
+        if (payload.questions && Array.isArray(payload.questions) && payload.questions.length > 0) {
+          result = await handleQuestionGenerated(supabaseAdmin, payload);
+          
+          // Mark the event as processed if successful
+          if (result.success) {
+            await supabaseAdmin
+              .from('webhook_events')
+              .update({ 
+                processed: true,
+                processed_at: new Date().toISOString()
+              })
+              .eq('id', eventData.id);
+          }
+        } else {
+          // No structured questions, leave unprocessed for manual review
+          result = { 
+            success: true, 
+            message: 'Event stored for manual review'
+          };
+        }
         break;
       default:
         result = { 
@@ -106,15 +171,6 @@ serve(async (req) => {
           message: 'Unsupported event type' 
         };
     }
-
-    // Mark the event as processed
-    await supabaseAdmin
-      .from('webhook_events')
-      .update({ 
-        processed: true,
-        processed_at: new Date().toISOString()
-      })
-      .eq('id', eventData.id);
 
     return new Response(
       JSON.stringify(result),

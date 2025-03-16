@@ -15,6 +15,7 @@ export const WebhookQuestionReview = () => {
     handleUpdateQuestion,
     handleSaveQuestions,
     handleDiscardEvent,
+    handleSetQuestions,
   } = useWebhookQuestions();
 
   return (
@@ -39,6 +40,7 @@ export const WebhookQuestionReview = () => {
                 onUpdateQuestion={handleUpdateQuestion}
                 onSaveQuestions={handleSaveQuestions}
                 onDiscardEvent={handleDiscardEvent}
+                onSetQuestions={handleSetQuestions}
               />
 
               <QuestionsPreview

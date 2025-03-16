@@ -17,6 +17,7 @@ export interface WebhookEventPayload {
   sub_topic_name?: string;
   prompt?: string;
   questions: QuestionItem[];
+  raw_text?: string; // Add support for raw text input
   [key: string]: any;
 }
 
