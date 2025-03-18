@@ -61,7 +61,12 @@ export function ApiKeyGenerationInfo({ functionEndpoint }: ApiKeyGenerationInfoP
                 {"{\n  \"keyName\": \"Your Key Name\"\n}"}
               </pre>
               <div className="mt-2 text-xs text-red-600 dark:text-red-400 font-medium">
-                ⚠️ Important: The property name must be exactly "keyName"
+                ⚠️ Important: 
+                <ul className="list-disc pl-5 mt-1">
+                  <li>The property name must be exactly "keyName"</li>
+                  <li>Each key name must be unique in the database</li>
+                  <li>If you get a duplicate key error, try using a different key name</li>
+                </ul>
               </div>
             </div>
             
@@ -70,6 +75,20 @@ export function ApiKeyGenerationInfo({ functionEndpoint }: ApiKeyGenerationInfoP
               <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto">
                 {"{\n  \"success\": true,\n  \"key\": \"generated-api-key\"\n}"}
               </pre>
+            </div>
+            
+            <div className="font-medium">Common Errors:</div>
+            <div className="col-span-2">
+              <div className="space-y-2">
+                <div>
+                  <code className="text-xs bg-muted p-1 rounded">{"\"error\": \"Key name is required\""}</code>
+                  <p className="text-xs mt-1">Fix: Make sure your JSON has the exact "keyName" property</p>
+                </div>
+                <div>
+                  <code className="text-xs bg-muted p-1 rounded">{"\"error\": \"Failed to create webhook key: duplicate key value violates unique constraint\""}</code>
+                  <p className="text-xs mt-1">Fix: Try a different key name, this one is already in use</p>
+                </div>
+              </div>
             </div>
           </div>
         </AlertDescription>
