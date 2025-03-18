@@ -23,22 +23,40 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     };
   }
   
+  console.log('Creating Supabase admin client with URL:', supabaseUrl);
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
   
   // Verify the webhook key
-  const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
-    .from('webhook_keys')
-    .select('id')
-    .eq('api_key', webhookKey)
-    .maybeSingle();
+  try {
+    const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
+      .from('webhook_keys')
+      .select('id')
+      .eq('api_key', webhookKey)
+      .maybeSingle();
 
-  if (keyCheckError || !keyCheck) {
-    console.error('Invalid webhook key or error checking key', keyCheckError);
-    return { 
-      valid: false, 
-      response: createErrorResponse('Unauthorized: Invalid webhook key', 401)
+    if (keyCheckError) {
+      console.error('Error checking webhook key:', keyCheckError);
+      return { 
+        valid: false, 
+        response: createErrorResponse(`Database error checking webhook key: ${keyCheckError.message}`, 500)
+      };
+    }
+
+    if (!keyCheck) {
+      console.error('Invalid webhook key provided');
+      return { 
+        valid: false, 
+        response: createErrorResponse('Unauthorized: Invalid webhook key', 401)
+      };
+    }
+
+    console.log('Webhook key verification successful');
+    return { valid: true, supabaseAdmin };
+  } catch (error) {
+    console.error('Unexpected error verifying webhook key:', error);
+    return {
+      valid: false,
+      response: createErrorResponse(`Server error verifying webhook key: ${error.message}`, 500)
     };
   }
-
-  return { valid: true, supabaseAdmin };
 }

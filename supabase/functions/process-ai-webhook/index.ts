@@ -13,11 +13,17 @@ serve(async (req) => {
   }
 
   console.log(`Received ${req.method} request to process-ai-webhook`);
+  console.log(`URL: ${req.url}`);
   
   try {
     // Get Supabase credentials from environment
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('Missing required environment variables');
+      return createErrorResponse('Server configuration error: Missing environment variables', 500);
+    }
     
     // Verify the webhook key
     const authResult = await verifyWebhookKey(req, supabaseUrl, supabaseServiceKey);
@@ -28,8 +34,18 @@ serve(async (req) => {
     const supabaseAdmin = authResult.supabaseAdmin;
 
     // Parse the webhook payload
-    const payload = await req.json();
-    console.log('Received webhook payload:', JSON.stringify(payload));
+    let payload;
+    try {
+      payload = await req.json();
+      console.log('Received webhook payload:', JSON.stringify(payload));
+    } catch (error) {
+      console.error('Failed to parse JSON payload:', error);
+      return createErrorResponse('Invalid JSON payload', 400);
+    }
+
+    if (!payload) {
+      return createErrorResponse('Empty payload received', 400);
+    }
 
     // Check if this is a raw text submission
     if (payload.raw_text && payload.sub_topic_id) {
@@ -81,7 +97,7 @@ serve(async (req) => {
       default:
         result = { 
           success: false, 
-          message: 'Unsupported event type' 
+          message: `Unsupported event type: ${payload.event_type}` 
         };
     }
 
