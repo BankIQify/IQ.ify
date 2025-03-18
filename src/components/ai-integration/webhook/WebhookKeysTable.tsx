@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Copy, Eye, EyeOff } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,6 +11,7 @@ export function WebhookKeysTable() {
   const [keys, setKeys] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visibleKeys, setVisibleKeys] = useState<Record<string, boolean>>({});
   
   useEffect(() => {
     fetchWebhookKeys();
@@ -29,6 +30,14 @@ export function WebhookKeysTable() {
       if (error) throw error;
       
       setKeys(data || []);
+      
+      // Initialize visibility state for new keys
+      const initialVisibility: Record<string, boolean> = {};
+      data?.forEach(key => {
+        initialVisibility[key.id] = false;
+      });
+      setVisibleKeys(prev => ({ ...prev, ...initialVisibility }));
+      
     } catch (error) {
       console.error('Error fetching webhook keys:', error);
       setError('Failed to load webhook keys');
@@ -40,6 +49,31 @@ export function WebhookKeysTable() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const copyToClipboard = (text: string, keyName: string) => {
+    navigator.clipboard.writeText(text).then(
+      () => {
+        toast({
+          title: "Copied!",
+          description: `API key for "${keyName}" copied to clipboard`,
+        });
+      },
+      () => {
+        toast({
+          title: "Error",
+          description: "Failed to copy to clipboard",
+          variant: "destructive",
+        });
+      }
+    );
+  };
+
+  const toggleKeyVisibility = (id: string) => {
+    setVisibleKeys(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
   return (
@@ -64,7 +98,8 @@ export function WebhookKeysTable() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Created</TableHead>
-              <TableHead>API Key (Partial)</TableHead>
+              <TableHead className="w-1/2">API Key</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -75,10 +110,34 @@ export function WebhookKeysTable() {
                   {new Date(key.created_at).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center">
-                    <code className="text-xs bg-muted p-1 rounded">
-                      {key.api_key.substring(0, 8)}...
+                  <div className="flex items-center gap-2 max-w-md overflow-x-auto">
+                    <code className="text-xs bg-muted p-1 rounded whitespace-nowrap">
+                      {visibleKeys[key.id] ? key.api_key : `${key.api_key.substring(0, 8)}...`}
                     </code>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => toggleKeyVisibility(key.id)}
+                    >
+                      {visibleKeys[key.id] ? (
+                        <EyeOff className="h-3.5 w-3.5 mr-1" />
+                      ) : (
+                        <Eye className="h-3.5 w-3.5 mr-1" />
+                      )}
+                      {visibleKeys[key.id] ? "Hide" : "Show"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => copyToClipboard(key.api_key, key.key_name)}
+                    >
+                      <Copy className="h-3.5 w-3.5 mr-1" />
+                      Copy
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
