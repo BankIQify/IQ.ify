@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,84 +9,43 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Copy, AlertCircle, ExternalLink } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Copy, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export function WebhookKeyManager() {
-  const [keyName, setKeyName] = useState("");
-  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showKey, setShowKey] = useState(false);
+  const [keys, setKeys] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const webhookUrl = `${window.location.origin.replace(/^http/, 'https')}/api/process-webhook`;
+  const functionEndpoint = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-webhook-key`;
 
-  const handleGenerateKey = async () => {
-    if (!keyName.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a key name",
-        variant: "destructive",
-      });
-      return;
-    }
+  useEffect(() => {
+    fetchWebhookKeys();
+  }, []);
 
+  const fetchWebhookKeys = async () => {
     setIsLoading(true);
     setError(null);
-
+    
     try {
-      console.log('Generating webhook key with name:', keyName);
+      const { data, error } = await supabase
+        .from('webhook_keys')
+        .select('id, key_name, created_at, api_key, created_by')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
       
-      // Log the function endpoint we're calling instead of the URL
-      console.log('Calling edge function: generate-webhook-key');
-      
-      // Make the function call with detailed error logging
-      const response = await supabase.functions.invoke('generate-webhook-key', {
-        body: { keyName: keyName.trim() }
-      });
-      
-      console.log('Raw response from generate-webhook-key:', response);
-      
-      // Destructure after logging the full response
-      const { data, error } = response;
-      
-      console.log('Response data:', data);
-      console.log('Response error:', error);
-
-      if (error) {
-        console.error('Function error details:', {
-          message: error.message,
-          name: error.name,
-          context: error.context,
-        });
-        throw error;
-      }
-
-      if (data?.success && data?.key) {
-        setGeneratedKey(data.key);
-        toast({
-          title: "Success",
-          description: "Webhook key generated successfully",
-        });
-      } else if (data?.error) {
-        throw new Error(data.error);
-      } else {
-        console.error('Unexpected response format:', data);
-        throw new Error("Failed to generate key: Unexpected response format");
-      }
+      setKeys(data || []);
     } catch (error) {
-      console.error("Error generating webhook key:", error);
-      
-      // Enhanced error message with type information
-      const errorMessage = error?.message || "Unknown error";
-      const errorType = error?.constructor?.name || "Unknown type";
-      
-      setError(`Failed to generate webhook key: ${errorMessage} (${errorType})`);
+      console.error('Error fetching webhook keys:', error);
+      setError('Failed to load webhook keys');
       toast({
         title: "Error",
-        description: `Failed to generate webhook key: ${errorMessage}`,
+        description: "Failed to load webhook keys",
         variant: "destructive",
       });
     } finally {
@@ -93,18 +53,18 @@ export function WebhookKeyManager() {
     }
   };
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, description: string) => {
     navigator.clipboard.writeText(text).then(
       () => {
         toast({
           title: "Copied",
-          description: "Key copied to clipboard",
+          description: description,
         });
       },
       () => {
         toast({
           title: "Error",
-          description: "Failed to copy key",
+          description: "Failed to copy to clipboard",
           variant: "destructive",
         });
       }
@@ -112,77 +72,147 @@ export function WebhookKeyManager() {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Webhook API Key Generator</CardTitle>
-        <CardDescription>
-          Generate a secure API key for your Make (Integromat) webhook integration
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid w-full items-center gap-4">
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Webhook Integration Information</CardTitle>
+          <CardDescription>
+            Use these details to set up your webhook integrations with Make or other services
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Webhook URL Section */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">1. Webhook Endpoint URL</h3>
+            <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+              <code className="text-sm flex-1 overflow-x-auto">{webhookUrl}</code>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => copyToClipboard(webhookUrl, "Webhook URL copied to clipboard")}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              This is the URL to use when configuring your webhook destination
+            </p>
+          </div>
+
+          {/* API Key Generation Section */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">2. Generate API Key Using Postman</h3>
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Instructions</AlertTitle>
+              <AlertDescription className="space-y-2">
+                <p>
+                  To generate a new webhook key, make a POST request to the following endpoint:
+                </p>
+                <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
+                  <code className="text-sm flex-1 overflow-x-auto">{functionEndpoint}</code>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => copyToClipboard(functionEndpoint, "Function endpoint copied to clipboard")}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="mt-2">
+                  Send a JSON body with a key name:
+                </p>
+                <pre className="p-2 bg-muted rounded-md text-sm overflow-x-auto">
+                  {"{\n  \"keyName\": \"Your Key Name\"\n}"}
+                </pre>
+              </AlertDescription>
+            </Alert>
+          </div>
+
+          {/* Header Format Section */}
+          <div className="space-y-2">
+            <h3 className="text-lg font-medium">3. Authentication Header Format</h3>
+            <div className="p-2 bg-muted rounded-md">
+              <code className="text-sm">x-webhook-key: YOUR_GENERATED_API_KEY</code>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Include this header with your API key in webhook requests
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => window.open("https://www.postman.com/downloads/", "_blank")}
+          >
+            <ExternalLink className="h-4 w-4" />
+            Get Postman
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Existing Webhook Keys</CardTitle>
+          <CardDescription>
+            List of webhook keys that have been generated for this application
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="keyName">Key Name</Label>
-            <Input
-              id="keyName"
-              placeholder="Enter a name for this key"
-              value={keyName}
-              onChange={(e) => setKeyName(e.target.value)}
-            />
-          </div>
-
-          {generatedKey && (
-            <Alert variant="default" className="mt-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Important</AlertTitle>
-              <AlertDescription>
-                This key will only be shown once. Make sure to save it now.
-              </AlertDescription>
-              <div className="mt-2 relative">
-                <Input
-                  value={generatedKey}
-                  readOnly
-                  type={showKey ? "text" : "password"}
-                  className="pr-10"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full"
-                  onClick={() => copyToClipboard(generatedKey)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() => setShowKey(!showKey)}
-              >
-                {showKey ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                {showKey ? "Hide" : "Show"} Key
-              </Button>
-            </Alert>
+          {isLoading ? (
+            <div className="text-center py-4">Loading webhook keys...</div>
+          ) : keys.length === 0 ? (
+            <div className="text-center py-4 text-muted-foreground">
+              No webhook keys found. Use Postman to generate your first key.
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>API Key (Partial)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {keys.map((key) => (
+                  <TableRow key={key.id}>
+                    <TableCell className="font-medium">{key.key_name}</TableCell>
+                    <TableCell>
+                      {new Date(key.created_at).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <code className="text-xs bg-muted p-1 rounded">
+                          {key.api_key.substring(0, 8)}...
+                        </code>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button 
-          onClick={handleGenerateKey} 
-          disabled={isLoading || !keyName.trim()}
-        >
-          {isLoading ? "Generating..." : "Generate Key"}
-        </Button>
-      </CardFooter>
-    </Card>
+        </CardContent>
+        <CardFooter>
+          <Button 
+            variant="secondary" 
+            onClick={fetchWebhookKeys}
+            disabled={isLoading}
+          >
+            {isLoading ? "Refreshing..." : "Refresh List"}
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
