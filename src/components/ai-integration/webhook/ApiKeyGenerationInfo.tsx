@@ -60,6 +60,9 @@ export function ApiKeyGenerationInfo({ functionEndpoint }: ApiKeyGenerationInfoP
               <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto">
                 {"{\n  \"keyName\": \"Your Key Name\"\n}"}
               </pre>
+              <div className="mt-2 text-xs text-red-600 dark:text-red-400 font-medium">
+                ⚠️ Important: The property name must be exactly "keyName"
+              </div>
             </div>
             
             <div className="font-medium">Response:</div>
