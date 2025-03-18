@@ -39,13 +39,31 @@ export function WebhookKeyManager() {
     try {
       console.log('Generating webhook key with name:', keyName);
       
-      const { data, error } = await supabase.functions.invoke('generate-webhook-key', {
+      // Get the Supabase URL for debugging
+      const supabaseUrl = supabase.supabaseUrl;
+      console.log('Using Supabase URL:', supabaseUrl);
+      
+      // Make the function call with detailed error logging
+      const response = await supabase.functions.invoke('generate-webhook-key', {
         body: { keyName: keyName.trim() }
       });
       
-      console.log('Response from generate-webhook-key:', { data, error });
+      console.log('Raw response from generate-webhook-key:', response);
+      
+      // Destructure after logging the full response
+      const { data, error } = response;
+      
+      console.log('Response data:', data);
+      console.log('Response error:', error);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Function error details:', {
+          message: error.message,
+          name: error.name,
+          context: error.context,
+        });
+        throw error;
+      }
 
       if (data?.success && data?.key) {
         setGeneratedKey(data.key);
@@ -56,14 +74,20 @@ export function WebhookKeyManager() {
       } else if (data?.error) {
         throw new Error(data.error);
       } else {
-        throw new Error("Failed to generate key");
+        console.error('Unexpected response format:', data);
+        throw new Error("Failed to generate key: Unexpected response format");
       }
     } catch (error) {
       console.error("Error generating webhook key:", error);
-      setError(error.message || "Failed to generate webhook key");
+      
+      // Enhanced error message with type information
+      const errorMessage = error?.message || "Unknown error";
+      const errorType = error?.constructor?.name || "Unknown type";
+      
+      setError(`Failed to generate webhook key: ${errorMessage} (${errorType})`);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate webhook key",
+        description: `Failed to generate webhook key: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
