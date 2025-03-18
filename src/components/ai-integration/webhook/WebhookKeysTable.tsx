@@ -1,0 +1,100 @@
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertCircle } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+export function WebhookKeysTable() {
+  const [keys, setKeys] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    fetchWebhookKeys();
+  }, []);
+
+  const fetchWebhookKeys = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { data, error } = await supabase
+        .from('webhook_keys')
+        .select('id, key_name, created_at, api_key, created_by')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      setKeys(data || []);
+    } catch (error) {
+      console.error('Error fetching webhook keys:', error);
+      setError('Failed to load webhook keys');
+      toast({
+        title: "Error",
+        description: "Failed to load webhook keys",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {error && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {isLoading ? (
+        <div className="text-center py-4">Loading webhook keys...</div>
+      ) : keys.length === 0 ? (
+        <div className="text-center py-4 text-muted-foreground">
+          No webhook keys found. Use Postman to generate your first key.
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>API Key (Partial)</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {keys.map((key) => (
+              <TableRow key={key.id}>
+                <TableCell className="font-medium">{key.key_name}</TableCell>
+                <TableCell>
+                  {new Date(key.created_at).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <code className="text-xs bg-muted p-1 rounded">
+                      {key.api_key.substring(0, 8)}...
+                    </code>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+
+      <Button 
+        variant="secondary" 
+        onClick={fetchWebhookKeys}
+        disabled={isLoading}
+        className="mt-4"
+      >
+        {isLoading ? "Refreshing..." : "Refresh List"}
+      </Button>
+    </>
+  );
+}
