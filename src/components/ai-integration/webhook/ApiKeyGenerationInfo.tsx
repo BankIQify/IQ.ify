@@ -29,30 +29,46 @@ export function ApiKeyGenerationInfo({ functionEndpoint }: ApiKeyGenerationInfoP
 
   return (
     <div className="space-y-2">
-      <h3 className="text-lg font-medium">2. Generate API Key Using Postman</h3>
+      <h3 className="text-lg font-medium">2. Generate API Key</h3>
       <Alert>
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Instructions</AlertTitle>
+        <AlertTitle>API Reference</AlertTitle>
         <AlertDescription className="space-y-2">
-          <p>
-            To generate a new webhook key, make a POST request to the following endpoint:
-          </p>
-          <div className="flex items-center gap-2 p-2 bg-muted rounded-md">
-            <code className="text-sm flex-1 overflow-x-auto">{functionEndpoint}</code>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => copyToClipboard(functionEndpoint, "Function endpoint copied to clipboard")}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
+          <div className="grid grid-cols-3 gap-2 text-sm">
+            <div className="font-medium">Method:</div>
+            <div className="col-span-2">POST</div>
+            
+            <div className="font-medium">URL:</div>
+            <div className="col-span-2 flex items-center gap-2">
+              <code className="text-xs flex-1 overflow-x-auto">{functionEndpoint}</code>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => copyToClipboard(functionEndpoint, "Function endpoint copied to clipboard")}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+            </div>
+            
+            <div className="font-medium">Headers:</div>
+            <div className="col-span-2">
+              <code className="text-xs">Content-Type: application/json</code>
+            </div>
+            
+            <div className="font-medium">Request Body:</div>
+            <div className="col-span-2">
+              <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto">
+                {"{\n  \"keyName\": \"Your Key Name\"\n}"}
+              </pre>
+            </div>
+            
+            <div className="font-medium">Response:</div>
+            <div className="col-span-2">
+              <pre className="text-xs bg-muted p-2 rounded-md overflow-x-auto">
+                {"{\n  \"success\": true,\n  \"key\": \"generated-api-key\"\n}"}
+              </pre>
+            </div>
           </div>
-          <p className="mt-2">
-            Send a JSON body with a key name:
-          </p>
-          <pre className="p-2 bg-muted rounded-md text-sm overflow-x-auto">
-            {"{\n  \"keyName\": \"Your Key Name\"\n}"}
-          </pre>
         </AlertDescription>
       </Alert>
     </div>

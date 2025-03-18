@@ -17,7 +17,7 @@ export function WebhookSetupCard({ webhookUrl, functionEndpoint }: WebhookSetupC
       <CardHeader>
         <CardTitle>Webhook Integration Information</CardTitle>
         <CardDescription>
-          Use these details to set up your webhook integrations with Make or other services
+          Reference details for webhook integrations and API key generation
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -29,10 +29,10 @@ export function WebhookSetupCard({ webhookUrl, functionEndpoint }: WebhookSetupC
         <Button 
           variant="outline" 
           className="w-full flex items-center justify-center gap-2"
-          onClick={() => window.open("https://www.postman.com/downloads/", "_blank")}
+          onClick={() => window.open("https://supabase.com/docs/guides/functions", "_blank")}
         >
           <ExternalLink className="h-4 w-4" />
-          Get Postman
+          Supabase Functions Documentation
         </Button>
       </CardFooter>
     </Card>

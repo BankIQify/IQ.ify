@@ -36,7 +36,7 @@ export function WebhookInfoCard() {
       <CardHeader>
         <CardTitle>Webhook Integration Guide</CardTitle>
         <CardDescription>
-          Configure your Make (Integromat) webhook to connect with this application
+          Complete reference for webhook integration with external services
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -56,7 +56,7 @@ export function WebhookInfoCard() {
             </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Use this URL in your Make scenario as the webhook destination
+            Use this URL as the webhook destination
           </p>
         </div>
 
@@ -66,12 +66,37 @@ export function WebhookInfoCard() {
             <pre>x-webhook-key: YOUR_API_KEY</pre>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Include this header with the API key you generated
+            Include this header with your API key in all webhook requests
           </p>
         </div>
 
         <div>
-          <h3 className="font-medium mb-1">3. Payload Format - Conversation Created</h3>
+          <h3 className="font-medium mb-1">3. API Key Generation</h3>
+          <div className="grid grid-cols-3 gap-2 text-sm bg-muted p-3 rounded-md">
+            <div className="font-medium">Method:</div>
+            <div className="col-span-2">POST</div>
+            
+            <div className="font-medium">URL:</div>
+            <div className="col-span-2">
+              <code className="text-xs">{`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-webhook-key`}</code>
+            </div>
+            
+            <div className="font-medium">Headers:</div>
+            <div className="col-span-2">
+              <code className="text-xs">Content-Type: application/json</code>
+            </div>
+            
+            <div className="font-medium">Request Body:</div>
+            <div className="col-span-2">
+              <pre className="text-xs bg-muted p-2 rounded-md">
+                {"{\n  \"keyName\": \"Your Key Name\"\n}"}
+              </pre>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="font-medium mb-1">4. Payload Format - Conversation Created</h3>
           <div className="bg-muted p-2 rounded text-sm overflow-x-auto">
             <pre>{`{
   "event_type": "conversation_created",
@@ -82,7 +107,7 @@ export function WebhookInfoCard() {
         </div>
 
         <div>
-          <h3 className="font-medium mb-1">4. Payload Format - Message Created</h3>
+          <h3 className="font-medium mb-1">5. Payload Format - Message Created</h3>
           <div className="bg-muted p-2 rounded text-sm overflow-x-auto">
             <pre>{`{
   "event_type": "message_created",
@@ -97,10 +122,10 @@ export function WebhookInfoCard() {
         <Button
           variant="outline"
           className="w-full flex items-center justify-center gap-2 mt-4"
-          onClick={() => window.open("https://www.make.com/en/help/apps/connections/webhooks", "_blank")}
+          onClick={() => window.open("https://supabase.com/docs/guides/functions", "_blank")}
         >
           <ExternalLink className="h-4 w-4" />
-          Make Webhooks Documentation
+          Supabase Functions Documentation
         </Button>
       </CardContent>
     </Card>
