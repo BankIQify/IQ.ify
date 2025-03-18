@@ -15,7 +15,7 @@ export const useWebhookKeyGeneration = () => {
   useState(() => {
     const baseUrl = window.location.origin;
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://dqaihawavxlacegykwqu.supabase.co";
-    setWebhookUrl(`${supabaseUrl}/functions/v1/webhook-processor`);
+    setWebhookUrl(`${supabaseUrl}/functions/v1/process-webhook`);
   });
 
   const generateKey = async () => {
