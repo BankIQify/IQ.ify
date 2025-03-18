@@ -1,5 +1,6 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WebhookKeyGenerator } from "./WebhookKeyGenerator";
+import { WebhookKeyManager } from "../ai-integration/WebhookKeyManager";
 import { WebhookQuestionReview } from "./question-review";
 
 export const WebhookManagement = () => {
@@ -12,7 +13,7 @@ export const WebhookManagement = () => {
         </TabsList>
 
         <TabsContent value="keys">
-          <WebhookKeyGenerator />
+          <WebhookKeyManager />
         </TabsContent>
 
         <TabsContent value="review">
@@ -21,4 +22,4 @@ export const WebhookManagement = () => {
       </Tabs>
     </div>
   );
-};
+}
