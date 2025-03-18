@@ -13,10 +13,7 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
     sub_topic_id: "uuid",
     questions: [
       {
-        question: "What is the capital of France?",
-        explanation: "Paris is the capital and most populous city of France.",
-        options: ["Berlin", "Madrid", "Paris", "Rome"],
-        correctAnswer: "Paris",
+        content: "What is the capital of France?",
         difficulty: "medium"
       }
     ]
