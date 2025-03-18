@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,9 +38,8 @@ export function WebhookKeyManager() {
     try {
       console.log('Generating webhook key with name:', keyName);
       
-      // Get the Supabase URL for debugging
-      const supabaseUrl = supabase.supabaseUrl;
-      console.log('Using Supabase URL:', supabaseUrl);
+      // Log the function endpoint we're calling instead of the URL
+      console.log('Calling edge function: generate-webhook-key');
       
       // Make the function call with detailed error logging
       const response = await supabase.functions.invoke('generate-webhook-key', {
