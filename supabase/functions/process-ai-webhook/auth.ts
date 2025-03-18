@@ -6,8 +6,13 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   // Get webhook key for authentication
   const webhookKey = req.headers.get('x-webhook-key');
   
+  console.log('Webhook request received, checking authorization');
+  console.log('Request URL:', req.url);
+  console.log('Request method:', req.method);
+  console.log('Headers present:', [...req.headers.keys()].join(', '));
+  
   if (!webhookKey) {
-    console.error('Missing webhook key');
+    console.error('Missing webhook key in headers');
     return { 
       valid: false, 
       response: createErrorResponse('Unauthorized: Missing webhook key', 401)
@@ -17,6 +22,8 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   // Create a Supabase client
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Required environment variables SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY are missing.');
+    console.error('SUPABASE_URL present:', !!supabaseUrl);
+    console.error('SUPABASE_SERVICE_ROLE_KEY present:', !!supabaseServiceKey);
     return { 
       valid: false, 
       response: createErrorResponse('Server configuration error', 500)
@@ -28,6 +35,7 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   
   // Verify the webhook key
   try {
+    console.log('Attempting to verify webhook key in database');
     const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
       .from('webhook_keys')
       .select('id')
