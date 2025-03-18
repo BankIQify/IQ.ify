@@ -33,16 +33,9 @@ export async function handleRawTextSubmission(supabaseAdmin, payload) {
   });
 }
 
-export async function handleQuestionGenerated(supabase, payload) {
-  const { questions, sub_topic_id, prompt } = payload;
-  
-  if (!sub_topic_id) {
-    return { success: false, error: 'Missing sub_topic_id in payload' };
-  }
-  
-  if (!questions || !Array.isArray(questions)) {
-    return { success: false, error: 'Missing or invalid questions array in payload' };
-  }
+// New function to handle question insertion
+async function insertQuestions(supabase, questions, sub_topic_id, prompt) {
+  console.log(`Inserting ${questions.length} questions for sub-topic ${sub_topic_id}`);
   
   try {
     // Insert all questions in parallel
@@ -68,7 +61,11 @@ export async function handleQuestionGenerated(supabase, payload) {
 
     if (insertErrors.length > 0) {
       console.error('Database insert errors:', insertErrors);
-      return { success: false, error: 'Failed to save some generated questions', details: insertErrors };
+      return { 
+        success: false, 
+        error: 'Failed to save some generated questions', 
+        details: insertErrors 
+      };
     }
     
     return { 
@@ -77,9 +74,27 @@ export async function handleQuestionGenerated(supabase, payload) {
       question_count: questions.length 
     };
   } catch (error) {
-    console.error('Error processing questions:', error);
-    return { success: false, error: `Failed to process questions: ${error.message}` };
+    console.error('Error inserting questions:', error);
+    return { 
+      success: false, 
+      error: `Failed to insert questions: ${error.message}` 
+    };
   }
+}
+
+export async function handleQuestionGenerated(supabase, payload) {
+  const { questions, sub_topic_id, prompt } = payload;
+  
+  if (!sub_topic_id) {
+    return { success: false, error: 'Missing sub_topic_id in payload' };
+  }
+  
+  if (!questions || !Array.isArray(questions)) {
+    return { success: false, error: 'Missing or invalid questions array in payload' };
+  }
+  
+  // Call the extracted function to handle question insertion
+  return await insertQuestions(supabase, questions, sub_topic_id, prompt);
 }
 
 // Helper function to determine question type based on content
