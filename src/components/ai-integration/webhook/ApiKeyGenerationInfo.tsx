@@ -71,6 +71,16 @@ export function ApiKeyGenerationInfo({ functionEndpoint }: ApiKeyGenerationInfoP
           </div>
         </AlertDescription>
       </Alert>
+      
+      <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md">
+        <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-2">For Make.com integration:</p>
+        <div className="bg-muted p-2 rounded-md">
+          <code className="text-xs font-bold">x-webhook-key: YOUR_GENERATED_API_KEY</code>
+        </div>
+        <p className="text-xs text-muted-foreground mt-1">
+          Use this exact header name in Make, not "authorization" or "bearer"
+        </p>
+      </div>
     </div>
   );
 }
