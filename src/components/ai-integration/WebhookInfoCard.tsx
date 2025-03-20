@@ -69,7 +69,7 @@ export function WebhookInfoCard() {
             <pre className="mt-1">Authorization: Bearer YOUR_API_KEY</pre>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Include one of these headers with your API key in all webhook requests
+            Include one of these headers with your raw API key in all webhook requests
           </p>
         </div>
 

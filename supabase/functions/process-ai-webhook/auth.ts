@@ -3,22 +3,27 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createErrorResponse } from "../_shared/webhook-utils.ts";
 
 export async function verifyWebhookKey(req: Request, supabaseUrl: string, supabaseServiceKey: string) {
-  // Get webhook key from either x-webhook-key or Authorization header
-  let webhookKey = req.headers.get('x-webhook-key');
+  // Get webhook key from request headers
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+  const customHeader = req.headers.get('x-webhook-key');
   
-  // Check for Authorization header if x-webhook-key is not present
-  if (!webhookKey) {
-    const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
-    
-    if (authHeader) {
-      // Handle both "Bearer <key>" and plain "<key>" formats
-      if (authHeader.startsWith('Bearer ')) {
-        webhookKey = authHeader.substring(7).trim();
-        console.log('Using key from Authorization header with Bearer prefix');
-      } else {
-        webhookKey = authHeader.trim();
-        console.log('Using key from Authorization header without Bearer prefix');
-      }
+  let webhookKey = null;
+  
+  // Try to get key from custom header
+  if (customHeader) {
+    webhookKey = customHeader;
+    console.log('Using key from x-webhook-key header');
+  }
+  // Try to get key from Authorization header
+  else if (authHeader) {
+    // Check if it has Bearer prefix and extract key
+    if (authHeader.startsWith('Bearer ')) {
+      webhookKey = authHeader.substring(7).trim();
+      console.log('Using key from Authorization header with Bearer prefix');
+    } else {
+      // Use the raw Authorization header value
+      webhookKey = authHeader.trim();
+      console.log('Using key from Authorization header without Bearer prefix');
     }
   }
   
@@ -26,16 +31,12 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   console.log('Request URL:', req.url);
   console.log('Request method:', req.method);
   console.log('Headers present:', [...req.headers.keys()].join(', '));
-  console.log('Header types found:', 
-    req.headers.has('x-webhook-key') ? 'x-webhook-key' : 'No x-webhook-key', 
-    req.headers.has('authorization') || req.headers.has('Authorization') ? 'Authorization' : 'No Authorization'
-  );
   
   if (!webhookKey) {
     console.error('Missing webhook key in headers (tried both x-webhook-key and Authorization)');
     return { 
       valid: false, 
-      response: createErrorResponse('Unauthorized: Missing webhook key in both x-webhook-key and Authorization headers', 401)
+      response: createErrorResponse('Unauthorized: Missing webhook key in headers', 401)
     };
   }
 
@@ -48,7 +49,7 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     };
   }
   
-  // Ensure Supabase URL is properly formatted with https:// prefix
+  // Ensure Supabase URL is properly formatted
   if (!supabaseUrl.startsWith('http')) {
     supabaseUrl = `https://${supabaseUrl}`;
   }
@@ -74,7 +75,7 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     }
 
     if (!keyCheck) {
-      console.error('Invalid webhook key provided');
+      console.error('Invalid webhook key provided:', webhookKey);
       return { 
         valid: false, 
         response: createErrorResponse('Unauthorized: Invalid webhook key', 401)
