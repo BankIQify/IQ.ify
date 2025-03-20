@@ -2,6 +2,7 @@
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "./CopyButton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface UsageExampleProps {
   webhookUrl: string;
@@ -47,25 +48,61 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
   const formattedWebhookUrl = ensureFullUrl(webhookUrl);
   console.log("Usage example using webhook URL:", formattedWebhookUrl);
   
-  // Create the curl command that accurately reflects the endpoint being used
-  const curlCommand = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_KEY_HERE"\n-d '${formattedJson}'`;
+  // Create the curl commands for both header formats
+  const curlCommandCustomHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_KEY_HERE"\n-d '${formattedJson}'`;
+  
+  const curlCommandAuthHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "Authorization: Bearer YOUR_KEY_HERE"\n-d '${formattedJson}'`;
 
   return (
     <div className="space-y-2">
       <Label>How to Use</Label>
-      <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap">
-        {curlCommand}
+      
+      <Tabs defaultValue="custom" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="custom">Custom Header (x-webhook-key)</TabsTrigger>
+          <TabsTrigger value="auth">Authorization Header</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="custom" className="space-y-2">
+          <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap">
+            {curlCommandCustomHeader}
+          </div>
+          <CopyButton 
+            text={curlCommandCustomHeader}
+            description="cURL command with custom header copied to clipboard"
+            className="mt-2"
+          />
+          <p className="text-xs text-muted-foreground">
+            Use this format for tools that support custom headers
+          </p>
+        </TabsContent>
+        
+        <TabsContent value="auth" className="space-y-2">
+          <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap">
+            {curlCommandAuthHeader}
+          </div>
+          <CopyButton 
+            text={curlCommandAuthHeader}
+            description="cURL command with Authorization header copied to clipboard"
+            className="mt-2"
+          />
+          <p className="text-xs text-muted-foreground">
+            Use this format for tools that expect standard Authorization headers like Make or Postman
+          </p>
+        </TabsContent>
+      </Tabs>
+      
+      <div className="pt-4">
+        <Label>JSON Example</Label>
+        <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap mt-2">
+          {formattedJson}
+        </div>
+        <CopyButton 
+          text={formattedJson}
+          description="JSON example copied to clipboard"
+          className="mt-2"
+        />
       </div>
-      <CopyButton 
-        text={curlCommand}
-        description="cURL command copied to clipboard"
-        className="mt-2 mr-2"
-      />
-      <CopyButton 
-        text={formattedJson}
-        description="JSON example copied to clipboard"
-        className="mt-2"
-      />
     </div>
   );
 };

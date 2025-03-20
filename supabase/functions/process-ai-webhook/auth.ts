@@ -3,20 +3,38 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createErrorResponse } from "../_shared/webhook-utils.ts";
 
 export async function verifyWebhookKey(req: Request, supabaseUrl: string, supabaseServiceKey: string) {
-  // Get webhook key for authentication
-  const webhookKey = req.headers.get('x-webhook-key');
+  // Get webhook key from either x-webhook-key or Authorization header
+  let webhookKey = req.headers.get('x-webhook-key');
+  
+  // Check for Authorization header if x-webhook-key is not present
+  if (!webhookKey) {
+    const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+    
+    if (authHeader) {
+      // Handle both "Bearer <key>" and plain "<key>" formats
+      webhookKey = authHeader.startsWith('Bearer ') 
+        ? authHeader.substring(7).trim() 
+        : authHeader.trim();
+      
+      console.log('Using key from Authorization header');
+    }
+  }
   
   console.log('Webhook request received, checking authorization');
   console.log('Request URL:', req.url);
   console.log('Request method:', req.method);
   console.log('Headers present:', [...req.headers.keys()].join(', '));
+  console.log('Header types found:', 
+    req.headers.has('x-webhook-key') ? 'x-webhook-key' : 'No x-webhook-key', 
+    req.headers.has('authorization') || req.headers.has('Authorization') ? 'Authorization' : 'No Authorization'
+  );
   console.log('Supabase URL being used:', supabaseUrl);
   
   if (!webhookKey) {
-    console.error('Missing webhook key in headers');
+    console.error('Missing webhook key in headers (tried both x-webhook-key and Authorization)');
     return { 
       valid: false, 
-      response: createErrorResponse('Unauthorized: Missing webhook key', 401)
+      response: createErrorResponse('Unauthorized: Missing webhook key in both x-webhook-key and Authorization headers', 401)
     };
   }
 
