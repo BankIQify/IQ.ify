@@ -5,7 +5,6 @@ import { createErrorResponse } from "../_shared/webhook-utils.ts";
 export async function verifyWebhookKey(req: Request, supabaseUrl: string, supabaseServiceKey: string) {
   // Get webhook key from either x-webhook-key or Authorization header
   let webhookKey = req.headers.get('x-webhook-key');
-  let isJwtToken = false;
   
   // Check for Authorization header if x-webhook-key is not present
   if (!webhookKey) {
@@ -15,15 +14,7 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
       // Handle both "Bearer <key>" and plain "<key>" formats
       if (authHeader.startsWith('Bearer ')) {
         webhookKey = authHeader.substring(7).trim();
-        
-        // Only check for JWT format if it actually looks like a JWT
-        // A JWT typically has three segments separated by dots and is significantly longer
-        if (webhookKey.split('.').length === 3 && webhookKey.length > 100) {
-          isJwtToken = true;
-          console.log('Using key from Authorization header with Bearer prefix, detected as JWT format');
-        } else {
-          console.log('Using key from Authorization header with Bearer prefix, not a JWT format');
-        }
+        console.log('Using key from Authorization header with Bearer prefix');
       } else {
         webhookKey = authHeader.trim();
         console.log('Using key from Authorization header without Bearer prefix');
@@ -39,7 +30,6 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     req.headers.has('x-webhook-key') ? 'x-webhook-key' : 'No x-webhook-key', 
     req.headers.has('authorization') || req.headers.has('Authorization') ? 'Authorization' : 'No Authorization'
   );
-  console.log('Supabase URL being used:', supabaseUrl);
   
   if (!webhookKey) {
     console.error('Missing webhook key in headers (tried both x-webhook-key and Authorization)');
@@ -52,8 +42,6 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   // Create a Supabase client
   if (!supabaseUrl || !supabaseServiceKey) {
     console.error('Required environment variables SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY are missing.');
-    console.error('SUPABASE_URL present:', !!supabaseUrl);
-    console.error('SUPABASE_SERVICE_ROLE_KEY present:', !!supabaseServiceKey);
     return { 
       valid: false, 
       response: createErrorResponse('Server configuration error', 500)
@@ -63,15 +51,13 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   // Ensure Supabase URL is properly formatted with https:// prefix
   if (!supabaseUrl.startsWith('http')) {
     supabaseUrl = `https://${supabaseUrl}`;
-    console.log('Updated Supabase URL with https:// prefix:', supabaseUrl);
   }
   
-  console.log('Creating Supabase admin client with URL:', supabaseUrl);
-  
   try {
+    console.log('Creating Supabase admin client');
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Check the webhook key against the database, regardless of format
+    // Check the webhook key against the database
     console.log('Attempting to verify webhook key in database');
     const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
       .from('webhook_keys')

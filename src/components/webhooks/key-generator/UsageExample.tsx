@@ -46,12 +46,11 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
   };
   
   const formattedWebhookUrl = ensureFullUrl(webhookUrl);
-  console.log("Usage example using webhook URL:", formattedWebhookUrl);
   
   // Create the curl commands for different header formats
-  const curlCommandCustomHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_KEY_HERE"\n-d '${formattedJson}'`;
+  const curlCommandCustomHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_API_KEY"\n-d '${formattedJson}'`;
   
-  const curlCommandAuthHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "Authorization: Bearer YOUR_KEY_HERE"\n-d '${formattedJson}'`;
+  const curlCommandAuthHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "Authorization: Bearer YOUR_API_KEY"\n-d '${formattedJson}'`;
 
   return (
     <div className="space-y-2">
@@ -87,7 +86,7 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
             className="mt-2"
           />
           <p className="text-xs text-muted-foreground">
-            Use this format for tools that expect standard Authorization headers like Make or Postman
+            Use this format for tools that expect standard Authorization headers
           </p>
         </TabsContent>
       </Tabs>
@@ -105,4 +104,4 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
       </div>
     </div>
   );
-};
+}
