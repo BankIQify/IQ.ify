@@ -61,12 +61,19 @@ export function WebhookInfoCard() {
         </div>
 
         <div>
-          <h3 className="font-medium mb-1">2. Authentication Header</h3>
+          <h3 className="font-medium mb-1">2. Authentication Headers</h3>
           <div className="bg-muted p-2 rounded text-sm">
-            <pre>x-webhook-key: YOUR_API_KEY</pre>
+            <p className="font-medium">Multiple authentication options available:</p>
+            <pre className="mt-1">x-webhook-key: YOUR_API_KEY</pre>
+            <p className="text-xs text-muted-foreground mt-1">OR</p>
+            <pre className="mt-1">Authorization: YOUR_API_KEY</pre>
+            <p className="text-xs text-muted-foreground mt-1">OR</p>
+            <pre className="mt-1">Authorization: Bearer YOUR_API_KEY</pre>
+            <p className="text-xs text-muted-foreground mt-1">OR</p>
+            <pre className="mt-1">Authorization: Bearer YOUR_JWT_TOKEN</pre>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
-            Include this header with your API key in all webhook requests
+            Include one of these headers with your API key in all webhook requests
           </p>
         </div>
 

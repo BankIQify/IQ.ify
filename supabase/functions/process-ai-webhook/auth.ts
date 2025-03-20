@@ -5,6 +5,7 @@ import { createErrorResponse } from "../_shared/webhook-utils.ts";
 export async function verifyWebhookKey(req: Request, supabaseUrl: string, supabaseServiceKey: string) {
   // Get webhook key from either x-webhook-key or Authorization header
   let webhookKey = req.headers.get('x-webhook-key');
+  let isJwtToken = false;
   
   // Check for Authorization header if x-webhook-key is not present
   if (!webhookKey) {
@@ -12,11 +13,15 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     
     if (authHeader) {
       // Handle both "Bearer <key>" and plain "<key>" formats
-      webhookKey = authHeader.startsWith('Bearer ') 
-        ? authHeader.substring(7).trim() 
-        : authHeader.trim();
-      
-      console.log('Using key from Authorization header');
+      if (authHeader.startsWith('Bearer ')) {
+        webhookKey = authHeader.substring(7).trim();
+        // Check if this looks like a JWT (has two dots for three segments)
+        isJwtToken = webhookKey.split('.').length === 3;
+        console.log('Using key from Authorization header with Bearer prefix, JWT format:', isJwtToken);
+      } else {
+        webhookKey = authHeader.trim();
+        console.log('Using key from Authorization header without Bearer prefix');
+      }
     }
   }
   
@@ -60,7 +65,48 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   try {
     const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     
-    // Verify the webhook key
+    // If it's a JWT token, we need to validate it differently
+    if (isJwtToken) {
+      console.log('Validating JWT token format');
+      
+      try {
+        // For JWT tokens, we just check if they're valid API keys in the database
+        // We're not decoding/verifying the JWT structure here since we don't have the secret
+        // Instead, we're checking if this token is registered in our webhook_keys table
+        const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
+          .from('webhook_keys')
+          .select('id')
+          .eq('api_key', webhookKey)
+          .maybeSingle();
+          
+        if (keyCheckError) {
+          console.error('Error checking JWT as webhook key:', keyCheckError);
+          return { 
+            valid: false, 
+            response: createErrorResponse(`Database error checking webhook key: ${keyCheckError.message}`, 500)
+          };
+        }
+
+        if (!keyCheck) {
+          console.error('Invalid JWT token provided');
+          return { 
+            valid: false, 
+            response: createErrorResponse('Unauthorized: Invalid JWT token', 401)
+          };
+        }
+        
+        console.log('JWT token validation successful');
+        return { valid: true, supabaseAdmin };
+      } catch (jwtError) {
+        console.error('Error validating JWT token:', jwtError);
+        return {
+          valid: false,
+          response: createErrorResponse(`Invalid JWT token format: ${jwtError.message}`, 401)
+        };
+      }
+    }
+    
+    // For regular API keys, verify against the webhook_keys table
     console.log('Attempting to verify webhook key in database');
     const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
       .from('webhook_keys')

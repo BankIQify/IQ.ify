@@ -48,19 +48,22 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
   const formattedWebhookUrl = ensureFullUrl(webhookUrl);
   console.log("Usage example using webhook URL:", formattedWebhookUrl);
   
-  // Create the curl commands for both header formats
+  // Create the curl commands for different header formats
   const curlCommandCustomHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_KEY_HERE"\n-d '${formattedJson}'`;
   
   const curlCommandAuthHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "Authorization: Bearer YOUR_KEY_HERE"\n-d '${formattedJson}'`;
+
+  const curlCommandJwtHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"\n-d '${formattedJson}'`;
 
   return (
     <div className="space-y-2">
       <Label>How to Use</Label>
       
       <Tabs defaultValue="custom" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="custom">Custom Header (x-webhook-key)</TabsTrigger>
-          <TabsTrigger value="auth">Authorization Header</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="custom">Custom Header</TabsTrigger>
+          <TabsTrigger value="auth">Auth Header</TabsTrigger>
+          <TabsTrigger value="jwt">JWT Token</TabsTrigger>
         </TabsList>
         
         <TabsContent value="custom" className="space-y-2">
@@ -88,6 +91,20 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
           />
           <p className="text-xs text-muted-foreground">
             Use this format for tools that expect standard Authorization headers like Make or Postman
+          </p>
+        </TabsContent>
+        
+        <TabsContent value="jwt" className="space-y-2">
+          <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap">
+            {curlCommandJwtHeader}
+          </div>
+          <CopyButton 
+            text={curlCommandJwtHeader}
+            description="cURL command with JWT token copied to clipboard"
+            className="mt-2"
+          />
+          <p className="text-xs text-muted-foreground">
+            Use this format for integrations that require JWT authentication
           </p>
         </TabsContent>
       </Tabs>
