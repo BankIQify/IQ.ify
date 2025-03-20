@@ -10,6 +10,7 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   console.log('Request URL:', req.url);
   console.log('Request method:', req.method);
   console.log('Headers present:', [...req.headers.keys()].join(', '));
+  console.log('Supabase URL being used:', supabaseUrl);
   
   if (!webhookKey) {
     console.error('Missing webhook key in headers');
@@ -30,11 +31,18 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     };
   }
   
-  console.log('Creating Supabase admin client with URL:', supabaseUrl);
-  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+  // Ensure Supabase URL is properly formatted with https:// prefix
+  if (!supabaseUrl.startsWith('http')) {
+    supabaseUrl = `https://${supabaseUrl}`;
+    console.log('Updated Supabase URL with https:// prefix:', supabaseUrl);
+  }
   
-  // Verify the webhook key
+  console.log('Creating Supabase admin client with URL:', supabaseUrl);
+  
   try {
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    // Verify the webhook key
     console.log('Attempting to verify webhook key in database');
     const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
       .from('webhook_keys')

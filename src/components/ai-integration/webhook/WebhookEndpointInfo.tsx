@@ -10,17 +10,26 @@ interface WebhookEndpointInfoProps {
 }
 
 export function WebhookEndpointInfo({ webhookUrl }: WebhookEndpointInfoProps) {
-  // Ensure the URL has a proper protocol
-  const ensureProtocol = (url: string): string => {
-    if (!url) return url;
+  // Ensure the URL has a proper protocol and full domain
+  const ensureFullUrl = (url: string): string => {
+    if (!url) return "";
+    
+    // Check if URL has protocol
     if (!/^https?:\/\//i.test(url)) {
-      // If no protocol is specified, add https://
-      return `https://${url}`;
+      url = `https://${url}`;
     }
+    
+    // Check if this is a partial URL (without domain)
+    if (url.includes('functions/v1') && !url.includes('.supabase.co')) {
+      // Replace with full URL pattern
+      return `https://dqaihawavxlacegykwqu.supabase.co/functions/v1/process-ai-webhook`;
+    }
+    
     return url;
   };
 
-  const formattedUrl = ensureProtocol(webhookUrl);
+  const formattedUrl = ensureFullUrl(webhookUrl);
+  console.log("WebhookEndpointInfo using URL:", formattedUrl);
 
   const copyToClipboard = (text: string, description: string) => {
     navigator.clipboard.writeText(text).then(
@@ -60,8 +69,9 @@ export function WebhookEndpointInfo({ webhookUrl }: WebhookEndpointInfoProps) {
       <Alert className="mt-4">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Important:</strong> Make sure your webhook URL starts with <code>http://</code> or <code>https://</code> when configuring in Make.com or other services. 
-          Invalid protocols will cause connection errors.
+          <strong>Important:</strong> Make sure your webhook URL is a fully qualified domain name (FQDN). 
+          The URL should look like <code>https://dqaihawavxlacegykwqu.supabase.co/functions/v1/process-ai-webhook</code>, 
+          not just <code>/functions/v1/process-ai-webhook</code>.
         </AlertDescription>
       </Alert>
     </div>

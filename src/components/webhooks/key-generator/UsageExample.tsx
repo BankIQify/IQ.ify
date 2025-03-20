@@ -26,17 +26,26 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
 
   const formattedJson = JSON.stringify(sampleJsonPayload, null, 2);
   
-  // Ensure the webhook URL has a proper protocol
-  const ensureProtocol = (url: string): string => {
+  // Ensure the webhook URL is fully qualified
+  const ensureFullUrl = (url: string): string => {
     if (!url) return "";
+    
+    // Check if URL has protocol
     if (!/^https?:\/\//i.test(url)) {
-      // If no protocol is specified, add https://
-      return `https://${url}`;
+      url = `https://${url}`;
     }
+    
+    // Check if this is a partial URL (without domain)
+    if (url.includes('functions/v1') && !url.includes('.supabase.co')) {
+      // Replace with full URL pattern
+      return `https://dqaihawavxlacegykwqu.supabase.co/functions/v1/process-ai-webhook`;
+    }
+    
     return url;
   };
   
-  const formattedWebhookUrl = ensureProtocol(webhookUrl);
+  const formattedWebhookUrl = ensureFullUrl(webhookUrl);
+  console.log("Usage example using webhook URL:", formattedWebhookUrl);
   
   // Create the curl command that accurately reflects the endpoint being used
   const curlCommand = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_KEY_HERE"\n-d '${formattedJson}'`;

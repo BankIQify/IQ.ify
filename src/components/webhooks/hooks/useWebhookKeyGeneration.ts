@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -12,11 +12,20 @@ export const useWebhookKeyGeneration = () => {
   const { toast } = useToast();
 
   // Set the webhook URL based on the current environment
-  useState(() => {
-    const baseUrl = window.location.origin;
+  useEffect(() => {
+    // Get the Supabase URL from environment or fall back to a default
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://dqaihawavxlacegykwqu.supabase.co";
-    setWebhookUrl(`${supabaseUrl}/functions/v1/process-ai-webhook`);
-  });
+    
+    // Ensure the URL has proper format
+    let formattedUrl = supabaseUrl;
+    if (!formattedUrl.startsWith('http')) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+    
+    const webhookEndpoint = `${formattedUrl}/functions/v1/process-ai-webhook`;
+    console.log('Setting up webhook URL in useWebhookKeyGeneration:', webhookEndpoint);
+    setWebhookUrl(webhookEndpoint);
+  }, []);
 
   const generateKey = async () => {
     if (!keyName.trim()) {
