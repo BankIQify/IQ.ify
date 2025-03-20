@@ -63,14 +63,10 @@ export function WebhookInfoCard() {
         <div>
           <h3 className="font-medium mb-1">2. Authentication Headers</h3>
           <div className="bg-muted p-2 rounded text-sm">
-            <p className="font-medium">Multiple authentication options available:</p>
+            <p className="font-medium">Use one of these authentication options:</p>
             <pre className="mt-1">x-webhook-key: YOUR_API_KEY</pre>
             <p className="text-xs text-muted-foreground mt-1">OR</p>
-            <pre className="mt-1">Authorization: YOUR_API_KEY</pre>
-            <p className="text-xs text-muted-foreground mt-1">OR</p>
             <pre className="mt-1">Authorization: Bearer YOUR_API_KEY</pre>
-            <p className="text-xs text-muted-foreground mt-1">OR</p>
-            <pre className="mt-1">Authorization: Bearer YOUR_JWT_TOKEN</pre>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
             Include one of these headers with your API key in all webhook requests
@@ -103,25 +99,17 @@ export function WebhookInfoCard() {
         </div>
 
         <div>
-          <h3 className="font-medium mb-1">4. Payload Format - Conversation Created</h3>
+          <h3 className="font-medium mb-1">4. Payload Format Example</h3>
           <div className="bg-muted p-2 rounded text-sm overflow-x-auto">
             <pre>{`{
-  "event_type": "conversation_created",
-  "user_id": "auth-user-id",
-  "title": "Conversation Title"
-}`}</pre>
-          </div>
-        </div>
-
-        <div>
-          <h3 className="font-medium mb-1">5. Payload Format - Message Created</h3>
-          <div className="bg-muted p-2 rounded text-sm overflow-x-auto">
-            <pre>{`{
-  "event_type": "message_created",
-  "conversation_id": "existing-conversation-id",
-  "role": "user", // or "assistant" or "system"
-  "content": "Message content text",
-  "tokens_used": 150 // optional
+  "event_type": "question_generated",
+  "sub_topic_id": "uuid-of-subtopic",
+  "questions": [
+    {
+      "content": "Question text?",
+      "difficulty": "medium"
+    }
+  ]
 }`}</pre>
           </div>
         </div>
