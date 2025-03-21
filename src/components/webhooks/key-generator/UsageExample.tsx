@@ -9,7 +9,8 @@ interface UsageExampleProps {
 }
 
 export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
-  const sampleJsonPayload = {
+  // Create example payloads with correct structures
+  const structuredQuestionsPayload = {
     event_type: "question_generated",
     sub_topic_id: "123e4567-e89b-12d3-a456-426614174000",
     questions: [
@@ -25,7 +26,14 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
     prompt: "Generate basic knowledge questions"
   };
 
-  const formattedJson = JSON.stringify(sampleJsonPayload, null, 2);
+  const rawTextPayload = {
+    sub_topic_id: "123e4567-e89b-12d3-a456-426614174000",
+    sub_topic_name: "World Geography",
+    raw_text: "1. What is the capital of France?\n2. What is the largest ocean on Earth?\n3. Which country has the largest population?"
+  };
+
+  const formattedStructuredJson = JSON.stringify(structuredQuestionsPayload, null, 2);
+  const formattedRawTextJson = JSON.stringify(rawTextPayload, null, 2);
   
   // Ensure the webhook URL is fully qualified
   const ensureFullUrl = (url: string): string => {
@@ -48,12 +56,12 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
   const formattedWebhookUrl = ensureFullUrl(webhookUrl);
   
   // Create the curl commands for different header formats
-  const curlCommandCustomHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_API_KEY"\n-d '${formattedJson}'`;
+  const curlCommandCustomHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "x-webhook-key: YOUR_API_KEY"\n-d '${formattedStructuredJson}'`;
   
-  const curlCommandAuthHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "Authorization: Bearer YOUR_API_KEY"\n-d '${formattedJson}'`;
+  const curlCommandAuthHeader = `curl -X POST ${formattedWebhookUrl}\n-H "Content-Type: application/json"\n-H "Authorization: Bearer YOUR_API_KEY"\n-d '${formattedStructuredJson}'`;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <Label>How to Use</Label>
       
       <Tabs defaultValue="custom" className="w-full">
@@ -91,17 +99,42 @@ export const UsageExample = ({ webhookUrl }: UsageExampleProps) => {
         </TabsContent>
       </Tabs>
       
-      <div className="pt-4">
-        <Label>JSON Example</Label>
-        <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap mt-2">
-          {formattedJson}
-        </div>
-        <CopyButton 
-          text={formattedJson}
-          description="JSON example copied to clipboard"
-          className="mt-2"
-        />
-      </div>
+      <Tabs defaultValue="structured" className="w-full mt-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="structured">Structured Questions</TabsTrigger>
+          <TabsTrigger value="rawtext">Raw Text</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="structured" className="space-y-2">
+          <Label>JSON Example (Structured Questions)</Label>
+          <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap">
+            {formattedStructuredJson}
+          </div>
+          <CopyButton 
+            text={formattedStructuredJson}
+            description="Structured questions JSON example copied to clipboard"
+            className="mt-2"
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            Use this format when you have already structured questions with properties
+          </p>
+        </TabsContent>
+        
+        <TabsContent value="rawtext" className="space-y-2">
+          <Label>JSON Example (Raw Text)</Label>
+          <div className="bg-muted p-3 rounded-md text-sm font-mono overflow-x-auto whitespace-pre-wrap">
+            {formattedRawTextJson}
+          </div>
+          <CopyButton 
+            text={formattedRawTextJson}
+            description="Raw text JSON example copied to clipboard"
+            className="mt-2"
+          />
+          <p className="text-xs text-muted-foreground mt-2">
+            Use this format when you have unstructured text that needs to be parsed into questions
+          </p>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

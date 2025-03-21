@@ -17,6 +17,17 @@ serve(async (req) => {
   console.log(`Received ${req.method} request to process-ai-webhook`);
   console.log(`URL: ${req.url}`);
   
+  // Log all request headers for debugging
+  console.log('Request headers:');
+  req.headers.forEach((value, key) => {
+    // Don't log actual authorization values for security
+    if (key.toLowerCase() === 'authorization' || key.toLowerCase() === 'x-webhook-key') {
+      console.log(`${key}: [REDACTED]`);
+    } else {
+      console.log(`${key}: ${value}`);
+    }
+  });
+  
   try {
     // Get Supabase credentials from environment
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -41,17 +52,49 @@ serve(async (req) => {
 
     // Parse the webhook payload
     let payload;
+    let rawBody;
     try {
-      payload = await req.json();
-      console.log('Received webhook payload:', JSON.stringify(payload));
+      // First, get the raw body for logging in case of parse error
+      rawBody = await req.text();
+      console.log('Raw payload received:', rawBody);
+      
+      // Try to parse as JSON
+      try {
+        payload = JSON.parse(rawBody);
+        console.log('Parsed JSON payload:', JSON.stringify(payload, null, 2));
+      } catch (parseError) {
+        console.error('JSON parse error:', parseError.message);
+        return createErrorResponse(`Invalid JSON payload: ${parseError.message}. Please ensure you're sending valid JSON.`, 400);
+      }
     } catch (error) {
-      console.error('Failed to parse JSON payload:', error);
-      return createErrorResponse('Invalid JSON payload', 400);
+      console.error('Failed to read request body:', error);
+      return createErrorResponse('Failed to read request body', 400);
     }
 
     if (!payload) {
       console.error('Empty payload received');
       return createErrorResponse('Empty payload received', 400);
+    }
+
+    // Validate the required fields based on the payload type
+    if (payload.raw_text && payload.sub_topic_id) {
+      // For raw text submissions, these fields are sufficient
+      console.log('Processing raw text submission');
+    } else if (payload.event_type === 'question_generated') {
+      // For question_generated events, validate required fields
+      if (!payload.sub_topic_id) {
+        console.error('Missing required field: sub_topic_id');
+        return createErrorResponse('Missing required field: sub_topic_id', 400);
+      }
+      
+      // Questions array is optional for raw storage, but should be validated if present
+      if (payload.questions && (!Array.isArray(payload.questions) || payload.questions.length === 0)) {
+        console.error('Invalid questions array: must be a non-empty array');
+        return createErrorResponse('Invalid questions array: must be a non-empty array', 400);
+      }
+    } else {
+      console.error('Unrecognized payload structure. Expected either raw_text+sub_topic_id or event_type+sub_topic_id+questions');
+      return createErrorResponse('Unrecognized payload structure. Please check the documentation for valid formats.', 400);
     }
 
     // Check if this is a raw text submission

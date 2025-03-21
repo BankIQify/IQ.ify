@@ -1,36 +1,42 @@
-
 import { createSuccessResponse } from "../_shared/webhook-utils.ts";
 
 export async function handleRawTextSubmission(supabaseAdmin, payload) {
   console.log('Received raw text submission');
-  // Store the event but don't process it automatically - let the user edit it in the UI
-  const { data: eventData, error: eventError } = await supabaseAdmin
-    .from('webhook_events')
-    .insert({
-      source: payload.source || 'external_ai',
-      event_type: 'question_generated',
-      payload: {
-        sub_topic_id: payload.sub_topic_id,
-        sub_topic_name: payload.sub_topic_name || null,
-        prompt: payload.prompt || null,
-        raw_text: payload.raw_text,
-        questions: [] // Empty array to be filled after editing
-      },
-      processed: false
-    })
-    .select('id')
-    .single();
+  console.log('Raw text content:', payload.raw_text.substring(0, 100) + '...');
+  
+  try {
+    // Store the event but don't process it automatically - let the user edit it in the UI
+    const { data: eventData, error: eventError } = await supabaseAdmin
+      .from('webhook_events')
+      .insert({
+        source: payload.source || 'external_ai',
+        event_type: 'question_generated',
+        payload: {
+          sub_topic_id: payload.sub_topic_id,
+          sub_topic_name: payload.sub_topic_name || null,
+          prompt: payload.prompt || null,
+          raw_text: payload.raw_text,
+          questions: [] // Empty array to be filled after editing
+        },
+        processed: false
+      })
+      .select('id')
+      .single();
 
-  if (eventError) {
-    console.error('Error recording webhook event with raw text:', eventError);
-    throw new Error('Failed to record webhook event with raw text');
+    if (eventError) {
+      console.error('Error recording webhook event with raw text:', eventError);
+      throw new Error(`Failed to record webhook event with raw text: ${eventError.message}`);
+    }
+
+    return createSuccessResponse({
+      success: true,
+      message: 'Raw text questions received and stored for editing', 
+      event_id: eventData.id
+    });
+  } catch (error) {
+    console.error('Error in handleRawTextSubmission:', error);
+    throw error; // Let the main handler catch and format the error response
   }
-
-  return createSuccessResponse({
-    success: true,
-    message: 'Raw text questions received and stored for editing', 
-    event_id: eventData.id
-  });
 }
 
 // New function to handle question insertion
@@ -38,19 +44,33 @@ async function insertQuestions(supabase, questions, sub_topic_id, prompt) {
   console.log(`Inserting ${questions.length} questions for sub-topic ${sub_topic_id}`);
   
   try {
+    // Log the structure of the first question for debugging
+    if (questions.length > 0) {
+      console.log('First question structure:', JSON.stringify(questions[0], null, 2));
+    }
+    
     // Insert all questions in parallel
-    const insertPromises = questions.map(question => 
-      supabase
+    const insertPromises = questions.map(question => {
+      // Normalize question format - handle both content property and direct question strings
+      const questionContent = typeof question === 'string' 
+        ? question 
+        : (question.content || question.question || '');
+      
+      const difficulty = question.difficulty || 'medium';
+      
+      console.log(`Processing question: "${questionContent.substring(0, 30)}...", difficulty: ${difficulty}`);
+      
+      return supabase
         .from('questions')
         .insert({
-          content: question,
+          content: questionContent,
           sub_topic_id: sub_topic_id,
           generation_prompt: prompt || null,
           ai_generated: true,
           question_type: determineQuestionType(question),
-          difficulty: question.difficulty || 'medium', // Set difficulty or default to medium
-        })
-    );
+          difficulty: difficulty, // Set difficulty or default to medium
+        });
+    });
 
     const results = await Promise.all(insertPromises);
     
@@ -83,15 +103,27 @@ async function insertQuestions(supabase, questions, sub_topic_id, prompt) {
 }
 
 export async function handleQuestionGenerated(supabase, payload) {
+  console.log('Handling question_generated event');
+  console.log('Payload structure:', Object.keys(payload).join(', '));
+  
   const { questions, sub_topic_id, prompt } = payload;
   
   if (!sub_topic_id) {
+    console.error('Missing sub_topic_id in payload');
     return { success: false, error: 'Missing sub_topic_id in payload' };
   }
   
   if (!questions || !Array.isArray(questions)) {
+    console.error('Missing or invalid questions array in payload');
     return { success: false, error: 'Missing or invalid questions array in payload' };
   }
+  
+  if (questions.length === 0) {
+    console.error('Empty questions array in payload');
+    return { success: false, error: 'Questions array is empty' };
+  }
+  
+  console.log(`Found ${questions.length} questions to process`);
   
   // Call the extracted function to handle question insertion
   return await insertQuestions(supabase, questions, sub_topic_id, prompt);
@@ -99,6 +131,12 @@ export async function handleQuestionGenerated(supabase, payload) {
 
 // Helper function to determine question type based on content
 export function determineQuestionType(questionContent) {
+  // If questionContent is a string, it's a simple text question
+  if (typeof questionContent === 'string') {
+    return 'text';
+  }
+  
+  // Otherwise, examine the properties to determine the type
   if (questionContent.primaryOptions && questionContent.secondaryOptions) {
     return 'multiple_choice';
   } else if (questionContent.options && Array.isArray(questionContent.options)) {
