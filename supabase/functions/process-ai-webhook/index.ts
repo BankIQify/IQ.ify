@@ -16,17 +16,8 @@ serve(async (req) => {
   console.log(`============= START WEBHOOK REQUEST =============`);
   console.log(`Received ${req.method} request to process-ai-webhook`);
   console.log(`URL: ${req.url}`);
-  
-  // Log all request headers for debugging
-  console.log('Request headers:');
-  req.headers.forEach((value, key) => {
-    // Don't log actual authorization values for security
-    if (key.toLowerCase() === 'authorization' || key.toLowerCase() === 'x-webhook-key') {
-      console.log(`${key}: [REDACTED]`);
-    } else {
-      console.log(`${key}: ${value}`);
-    }
-  });
+  console.log(`Origin: ${req.headers.get('origin') || 'Not specified'}`);
+  console.log(`User-Agent: ${req.headers.get('user-agent') || 'Not specified'}`);
   
   try {
     // Get Supabase credentials from environment

@@ -3,9 +3,19 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createErrorResponse } from "../_shared/webhook-utils.ts";
 
 export async function verifyWebhookKey(req: Request, supabaseUrl: string, supabaseServiceKey: string) {
-  // Get webhook key from request headers
+  // Get webhook key from request headers - try multiple formats
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
-  const customHeader = req.headers.get('x-webhook-key');
+  const customHeader = req.headers.get('x-webhook-key') || req.headers.get('X-Webhook-Key');
+  
+  // Log all headers for debugging
+  console.log('Request headers:');
+  req.headers.forEach((value, key) => {
+    if (key.toLowerCase() !== 'authorization' && key.toLowerCase() !== 'x-webhook-key') {
+      console.log(`${key}: ${value}`);
+    } else {
+      console.log(`${key}: [PRESENT]`);
+    }
+  });
   
   let webhookKey = null;
   
@@ -30,13 +40,12 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
   console.log('Webhook request received, checking authorization');
   console.log('Request URL:', req.url);
   console.log('Request method:', req.method);
-  console.log('Headers present:', [...req.headers.keys()].join(', '));
   
   if (!webhookKey) {
     console.error('Missing webhook key in headers (tried both x-webhook-key and Authorization)');
     return { 
       valid: false, 
-      response: createErrorResponse('Unauthorized: Missing webhook key in headers', 401)
+      response: createErrorResponse('Unauthorized: Missing webhook key in headers. Please include either x-webhook-key or Authorization header.', 401)
     };
   }
 
@@ -62,7 +71,7 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     console.log('Attempting to verify webhook key in database');
     const { data: keyCheck, error: keyCheckError } = await supabaseAdmin
       .from('webhook_keys')
-      .select('id')
+      .select('id, key_name')
       .eq('api_key', webhookKey)
       .maybeSingle();
 
@@ -75,14 +84,21 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     }
 
     if (!keyCheck) {
-      console.error('Invalid webhook key provided:', webhookKey);
+      console.error('Invalid webhook key provided');
       return { 
         valid: false, 
         response: createErrorResponse('Unauthorized: Invalid webhook key', 401)
       };
     }
 
-    console.log('Webhook key verification successful');
+    console.log(`Webhook key verification successful for key: ${keyCheck.key_name} (${keyCheck.id})`);
+    
+    // Update last_used_at timestamp for the key
+    await supabaseAdmin
+      .from('webhook_keys')
+      .update({ last_used_at: new Date().toISOString() })
+      .eq('id', keyCheck.id);
+      
     return { valid: true, supabaseAdmin };
   } catch (error) {
     console.error('Unexpected error verifying webhook key:', error);
