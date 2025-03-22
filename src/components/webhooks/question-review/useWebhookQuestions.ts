@@ -18,12 +18,20 @@ export const useWebhookQuestions = () => {
   const { 
     selectedEvent, 
     editedQuestions, 
+    isProcessing: isProcessingEvent,
+    error: eventSelectionError,
     handleSelectEvent, 
     setEditedQuestions,
-    clearSelectedEvent 
+    clearSelectedEvent,
+    handleSetQuestions 
   } = useEventSelection();
   
-  const { handleUpdateQuestion } = useQuestionEditing(editedQuestions, setEditedQuestions);
+  const { 
+    handleUpdateQuestion,
+    handleBulkUpdate,
+    handleDeleteQuestion,
+    isUpdating 
+  } = useQuestionEditing(editedQuestions, setEditedQuestions);
 
   const loadWebhookEvents = async () => {
     setIsLoading(true);
@@ -50,18 +58,28 @@ export const useWebhookQuestions = () => {
   }, [toast]);
 
   const handleSaveQuestions = async () => {
-    if (!selectedEvent || !editedQuestions.length) return;
+    if (!selectedEvent || !editedQuestions.length) {
+      toast({
+        title: "Cannot save",
+        description: "No questions to save or no event selected",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     try {
-      const subTopicId = selectedEvent.payload.sub_topic_id;
+      // Try to get subTopicId either from the event payload or from individual questions
+      const eventSubTopicId = selectedEvent.payload.sub_topic_id;
       
-      if (!subTopicId) {
-        throw new Error("No sub-topic ID provided in webhook payload");
-      }
-      
-      // Save each question
       for (const question of editedQuestions) {
+        // Use question's subTopicId if available, otherwise fall back to event's subTopicId
+        const subTopicId = question.subTopicId || eventSubTopicId;
+        
+        if (!subTopicId) {
+          throw new Error("No sub-topic ID found for question: " + question.question.substring(0, 30) + "...");
+        }
+        
         await saveQuestion(
           question, 
           subTopicId, 
@@ -84,7 +102,7 @@ export const useWebhookQuestions = () => {
       console.error("Error saving questions:", error);
       toast({
         title: "Error",
-        description: "Failed to save questions",
+        description: error instanceof Error ? error.message : "Failed to save questions",
         variant: "destructive",
       });
     } finally {
@@ -93,7 +111,14 @@ export const useWebhookQuestions = () => {
   };
 
   const handleDiscardEvent = async () => {
-    if (!selectedEvent) return;
+    if (!selectedEvent) {
+      toast({
+        title: "No event selected",
+        description: "There is no event to discard",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     try {
@@ -111,7 +136,7 @@ export const useWebhookQuestions = () => {
       console.error("Error discarding event:", error);
       toast({
         title: "Error",
-        description: "Failed to discard event",
+        description: error instanceof Error ? error.message : "Failed to discard event",
         variant: "destructive",
       });
     } finally {
@@ -119,17 +144,18 @@ export const useWebhookQuestions = () => {
     }
   };
 
-  const handleSetQuestions = (questions: QuestionItem[]) => {
-    setEditedQuestions(questions);
-  };
+  // Combine all loading states
+  const isBusy = isLoading || isProcessingEvent || isUpdating;
 
   return {
     webhookEvents,
-    isLoading,
+    isLoading: isBusy,
     selectedEvent,
     editedQuestions,
+    error: eventSelectionError,
     handleSelectEvent,
     handleUpdateQuestion,
+    handleDeleteQuestion,
     handleSaveQuestions,
     handleDiscardEvent,
     handleSetQuestions,
