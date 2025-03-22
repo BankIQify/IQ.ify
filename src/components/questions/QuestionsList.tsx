@@ -5,12 +5,18 @@ import { Progress } from "@/components/ui/progress";
 import { AlertCircle } from "lucide-react";
 import type { QuestionContent } from "@/types/questions";
 import { QuestionWithDuplicateFlag } from "./utils/duplicationDetector";
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 
 interface QuestionsListProps {
   questions: Array<QuestionWithDuplicateFlag>;
 }
 
 export const QuestionsList = ({ questions }: QuestionsListProps) => {
+  // Function to safely render HTML content
+  const renderHTML = (html: string) => {
+    return { __html: html };
+  };
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Generated Questions</h2>
@@ -64,8 +70,14 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                 </div>
               )}
               
-              {/* Question text */}
-              <p>{content.question}</p>
+              {/* Question text - support for HTML content */}
+              <div className="question-content">
+                {content.question.includes('<table') || content.question.includes('<div') ? (
+                  <div dangerouslySetInnerHTML={renderHTML(content.question)} />
+                ) : (
+                  <p>{content.question}</p>
+                )}
+              </div>
               
               {/* Question image */}
               {content.imageUrl && (
@@ -90,7 +102,11 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                           : "border-gray-200"
                       }`}
                     >
-                      {option}
+                      {option.includes('<') && option.includes('>') ? (
+                        <div dangerouslySetInnerHTML={renderHTML(option)} />
+                      ) : (
+                        option
+                      )}
                     </div>
                   ))}
                 </div>
@@ -111,7 +127,11 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                               : "border-gray-200"
                           }`}
                         >
-                          {option}
+                          {option.includes('<') && option.includes('>') ? (
+                            <div dangerouslySetInnerHTML={renderHTML(option)} />
+                          ) : (
+                            option
+                          )}
                         </div>
                       ))}
                     </div>
@@ -129,7 +149,11 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                               : "border-gray-200"
                           }`}
                         >
-                          {option}
+                          {option.includes('<') && option.includes('>') ? (
+                            <div dangerouslySetInnerHTML={renderHTML(option)} />
+                          ) : (
+                            option
+                          )}
                         </div>
                       ))}
                     </div>
@@ -149,10 +173,14 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                 </div>
               )}
               
-              {/* Explanation section */}
+              {/* Explanation section - support for HTML content */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-medium mb-2">Explanation:</p>
-                <p>{content.explanation}</p>
+                {content.explanation.includes('<table') || content.explanation.includes('<div') ? (
+                  <div dangerouslySetInnerHTML={renderHTML(content.explanation)} />
+                ) : (
+                  <p>{content.explanation}</p>
+                )}
               </div>
             </div>
           </Card>
