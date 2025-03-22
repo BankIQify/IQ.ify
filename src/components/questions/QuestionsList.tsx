@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -63,7 +64,19 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                 </div>
               )}
               
+              {/* Question text */}
               <p>{content.question}</p>
+              
+              {/* Question image */}
+              {content.imageUrl && (
+                <div className="my-3">
+                  <img 
+                    src={content.imageUrl} 
+                    alt="Question visual" 
+                    className="max-w-full h-auto rounded-lg border"
+                  />
+                </div>
+              )}
               
               {/* Standard multiple choice options */}
               {content.options && content.options.length > 0 && (
@@ -124,6 +137,19 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                 </div>
               )}
               
+              {/* Answer image (if present) */}
+              {content.answerImageUrl && (
+                <div className="my-3">
+                  <p className="font-medium mb-2">Answer:</p>
+                  <img 
+                    src={content.answerImageUrl} 
+                    alt="Answer visual" 
+                    className="max-w-full h-auto rounded-lg border"
+                  />
+                </div>
+              )}
+              
+              {/* Explanation section */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-medium mb-2">Explanation:</p>
                 <p>{content.explanation}</p>
