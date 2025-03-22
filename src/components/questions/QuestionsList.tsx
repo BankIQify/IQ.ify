@@ -1,15 +1,12 @@
 
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle } from "lucide-react";
 import type { QuestionContent } from "@/types/questions";
+import { QuestionWithDuplicateFlag } from "./utils/duplicationDetector";
 
 interface QuestionsListProps {
-  questions: Array<{
-    id: string;
-    content: QuestionContent;
-    sub_topics: {
-      name: string;
-    };
-  }>;
+  questions: Array<QuestionWithDuplicateFlag>;
 }
 
 export const QuestionsList = ({ questions }: QuestionsListProps) => {
@@ -22,7 +19,20 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
           <Card key={question.id} className="p-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="font-medium">Question {index + 1}</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-medium">Question {index + 1}</h3>
+                  {question.hasSimilar && (
+                    <Badge variant="destructive" className="flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>Possible Duplicate</span>
+                      {question.similarityScore && (
+                        <span className="ml-1 text-xs">
+                          ({(question.similarityScore * 100).toFixed(0)}% match)
+                        </span>
+                      )}
+                    </Badge>
+                  )}
+                </div>
                 <span className="text-sm text-gray-500">
                   {question.sub_topics?.name}
                 </span>

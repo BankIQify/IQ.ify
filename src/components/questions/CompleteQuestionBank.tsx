@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { QuestionsList } from "./QuestionsList";
 import type { QuestionContent, QuestionCategory } from "@/types/questions";
+import { detectDuplicateQuestions } from "./utils/duplicationDetector";
 
 const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50, 100];
 
@@ -16,6 +18,7 @@ export const CompleteQuestionBank = () => {
   const [subTopicId, setSubTopicId] = useState<string>("all");
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showDuplicatesOnly, setShowDuplicatesOnly] = useState(false);
 
   // Fetch sub-topics based on selected category
   const { data: subTopics } = useQuery({
@@ -44,7 +47,7 @@ export const CompleteQuestionBank = () => {
 
   // Fetch questions with filters and pagination
   const { data: questions, isLoading } = useQuery({
-    queryKey: ['bank-questions', category, subTopicId, searchQuery, currentPage, itemsPerPage],
+    queryKey: ['bank-questions', category, subTopicId, searchQuery, currentPage, itemsPerPage, showDuplicatesOnly],
     queryFn: async () => {
       let query = supabase
         .from('questions')
@@ -72,22 +75,41 @@ export const CompleteQuestionBank = () => {
         query = query.textSearch('content->>question', searchQuery);
       }
 
+      // If we're only showing duplicates, we need to fetch more items to analyze
+      const effectiveItemsPerPage = showDuplicatesOnly ? itemsPerPage * 5 : itemsPerPage;
+
       // Add pagination
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage - 1;
+      const start = (currentPage - 1) * effectiveItemsPerPage;
+      const end = start + effectiveItemsPerPage - 1;
       query = query.range(start, end);
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      return data.map(q => ({
+      const formattedQuestions = data.map(q => ({
         id: q.id,
         content: q.content as QuestionContent,
         sub_topics: q.sub_topics
       }));
+
+      return formattedQuestions;
     }
   });
+
+  // Process questions to detect duplicates
+  const processedQuestions = useMemo(() => {
+    if (!questions) return [];
+    
+    const { questionsWithDuplicateFlags, duplicatesFound } = detectDuplicateQuestions(questions);
+    
+    // Filter to only show duplicates if that option is selected
+    if (showDuplicatesOnly) {
+      return questionsWithDuplicateFlags.filter(q => q.hasSimilar);
+    }
+    
+    return questionsWithDuplicateFlags;
+  }, [questions, showDuplicatesOnly]);
 
   return (
     <div className="space-y-6">
@@ -165,12 +187,24 @@ export const CompleteQuestionBank = () => {
             </Select>
           </div>
         </div>
+
+        <div className="mt-4 flex items-center">
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input 
+              type="checkbox" 
+              checked={showDuplicatesOnly} 
+              onChange={(e) => setShowDuplicatesOnly(e.target.checked)}
+              className="form-checkbox h-4 w-4"
+            />
+            <span>Show potential duplicates only</span>
+          </label>
+        </div>
       </Card>
 
       {isLoading ? (
         <p className="text-gray-600">Loading questions...</p>
-      ) : questions && questions.length > 0 ? (
-        <QuestionsList questions={questions} />
+      ) : processedQuestions.length > 0 ? (
+        <QuestionsList questions={processedQuestions} />
       ) : (
         <p className="text-gray-600">No questions found.</p>
       )}
