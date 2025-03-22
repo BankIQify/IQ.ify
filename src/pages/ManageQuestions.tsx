@@ -7,11 +7,9 @@ import { CompleteQuestionBank } from "@/components/questions/CompleteQuestionBan
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { GenerateQuestionsTab } from "@/components/questions/tabs/GenerateQuestionsTab";
 import { HomepageEditor } from "@/components/homepage/HomepageEditor";
 import { CategoriesTable } from "@/components/questions/sections/CategoriesTable";
 import { GamePuzzlesManager } from "@/components/puzzles/GamePuzzlesManager";
-import type { QuestionCategory } from "@/types/questions";
 import { supabase } from "@/integrations/supabase/client";
 import { WebhookManagement } from "@/components/webhooks/WebhookManagement";
 
@@ -19,8 +17,6 @@ const ManageQuestions = () => {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [category, setCategory] = useState<QuestionCategory>("verbal");
-  const [subTopicId, setSubTopicId] = useState<string>("");
   const [sections, setSections] = useState<any[]>([]);
 
   // Redirect if not admin
@@ -71,19 +67,16 @@ const ManageQuestions = () => {
     <div className="page-container">
       <h1 className="section-title">Question Management</h1>
 
-      <Tabs defaultValue="generate" className="w-full">
-        <TabsList className="grid w-full grid-cols-8">
-          <TabsTrigger value="generate" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
-            Generate Questions
+      <Tabs defaultValue="bank" className="w-full">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="bank" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+            Complete Question Bank
           </TabsTrigger>
           <TabsTrigger value="manual" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Manual Upload
           </TabsTrigger>
           <TabsTrigger value="categories" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Manage Categories
-          </TabsTrigger>
-          <TabsTrigger value="bank" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
-            Complete Question Bank
           </TabsTrigger>
           <TabsTrigger value="puzzles" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Puzzle Games
@@ -105,15 +98,6 @@ const ManageQuestions = () => {
 
         <TabsContent value="bank">
           <CompleteQuestionBank />
-        </TabsContent>
-
-        <TabsContent value="generate">
-          <GenerateQuestionsTab
-            category={category}
-            subTopicId={subTopicId}
-            onCategoryChange={setCategory}
-            onSubTopicChange={setSubTopicId}
-          />
         </TabsContent>
 
         <TabsContent value="manual">

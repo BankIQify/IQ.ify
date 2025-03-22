@@ -19,7 +19,8 @@ export const CompleteQuestionBank = () => {
     setShowDuplicatesOnly,
     subTopics,
     isLoading,
-    processedQuestions
+    processedQuestions,
+    refreshQuestions
   } = useQuestionBank();
 
   return (
@@ -44,6 +45,7 @@ export const CompleteQuestionBank = () => {
       <QuestionBankResults
         questions={processedQuestions}
         isLoading={isLoading}
+        onQuestionDeleted={refreshQuestions}
       />
     </div>
   );

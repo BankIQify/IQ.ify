@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { detectDuplicateQuestions } from "../utils/duplicationDetector";
@@ -12,6 +12,12 @@ export const useQuestionBank = () => {
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [showDuplicatesOnly, setShowDuplicatesOnly] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Function to force refresh
+  const refreshQuestions = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   // Fetch sub-topics based on selected category
   const { data: subTopics } = useQuery({
@@ -40,7 +46,7 @@ export const useQuestionBank = () => {
 
   // Fetch questions with filters and pagination
   const { data: questions, isLoading } = useQuery({
-    queryKey: ['bank-questions', category, subTopicId, searchQuery, currentPage, itemsPerPage, showDuplicatesOnly],
+    queryKey: ['bank-questions', category, subTopicId, searchQuery, currentPage, itemsPerPage, showDuplicatesOnly, refreshTrigger],
     queryFn: async () => {
       let query = supabase
         .from('questions')
@@ -119,6 +125,7 @@ export const useQuestionBank = () => {
     setShowDuplicatesOnly,
     subTopics,
     isLoading,
-    processedQuestions
+    processedQuestions,
+    refreshQuestions
   };
 };
