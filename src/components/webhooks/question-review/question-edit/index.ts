@@ -9,3 +9,6 @@ export * from './DifficultySelector';
 export * from './RawTextEditor';
 export * from './FormattedQuestionsView';
 export * from './EditorHeader';
+export * from './QuestionTypeManager';
+export * from './SubTopicDisplay';
+

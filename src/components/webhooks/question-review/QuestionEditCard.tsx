@@ -1,15 +1,10 @@
 
-import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { QuestionItem } from "./types";
-import {
-  QuestionBasicFields,
-  QuestionTypeSelector,
-  MultipleChoiceEditor,
-  DualChoiceEditor,
-  TextAnswerEditor,
-  DifficultySelector
-} from "./question-edit";
+import { QuestionBasicFields, DifficultySelector } from "./question-edit";
+import { useQuestionEditState } from "./hooks/useQuestionEditState";
+import { QuestionTypeManager } from "./question-edit/QuestionTypeManager";
+import { SubTopicDisplay } from "./question-edit/SubTopicDisplay";
 
 interface QuestionEditCardProps {
   question: QuestionItem;
@@ -26,137 +21,18 @@ export const QuestionEditCard = ({
   category = "verbal",
   selectedSubTopicId 
 }: QuestionEditCardProps) => {
-  const [editedQuestion, setEditedQuestion] = useState<QuestionItem>(question);
+  const {
+    editedQuestion,
+    handleChange,
+    handleOptionChange,
+    handlePrimaryOptionChange,
+    handleSecondaryOptionChange,
+    addOption,
+    removeOption,
+    convertToTextAnswer,
+    addInitialOptions
+  } = useQuestionEditState(question, onUpdateQuestion, selectedSubTopicId);
 
-  useEffect(() => {
-    if (selectedSubTopicId && !editedQuestion.subTopicId) {
-      handleChange("subTopicId", selectedSubTopicId);
-    }
-  }, [selectedSubTopicId]);
-
-  const handleChange = (field: keyof QuestionItem, value: string) => {
-    setEditedQuestion((prev) => {
-      const updated = { ...prev, [field]: value };
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const handleOptionChange = (optionIndex: number, value: string) => {
-    if (!editedQuestion.options) {
-      const options = Array(4).fill("");
-      setEditedQuestion((prev) => {
-        const updated = { ...prev, options };
-        onUpdateQuestion(updated);
-        return updated;
-      });
-      return;
-    }
-    
-    const newOptions = [...editedQuestion.options];
-    newOptions[optionIndex] = value;
-    
-    setEditedQuestion((prev) => {
-      const updated = { ...prev, options: newOptions };
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const handlePrimaryOptionChange = (optionIndex: number, value: string) => {
-    if (!editedQuestion.primaryOptions) return;
-    
-    const newOptions = [...editedQuestion.primaryOptions];
-    newOptions[optionIndex] = value;
-    
-    setEditedQuestion((prev) => {
-      const updated = { ...prev, primaryOptions: newOptions };
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const handleSecondaryOptionChange = (optionIndex: number, value: string) => {
-    if (!editedQuestion.secondaryOptions) return;
-    
-    const newOptions = [...editedQuestion.secondaryOptions];
-    newOptions[optionIndex] = value;
-    
-    setEditedQuestion((prev) => {
-      const updated = { ...prev, secondaryOptions: newOptions };
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const addOption = () => {
-    if (!editedQuestion.options) {
-      setEditedQuestion((prev) => {
-        const updated = { ...prev, options: [""] };
-        onUpdateQuestion(updated);
-        return updated;
-      });
-      return;
-    }
-    
-    setEditedQuestion((prev) => {
-      const newOptions = [...prev.options!, ""];
-      const updated = { ...prev, options: newOptions };
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const removeOption = (optionIndex: number) => {
-    if (!editedQuestion.options || editedQuestion.options.length <= 1) return;
-    
-    setEditedQuestion((prev) => {
-      const newOptions = prev.options!.filter((_, i) => i !== optionIndex);
-      
-      const correctAnswer = prev.correctAnswer;
-      const removedOption = prev.options![optionIndex];
-      const updated = { 
-        ...prev, 
-        options: newOptions,
-        correctAnswer: correctAnswer === removedOption ? "" : correctAnswer 
-      };
-      
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const convertToTextAnswer = () => {
-    setEditedQuestion((prev) => {
-      const { options, ...rest } = prev;
-      const updated = { 
-        ...rest, 
-        correctAnswer: rest.correctAnswer || "" 
-      };
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const addInitialOptions = () => {
-    setEditedQuestion((prev) => {
-      const initialOptions = ["", "", "", ""];
-      const updated = { 
-        ...prev, 
-        options: initialOptions,
-        correctAnswer: ""
-      };
-      
-      if (updated.hasOwnProperty('correctAnswer') && !Array.isArray(updated.options)) {
-        updated.correctAnswer = "";
-      }
-      
-      onUpdateQuestion(updated);
-      return updated;
-    });
-  };
-
-  const isDualChoice = !!editedQuestion.primaryOptions && !!editedQuestion.secondaryOptions;
   const shouldShowDifficulty = category === "brain_training";
 
   return (
@@ -170,43 +46,20 @@ export const QuestionEditCard = ({
           index={index}
         />
         
-        <QuestionTypeSelector
-          hasMultipleChoice={!!editedQuestion.options && Array.isArray(editedQuestion.options)}
-          onSelectTextAnswer={convertToTextAnswer}
-          onSelectMultipleChoice={addInitialOptions}
+        <QuestionTypeManager
+          question={editedQuestion}
+          onOptionChange={handleOptionChange}
+          onPrimaryOptionChange={handlePrimaryOptionChange}
+          onSecondaryOptionChange={handleSecondaryOptionChange}
+          onCorrectAnswerChange={(value) => handleChange("correctAnswer", value)}
+          onCorrectPrimaryAnswerChange={(value) => handleChange("correctPrimaryAnswer", value)}
+          onCorrectSecondaryAnswerChange={(value) => handleChange("correctSecondaryAnswer", value)}
+          onAddOption={addOption}
+          onRemoveOption={removeOption}
+          onConvertToTextAnswer={convertToTextAnswer}
+          onAddInitialOptions={addInitialOptions}
+          index={index}
         />
-
-        {editedQuestion.options && Array.isArray(editedQuestion.options) && !isDualChoice && (
-          <MultipleChoiceEditor
-            options={editedQuestion.options}
-            correctAnswer={editedQuestion.correctAnswer}
-            onOptionChange={handleOptionChange}
-            onCorrectAnswerChange={(value) => handleChange("correctAnswer", value)}
-            onAddOption={addOption}
-            onRemoveOption={removeOption}
-          />
-        )}
-
-        {isDualChoice && (
-          <DualChoiceEditor
-            primaryOptions={editedQuestion.primaryOptions || []}
-            secondaryOptions={editedQuestion.secondaryOptions || []}
-            correctPrimaryAnswer={editedQuestion.correctPrimaryAnswer}
-            correctSecondaryAnswer={editedQuestion.correctSecondaryAnswer}
-            onPrimaryOptionChange={handlePrimaryOptionChange}
-            onSecondaryOptionChange={handleSecondaryOptionChange}
-            onCorrectPrimaryAnswerChange={(value) => handleChange("correctPrimaryAnswer", value)}
-            onCorrectSecondaryAnswerChange={(value) => handleChange("correctSecondaryAnswer", value)}
-          />
-        )}
-
-        {(!editedQuestion.options || !Array.isArray(editedQuestion.options)) && !isDualChoice && (
-          <TextAnswerEditor
-            correctAnswer={editedQuestion.correctAnswer || ""}
-            onCorrectAnswerChange={(value) => handleChange("correctAnswer", value)}
-            index={index}
-          />
-        )}
 
         {shouldShowDifficulty && (
           <DifficultySelector
@@ -216,11 +69,7 @@ export const QuestionEditCard = ({
           />
         )}
 
-        {editedQuestion.subTopicId && (
-          <div className="text-sm text-muted-foreground">
-            Subtopic ID: {editedQuestion.subTopicId}
-          </div>
-        )}
+        <SubTopicDisplay subTopicId={editedQuestion.subTopicId} />
       </CardContent>
     </Card>
   );
