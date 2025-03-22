@@ -1,3 +1,4 @@
+
 import { QuestionItem } from "../types";
 
 export const parseRawQuestions = (rawText: string): QuestionItem[] => {
@@ -12,24 +13,50 @@ export const parseRawQuestions = (rawText: string): QuestionItem[] => {
     subTopicId = subTopicMatch[1];
   }
 
-  // First try to split by numbered questions (e.g., "1.", "2.", etc.)
-  let questionBlocks = rawText.split(/\n\s*\d+\.\s+/);
+  // Normalize line endings
+  const normalizedText = rawText.replace(/\r\n/g, '\n');
+  
+  // Try different question splitting strategies
+  let questionBlocks: string[] = [];
+  
+  // Strategy 1: Split by numbered questions (e.g., "1.", "2.", etc.)
+  questionBlocks = normalizedText.split(/\n\s*\d+\.\s+/);
   
   // If we didn't find multiple questions using numbers, try other formats
   if (questionBlocks.length <= 1) {
-    // Try splitting by "Question X:" format
-    questionBlocks = rawText.split(/\n\s*Question\s*\d+\s*[:.-]\s*/i);
+    // Strategy 2: Try splitting by "Question X:" format
+    questionBlocks = normalizedText.split(/\n\s*Question\s*\d+\s*[:.-]\s*/i);
     
-    // If still no luck, try splitting by double newlines (paragraph breaks)
-    if (questionBlocks.length <= 1 && rawText.includes("\n\n")) {
-      questionBlocks = rawText.split(/\n\n+/);
+    // Strategy 3: If still no luck, try splitting by double newlines (paragraph breaks)
+    if (questionBlocks.length <= 1 && normalizedText.includes("\n\n")) {
+      questionBlocks = normalizedText.split(/\n\n+/);
+    }
+    
+    // Strategy 4: Look for markdown-style headings
+    if (questionBlocks.length <= 1) {
+      questionBlocks = normalizedText.split(/\n\s*#{1,3}\s+/);
+    }
+    
+    // Strategy 5: Try to split by single question blocks with options
+    if (questionBlocks.length <= 1) {
+      // Split where there's a potential question followed by options
+      const potentialBlocks = normalizedText.match(/(.+?)(?:\n\s*[a-d][).]\s+.+?\n\s*[a-d][).]\s+.+?)+/gi);
+      if (potentialBlocks && potentialBlocks.length > 0) {
+        questionBlocks = potentialBlocks;
+      }
     }
   }
   
   // Skip the first block if it's not a question (often intro text)
-  const startIndex = questionBlocks[0]?.trim().length > 0 && 
-                      !questionBlocks[0].match(/^(question|prompt|instructions|note)/i) ? 0 : 1;
+  let startIndex = 0;
+  if (questionBlocks.length > 0 && 
+      questionBlocks[0]?.trim().length > 0 && 
+      !questionBlocks[0].match(/^(question|prompt|instructions|note)/i) &&
+      !questionBlocks[0].includes('?')) {
+    startIndex = 1;
+  }
   
+  // Process each question block
   for (let i = startIndex; i < questionBlocks.length; i++) {
     const block = questionBlocks[i]?.trim();
     if (!block) continue;
@@ -42,6 +69,20 @@ export const parseRawQuestions = (rawText: string): QuestionItem[] => {
       item.subTopicId = subTopicId;
     }
     
+    // Only add if it looks like a valid question
+    if (item.question && (item.question.includes('?') || item.options.length > 0)) {
+      questions.push(item);
+    }
+  }
+  
+  // If we couldn't parse any questions, treat the whole text as one question
+  if (questions.length === 0 && normalizedText.trim()) {
+    const item: QuestionItem = {
+      question: normalizedText.trim(),
+      explanation: "",
+      options: [],
+      subTopicId
+    };
     questions.push(item);
   }
   
@@ -135,6 +176,9 @@ function parseQuestionBlock(block: string): QuestionItem {
       item.question += " " + line;
     }
   }
+  
+  // Clean up the question - remove any numbering at the start
+  item.question = item.question.replace(/^\d+[\.\)]\s+/, '').trim();
   
   // Only set options if we found some
   if (currentOptions.length > 0) {

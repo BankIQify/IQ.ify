@@ -18,6 +18,7 @@ serve(async (req) => {
   console.log(`URL: ${req.url}`);
   console.log(`Origin: ${req.headers.get('origin') || 'Not specified'}`);
   console.log(`User-Agent: ${req.headers.get('user-agent') || 'Not specified'}`);
+  console.log(`Content-Type: ${req.headers.get('content-type') || 'Not specified'}`);
   
   try {
     // Get Supabase credentials from environment
@@ -45,21 +46,81 @@ serve(async (req) => {
     let payload;
     let rawBody;
     try {
-      // First, get the raw body for logging in case of parse error
+      // First, get the raw body text
       rawBody = await req.text();
       console.log('Raw payload received:', rawBody);
       
-      // Try to parse as JSON
-      try {
-        payload = JSON.parse(rawBody);
-        console.log('Parsed JSON payload:', JSON.stringify(payload, null, 2));
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError.message);
-        return createErrorResponse(`Invalid JSON payload: ${parseError.message}. Please ensure you're sending valid JSON.`, 400);
+      // Check content type to determine how to process the payload
+      const contentType = req.headers.get('content-type') || '';
+      
+      if (contentType.includes('application/json')) {
+        // Try to parse as JSON if content-type indicates JSON
+        try {
+          payload = JSON.parse(rawBody);
+          console.log('Parsed JSON payload:', JSON.stringify(payload, null, 2));
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError.message);
+          console.log('Treating payload as raw text due to JSON parse error');
+          
+          // If JSON parsing fails but we have text, treat it as raw text submission
+          if (rawBody.trim()) {
+            // Extract sub_topic_id if present in the text
+            const subTopicIdMatch = rawBody.match(/sub[_-]?topic[_-]?id:?\s*([a-f0-9-]{36})/i);
+            const subTopicId = subTopicIdMatch ? subTopicIdMatch[1] : null;
+            
+            if (subTopicId) {
+              console.log('Extracted sub_topic_id from text:', subTopicId);
+              payload = {
+                raw_text: rawBody,
+                sub_topic_id: subTopicId
+              };
+            } else {
+              console.error('Could not extract sub_topic_id from the text payload');
+              return createErrorResponse('Could not parse as JSON and no sub_topic_id was found in the text', 400);
+            }
+          } else {
+            return createErrorResponse(`Invalid JSON payload: ${parseError.message}. Please ensure you're sending valid JSON.`, 400);
+          }
+        }
+      } else if (contentType.includes('text/plain') || contentType.includes('text')) {
+        // Handle plain text content - try to extract sub_topic_id
+        console.log('Processing as plain text content');
+        const subTopicIdMatch = rawBody.match(/sub[_-]?topic[_-]?id:?\s*([a-f0-9-]{36})/i);
+        const subTopicId = subTopicIdMatch ? subTopicIdMatch[1] : null;
+        
+        if (subTopicId) {
+          console.log('Extracted sub_topic_id from text:', subTopicId);
+          payload = {
+            raw_text: rawBody,
+            sub_topic_id: subTopicId
+          };
+        } else {
+          console.error('Could not extract sub_topic_id from the text payload');
+          return createErrorResponse('Missing sub_topic_id in text payload. Please include sub_topic_id: UUID in the text.', 400);
+        }
+      } else {
+        // For other content types, attempt JSON parse first
+        try {
+          payload = JSON.parse(rawBody);
+        } catch (parseError) {
+          // If that fails, check if it might be text with a sub_topic_id
+          const subTopicIdMatch = rawBody.match(/sub[_-]?topic[_-]?id:?\s*([a-f0-9-]{36})/i);
+          const subTopicId = subTopicIdMatch ? subTopicIdMatch[1] : null;
+          
+          if (subTopicId) {
+            payload = {
+              raw_text: rawBody,
+              sub_topic_id: subTopicId
+            };
+          } else {
+            console.error('Could not parse payload and no sub_topic_id found');
+            return createErrorResponse('Unsupported content type and payload could not be parsed', 400);
+          }
+        }
       }
     } catch (error) {
-      console.error('Failed to read request body:', error);
-      return createErrorResponse('Failed to read request body', 400);
+      console.error('Failed to read or process request body:', error);
+      return createErrorResponse('Failed to read or process request body', 400);
     }
 
     if (!payload) {
@@ -67,11 +128,16 @@ serve(async (req) => {
       return createErrorResponse('Empty payload received', 400);
     }
 
-    // Validate the required fields based on the payload type
+    console.log('Final processed payload:', JSON.stringify(payload, null, 2));
+
+    // Check if this is a raw text submission
     if (payload.raw_text && payload.sub_topic_id) {
-      // For raw text submissions, these fields are sufficient
       console.log('Processing raw text submission');
-    } else if (payload.event_type === 'question_generated') {
+      return await handleRawTextSubmission(supabaseAdmin, payload);
+    }
+
+    // Validate the required fields based on the payload type
+    if (payload.event_type === 'question_generated') {
       // For question_generated events, validate required fields
       if (!payload.sub_topic_id) {
         console.error('Missing required field: sub_topic_id');
@@ -83,15 +149,9 @@ serve(async (req) => {
         console.error('Invalid questions array: must be a non-empty array');
         return createErrorResponse('Invalid questions array: must be a non-empty array', 400);
       }
-    } else {
-      console.error('Unrecognized payload structure. Expected either raw_text+sub_topic_id or event_type+sub_topic_id+questions');
+    } else if (!payload.raw_text || !payload.sub_topic_id) {
+      console.error('Unrecognized payload structure without raw_text and sub_topic_id');
       return createErrorResponse('Unrecognized payload structure. Please check the documentation for valid formats.', 400);
-    }
-
-    // Check if this is a raw text submission
-    if (payload.raw_text && payload.sub_topic_id) {
-      console.log('Processing raw text submission');
-      return await handleRawTextSubmission(supabaseAdmin, payload);
     }
 
     // Record the webhook event

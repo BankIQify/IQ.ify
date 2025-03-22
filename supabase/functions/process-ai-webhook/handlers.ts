@@ -1,10 +1,23 @@
+
 import { createSuccessResponse } from "../_shared/webhook-utils.ts";
 
 export async function handleRawTextSubmission(supabaseAdmin, payload) {
   console.log('Received raw text submission');
-  console.log('Raw text content:', payload.raw_text.substring(0, 100) + '...');
+  console.log('Raw text length:', payload.raw_text?.length || 0);
+  console.log('Raw text excerpt:', payload.raw_text?.substring(0, 100) + '...');
   
   try {
+    // Make sure we have the required fields
+    if (!payload.sub_topic_id) {
+      console.error('Missing sub_topic_id in raw text payload');
+      throw new Error('Missing sub_topic_id in raw text payload');
+    }
+    
+    if (!payload.raw_text || typeof payload.raw_text !== 'string') {
+      console.error('Missing or invalid raw_text in payload');
+      throw new Error('Missing or invalid raw_text in payload');
+    }
+    
     // Store the event but don't process it automatically - let the user edit it in the UI
     const { data: eventData, error: eventError } = await supabaseAdmin
       .from('webhook_events')
