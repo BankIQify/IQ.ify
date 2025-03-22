@@ -1,12 +1,13 @@
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { EventDetails } from "./EventDetails";
-import { QuestionEditCard } from "./QuestionEditCard";
-import { WebhookEvent, QuestionItem } from "./types";
+import { EventDetails } from "./question-review/EventDetails";
+import { QuestionEditCard } from "./question-review/QuestionEditCard";
+import { WebhookEvent, QuestionItem } from "./question-review/types";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { parseRawQuestions } from "./utils/questionParser";
+import { parseRawQuestions } from "./question-review/utils/questionParser";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle, Loader2 } from "lucide-react";
