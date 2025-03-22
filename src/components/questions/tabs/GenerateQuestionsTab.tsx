@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,6 +7,7 @@ import { QuestionsList } from "@/components/questions/QuestionsList";
 import { useQuestionData } from "@/hooks/useQuestionData";
 import type { QuestionCategory } from "@/types/questions";
 import { getSubTopicLayout } from "@/components/questions/utils/answer-layouts";
+import { QuestionWithDuplicateFlag } from "@/components/questions/utils/duplicationDetector";
 
 interface GenerateQuestionsTabProps {
   category: QuestionCategory;
@@ -24,6 +26,12 @@ export const GenerateQuestionsTab = ({
   
   // Get the answer layout for the selected sub-topic
   const answerLayout = getSubTopicLayout(subTopicId, subTopics || [], category);
+
+  // Convert questions to include hasSimilar property
+  const questionsWithDuplicateFlags: QuestionWithDuplicateFlag[] = questions?.map(q => ({
+    ...q,
+    hasSimilar: false  // Default to false since we're not checking for duplicates here
+  })) || [];
 
   return (
     <>
@@ -96,8 +104,8 @@ export const GenerateQuestionsTab = ({
         <p className="text-gray-600">Select a sub-topic to view questions</p>
       ) : isLoading ? (
         <p className="text-gray-600">Loading questions...</p>
-      ) : questions && questions.length > 0 ? (
-        <QuestionsList questions={questions} />
+      ) : questionsWithDuplicateFlags.length > 0 ? (
+        <QuestionsList questions={questionsWithDuplicateFlags} />
       ) : (
         <p className="text-gray-600">No questions generated yet.</p>
       )}

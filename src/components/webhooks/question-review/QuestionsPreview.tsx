@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { QuestionsList } from "@/components/questions/QuestionsList";
 import { WebhookEvent, QuestionItem } from "./types";
 import type { Question } from "@/types/questions";
+import { QuestionWithDuplicateFlag } from "@/components/questions/utils/duplicationDetector";
 
 interface QuestionsPreviewProps {
   selectedEvent: WebhookEvent;
@@ -13,7 +14,7 @@ export const QuestionsPreview = ({
   selectedEvent,
   editedQuestions
 }: QuestionsPreviewProps) => {
-  const getPreviewQuestions = (): Question[] => {
+  const getPreviewQuestions = (): QuestionWithDuplicateFlag[] => {
     if (!selectedEvent || !editedQuestions.length) return [];
     
     return editedQuestions.map((q: QuestionItem, index: number) => ({
@@ -30,7 +31,9 @@ export const QuestionsPreview = ({
       },
       sub_topics: {
         name: selectedEvent.payload?.sub_topic_name || "Unknown"
-      }
+      },
+      // Add the required hasSimilar property
+      hasSimilar: false
     }));
   };
 
