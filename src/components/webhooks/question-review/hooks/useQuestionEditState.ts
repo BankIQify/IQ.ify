@@ -4,7 +4,7 @@ import { QuestionItem } from "../types";
 
 export const useQuestionEditState = (
   question: QuestionItem,
-  onUpdateQuestion: (updatedQuestion: QuestionItem) => void,
+  onUpdateQuestion?: (updatedQuestion: QuestionItem) => void,
   selectedSubTopicId?: string
 ) => {
   const [editedQuestion, setEditedQuestion] = useState<QuestionItem>(question);
@@ -18,9 +18,25 @@ export const useQuestionEditState = (
   const handleChange = (field: keyof QuestionItem, value: string) => {
     setEditedQuestion((prev) => {
       const updated = { ...prev, [field]: value };
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
+  };
+  
+  const handleQuestionChange = (value: string) => {
+    handleChange("question", value);
+  };
+  
+  const handleExplanationChange = (value: string) => {
+    handleChange("explanation", value);
+  };
+  
+  const handleDifficultyChange = (value: string) => {
+    handleChange("difficulty", value);
+  };
+  
+  const handleCorrectAnswerChange = (value: string) => {
+    handleChange("correctAnswer", value);
   };
 
   const handleOptionChange = (optionIndex: number, value: string) => {
@@ -28,7 +44,7 @@ export const useQuestionEditState = (
       const options = Array(4).fill("");
       setEditedQuestion((prev) => {
         const updated = { ...prev, options };
-        onUpdateQuestion(updated);
+        if (onUpdateQuestion) onUpdateQuestion(updated);
         return updated;
       });
       return;
@@ -39,7 +55,7 @@ export const useQuestionEditState = (
     
     setEditedQuestion((prev) => {
       const updated = { ...prev, options: newOptions };
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -52,7 +68,7 @@ export const useQuestionEditState = (
     
     setEditedQuestion((prev) => {
       const updated = { ...prev, primaryOptions: newOptions };
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -65,7 +81,7 @@ export const useQuestionEditState = (
     
     setEditedQuestion((prev) => {
       const updated = { ...prev, secondaryOptions: newOptions };
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -74,7 +90,7 @@ export const useQuestionEditState = (
     if (!editedQuestion.options) {
       setEditedQuestion((prev) => {
         const updated = { ...prev, options: [""] };
-        onUpdateQuestion(updated);
+        if (onUpdateQuestion) onUpdateQuestion(updated);
         return updated;
       });
       return;
@@ -83,7 +99,7 @@ export const useQuestionEditState = (
     setEditedQuestion((prev) => {
       const newOptions = [...prev.options!, ""];
       const updated = { ...prev, options: newOptions };
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -102,7 +118,7 @@ export const useQuestionEditState = (
         correctAnswer: correctAnswer === removedOption ? "" : correctAnswer 
       };
       
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -114,7 +130,7 @@ export const useQuestionEditState = (
         ...rest, 
         correctAnswer: rest.correctAnswer || "" 
       };
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -132,7 +148,7 @@ export const useQuestionEditState = (
         updated.correctAnswer = "";
       }
       
-      onUpdateQuestion(updated);
+      if (onUpdateQuestion) onUpdateQuestion(updated);
       return updated;
     });
   };
@@ -140,6 +156,10 @@ export const useQuestionEditState = (
   return {
     editedQuestion,
     handleChange,
+    handleQuestionChange,
+    handleExplanationChange,
+    handleDifficultyChange,
+    handleCorrectAnswerChange,
     handleOptionChange,
     handlePrimaryOptionChange,
     handleSecondaryOptionChange,

@@ -27,28 +27,34 @@ export const QuestionEditCard = ({
   category,
   selectedSubTopicId
 }: QuestionEditCardProps) => {
+  const handleUpdate = (updatedQuestion: QuestionItem) => {
+    onUpdateQuestion(index, updatedQuestion);
+  };
+
   const {
-    questionState,
+    editedQuestion,
     handleQuestionChange,
     handleExplanationChange,
     handleDifficultyChange,
     handleOptionChange,
-    handleCorrectAnswerChange
-  } = useQuestionEditState(question);
-
-  const handleUpdate = () => {
-    onUpdateQuestion(index, questionState);
-  };
+    handlePrimaryOptionChange,
+    handleSecondaryOptionChange,
+    handleCorrectAnswerChange,
+    addOption,
+    removeOption,
+    convertToTextAnswer,
+    addInitialOptions
+  } = useQuestionEditState(question, handleUpdate, selectedSubTopicId);
 
   const handleDelete = () => {
     onDeleteQuestion(index);
   };
 
   const handleDuplicate = () => {
-    onUpdateQuestion(index, questionState); // Save current changes first
-    const duplicatedQuestion = { ...questionState };
+    // Save current changes first
+    onUpdateQuestion(index, editedQuestion);
     // Add the new question after the current one
-    onUpdateQuestion(-1, duplicatedQuestion); // -1 indicates append
+    onUpdateQuestion(-1, { ...editedQuestion }); // -1 indicates append
   };
 
   return (
@@ -77,36 +83,45 @@ export const QuestionEditCard = ({
         </div>
         
         {/* Show the SubTopic display component */}
-        <SubTopicDisplay subTopicId={questionState.subTopicId || selectedSubTopicId} />
+        <SubTopicDisplay subTopicId={editedQuestion.subTopicId || selectedSubTopicId} />
       </CardHeader>
       
       <CardContent className="space-y-4">
         <QuestionBasicFields 
-          question={questionState.question}
-          explanation={questionState.explanation}
+          question={editedQuestion.question}
+          explanation={editedQuestion.explanation}
           onQuestionChange={handleQuestionChange}
           onExplanationChange={handleExplanationChange}
+          index={index}
         />
         
         {/* Add difficulty selector for brain training questions */}
         {category === 'brain_training' && (
           <DifficultySelector
-            difficulty={questionState.difficulty || 'medium'}
-            onChange={handleDifficultyChange}
+            difficulty={editedQuestion.difficulty || 'medium'}
+            onDifficultyChange={handleDifficultyChange}
+            index={index}
           />
         )}
         
         <QuestionTypeManager
-          questionState={questionState}
+          question={editedQuestion}
           onOptionChange={handleOptionChange}
+          onPrimaryOptionChange={handlePrimaryOptionChange}
+          onSecondaryOptionChange={handleSecondaryOptionChange}
           onCorrectAnswerChange={handleCorrectAnswerChange}
+          onAddOption={addOption}
+          onRemoveOption={removeOption}
+          onConvertToTextAnswer={convertToTextAnswer}
+          onAddInitialOptions={addInitialOptions}
+          index={index}
         />
       </CardContent>
       
       <CardFooter>
         <Button 
           className="w-full" 
-          onClick={handleUpdate}
+          onClick={() => onUpdateQuestion(index, editedQuestion)}
         >
           Update Question
         </Button>

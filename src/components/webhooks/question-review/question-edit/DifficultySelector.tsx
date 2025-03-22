@@ -5,13 +5,13 @@ import { Label } from "@/components/ui/label";
 interface DifficultySelectorProps {
   difficulty: string;
   onDifficultyChange: (value: string) => void;
-  index: number;
+  index?: number;
 }
 
 export const DifficultySelector = ({
   difficulty,
   onDifficultyChange,
-  index
+  index = 0
 }: DifficultySelectorProps) => {
   return (
     <div>

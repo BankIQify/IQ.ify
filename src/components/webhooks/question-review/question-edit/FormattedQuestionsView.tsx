@@ -8,6 +8,7 @@ interface FormattedQuestionsViewProps {
   category: string;
   selectedSubTopicId?: string;
   onUpdateQuestion: (index: number, updatedQuestion: QuestionItem) => void;
+  onDeleteQuestion?: (index: number) => void;
   isLoading: boolean;
 }
 
@@ -16,6 +17,7 @@ export const FormattedQuestionsView = ({
   category,
   selectedSubTopicId,
   onUpdateQuestion,
+  onDeleteQuestion = () => {},
   isLoading
 }: FormattedQuestionsViewProps) => {
   if (questions.length === 0 && !isLoading) {
@@ -37,7 +39,8 @@ export const FormattedQuestionsView = ({
           index={index}
           category={category}
           selectedSubTopicId={selectedSubTopicId}
-          onUpdateQuestion={(updatedQuestion) => onUpdateQuestion(index, updatedQuestion)}
+          onUpdateQuestion={onUpdateQuestion}
+          onDeleteQuestion={onDeleteQuestion}
         />
       ))}
     </div>

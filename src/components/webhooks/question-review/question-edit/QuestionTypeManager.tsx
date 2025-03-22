@@ -8,31 +8,31 @@ import { QuestionItem } from "../types";
 interface QuestionTypeManagerProps {
   question: QuestionItem;
   onOptionChange: (index: number, value: string) => void;
-  onPrimaryOptionChange: (index: number, value: string) => void;
-  onSecondaryOptionChange: (index: number, value: string) => void;
+  onPrimaryOptionChange?: (index: number, value: string) => void;
+  onSecondaryOptionChange?: (index: number, value: string) => void;
   onCorrectAnswerChange: (value: string) => void;
-  onCorrectPrimaryAnswerChange: (value: string) => void;
-  onCorrectSecondaryAnswerChange: (value: string) => void;
-  onAddOption: () => void;
-  onRemoveOption: (index: number) => void;
-  onConvertToTextAnswer: () => void;
-  onAddInitialOptions: () => void;
-  index: number;
+  onCorrectPrimaryAnswerChange?: (value: string) => void;
+  onCorrectSecondaryAnswerChange?: (value: string) => void;
+  onAddOption?: () => void;
+  onRemoveOption?: (index: number) => void;
+  onConvertToTextAnswer?: () => void;
+  onAddInitialOptions?: () => void;
+  index?: number;
 }
 
 export const QuestionTypeManager = ({
   question,
   onOptionChange,
-  onPrimaryOptionChange,
-  onSecondaryOptionChange,
+  onPrimaryOptionChange = () => {},
+  onSecondaryOptionChange = () => {},
   onCorrectAnswerChange,
-  onCorrectPrimaryAnswerChange,
-  onCorrectSecondaryAnswerChange,
-  onAddOption,
-  onRemoveOption,
-  onConvertToTextAnswer,
-  onAddInitialOptions,
-  index
+  onCorrectPrimaryAnswerChange = () => {},
+  onCorrectSecondaryAnswerChange = () => {},
+  onAddOption = () => {},
+  onRemoveOption = () => {},
+  onConvertToTextAnswer = () => {},
+  onAddInitialOptions = () => {},
+  index = 0
 }: QuestionTypeManagerProps) => {
   const isDualChoice = !!question.primaryOptions && !!question.secondaryOptions;
   const hasMultipleChoice = !!question.options && Array.isArray(question.options);

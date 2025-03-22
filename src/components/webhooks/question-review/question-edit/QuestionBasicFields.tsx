@@ -7,7 +7,7 @@ interface QuestionBasicFieldsProps {
   explanation: string;
   onQuestionChange: (value: string) => void;
   onExplanationChange: (value: string) => void;
-  index: number;
+  index?: number;
 }
 
 export const QuestionBasicFields = ({
@@ -15,7 +15,7 @@ export const QuestionBasicFields = ({
   explanation,
   onQuestionChange,
   onExplanationChange,
-  index
+  index = 0
 }: QuestionBasicFieldsProps) => {
   return (
     <>
