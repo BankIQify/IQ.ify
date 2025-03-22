@@ -3,6 +3,7 @@ import { useState } from "react";
 import { parseRawQuestions } from "../utils/questionParser";
 import { QuestionItem } from "../types";
 import { useToast } from "@/hooks/use-toast";
+import { parseQuestionBlock } from "../utils/questionParser/parseQuestionBlock";
 
 export const useQuestionParser = (subTopicId?: string, onSetQuestions?: (questions: QuestionItem[]) => void) => {
   const [rawText, setRawText] = useState("");
@@ -28,7 +29,7 @@ export const useQuestionParser = (subTopicId?: string, onSetQuestions?: (questio
       
       const parsedQuestions = parseRawQuestions(text);
       if (parsedQuestions.length === 0) {
-        setParseError("No questions could be parsed from the text. Please check the format.");
+        setParseError("No questions could be parsed from the text. Please check the format or try selecting sections manually.");
         return;
       }
       
@@ -53,11 +54,47 @@ export const useQuestionParser = (subTopicId?: string, onSetQuestions?: (questio
     }
   };
 
+  const handleParseIndividualSelections = (selections: string[]) => {
+    if (!onSetQuestions || selections.length === 0) return;
+    
+    try {
+      setIsParsing(true);
+      setParseError(null);
+      
+      const parsedQuestions = selections.map(selection => {
+        const parsedQuestion = parseQuestionBlock(selection);
+        return {
+          ...parsedQuestion,
+          subTopicId: subTopicId
+        };
+      }).filter(q => q.question.trim().length > 0);
+      
+      if (parsedQuestions.length === 0) {
+        setParseError("No valid questions could be parsed from your selections.");
+        return;
+      }
+      
+      onSetQuestions(parsedQuestions);
+      setParseError(null);
+      
+      toast({
+        title: "Selections parsed",
+        description: `Successfully parsed ${parsedQuestions.length} questions from your selections`
+      });
+    } catch (error) {
+      console.error("Error parsing selections:", error);
+      setParseError(error instanceof Error ? error.message : "Failed to parse selections.");
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
   return {
     rawText,
     parseError,
     isParsing,
     handleRawTextChange,
-    handleParseRawText
+    handleParseRawText,
+    handleParseIndividualSelections
   };
 };

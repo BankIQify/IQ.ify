@@ -37,7 +37,8 @@ export const QuestionEditor = ({
     parseError,
     isParsing,
     handleRawTextChange,
-    handleParseRawText
+    handleParseRawText,
+    handleParseIndividualSelections
   } = useQuestionParser(selectedEvent.payload.sub_topic_id, onSetQuestions);
   
   // Get subject category if we have a sub_topic_id
