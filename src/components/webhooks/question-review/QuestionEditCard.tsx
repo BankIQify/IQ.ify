@@ -85,7 +85,7 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
           <Label htmlFor={`explanation-${index}`}>Explanation</Label>
           <Textarea
             id={`explanation-${index}`}
-            value={editedQuestion.explanation}
+            value={editedQuestion.explanation || ""}
             onChange={(e) => handleChange("explanation", e.target.value)}
             rows={3}
             className="mt-1"
@@ -93,7 +93,7 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
         </div>
 
         {/* Options for multiple choice */}
-        {editedQuestion.options && !isDualChoice && (
+        {editedQuestion.options && Array.isArray(editedQuestion.options) && !isDualChoice && (
           <div className="space-y-2">
             <Label>Options</Label>
             {editedQuestion.options.map((option, i) => (
@@ -131,7 +131,7 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
           <>
             <div className="space-y-2">
               <Label>Primary Options</Label>
-              {editedQuestion.primaryOptions?.map((option, i) => (
+              {editedQuestion.primaryOptions && editedQuestion.primaryOptions.map((option, i) => (
                 <div key={i} className="flex items-center space-x-2">
                   <Input
                     value={option}
@@ -162,7 +162,7 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
 
             <div className="space-y-2">
               <Label>Secondary Options</Label>
-              {editedQuestion.secondaryOptions?.map((option, i) => (
+              {editedQuestion.secondaryOptions && editedQuestion.secondaryOptions.map((option, i) => (
                 <div key={i} className="flex items-center space-x-2">
                   <Input
                     value={option}
@@ -194,7 +194,7 @@ export const QuestionEditCard = ({ question, index, onUpdateQuestion }: Question
         )}
 
         {/* Text answer input for non-multiple choice questions */}
-        {!editedQuestion.options && !isDualChoice && (
+        {(!editedQuestion.options || !Array.isArray(editedQuestion.options)) && !isDualChoice && (
           <div>
             <Label htmlFor={`correctAnswer-${index}`}>Correct Answer</Label>
             <Input
