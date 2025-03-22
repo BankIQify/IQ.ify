@@ -3,10 +3,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { createErrorResponse } from "../_shared/webhook-utils.ts";
 
 export async function verifyWebhookKey(req: Request, supabaseUrl: string, supabaseServiceKey: string) {
-  // Get webhook key from request headers - try multiple formats
-  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
-  const customHeader = req.headers.get('x-webhook-key') || req.headers.get('X-Webhook-Key');
-  
   // Log all headers for debugging
   console.log('Request headers:');
   req.headers.forEach((value, key) => {
@@ -17,14 +13,24 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
     }
   });
   
+  // Get webhook key from request headers - try multiple formats (case-insensitive)
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+  const customHeader = req.headers.get('x-webhook-key') || req.headers.get('X-Webhook-Key');
+  
+  console.log('Webhook request received, checking authorization');
+  console.log('Request URL:', req.url);
+  console.log('Request method:', req.method);
+  console.log('Auth header present:', !!authHeader);
+  console.log('X-webhook-key header present:', !!customHeader);
+  
   let webhookKey = null;
   
-  // Try to get key from custom header
+  // Try to get key from custom header first (preferred for Make.com)
   if (customHeader) {
-    webhookKey = customHeader;
+    webhookKey = customHeader.trim();
     console.log('Using key from x-webhook-key header');
   }
-  // Try to get key from Authorization header
+  // Try to get key from Authorization header as fallback
   else if (authHeader) {
     // Check if it has Bearer prefix and extract key
     if (authHeader.startsWith('Bearer ')) {
@@ -36,10 +42,6 @@ export async function verifyWebhookKey(req: Request, supabaseUrl: string, supaba
       console.log('Using key from Authorization header without Bearer prefix');
     }
   }
-  
-  console.log('Webhook request received, checking authorization');
-  console.log('Request URL:', req.url);
-  console.log('Request method:', req.method);
   
   if (!webhookKey) {
     console.error('Missing webhook key in headers (tried both x-webhook-key and Authorization)');

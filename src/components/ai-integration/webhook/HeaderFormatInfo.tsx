@@ -26,7 +26,7 @@ export function HeaderFormatInfo() {
           <li>In your Make.com webhook module, go to "Headers"</li>
           <li>Add a new header with <code className="text-xs font-bold">x-webhook-key</code> as the name</li>
           <li>Set the value to your raw API key (no quotes, no "Bearer" prefix)</li>
-          <li>Set Content-Type header to <code className="text-xs font-bold">application/json</code></li>
+          <li>Make sure "Content-Type" header is set to <code className="text-xs font-bold">application/json</code></li>
         </ol>
         <p className="text-sm mt-2">
           <span className="font-medium">Common Issues:</span>
@@ -35,7 +35,9 @@ export function HeaderFormatInfo() {
           <li>Make sure there are no extra spaces before or after your API key</li>
           <li>Don't wrap your API key in quotes or add any formatting</li>
           <li>Use lowercase for header names (Make.com converts them anyway)</li>
-          <li>If you still have issues, try both header formats</li>
+          <li>Make sure your payload is valid JSON</li>
+          <li>Check both headers are configured exactly as shown above</li>
+          <li>If you still have issues, verify the webhook key in your database</li>
         </ul>
       </div>
     </div>
