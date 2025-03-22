@@ -56,17 +56,46 @@ serve(async (req) => {
       if (contentType.includes('application/json')) {
         // Try to parse as JSON if content-type indicates JSON
         try {
-          payload = JSON.parse(rawBody);
-          console.log('Parsed JSON payload:', JSON.stringify(payload, null, 2));
+          // Try to clean up the JSON by removing problematic characters that might be present
+          const cleanedJson = rawBody
+            .replace(/###\s*[^#\n]+/g, '') // Remove "### Something" headings
+            .replace(/#/g, '') // Remove any remaining # characters
+            .trim();
+            
+          console.log('Cleaned JSON for parsing:', cleanedJson);
+          
+          try {
+            payload = JSON.parse(cleanedJson);
+            console.log('Parsed JSON payload:', JSON.stringify(payload, null, 2));
+          } catch (innerParseError) {
+            console.error('Clean JSON parse also failed:', innerParseError.message);
+            throw innerParseError;
+          }
         } catch (parseError) {
           console.error('JSON parse error:', parseError.message);
           console.log('Treating payload as raw text due to JSON parse error');
           
           // If JSON parsing fails but we have text, treat it as raw text submission
           if (rawBody.trim()) {
-            // Extract sub_topic_id if present in the text
-            const subTopicIdMatch = rawBody.match(/sub[_-]?topic[_-]?id:?\s*([a-f0-9-]{36})/i);
-            const subTopicId = subTopicIdMatch ? subTopicIdMatch[1] : null;
+            // Extract sub_topic_id if present in the text using various possible formats
+            // Look for: sub_topic_id, subtopicUUID, subtopicId, subtopic_id, etc.
+            const subTopicIdRegexes = [
+              /sub[_-]?topic[_-]?id:?\s*["']?([a-f0-9-]{36})["']?/i,
+              /subtopic[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i,
+              /subject[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i, // Sometimes mistakenly used
+              /"subtopic(?:UUID|Id|_id)"\s*:\s*"([a-f0-9-]{36})"/i,
+              /"sub_topic_id"\s*:\s*"([a-f0-9-]{36})"/i
+            ];
+            
+            let subTopicId = null;
+            for (const regex of subTopicIdRegexes) {
+              const match = rawBody.match(regex);
+              if (match && match[1]) {
+                subTopicId = match[1];
+                console.log(`Extracted sub_topic_id using pattern ${regex}: ${subTopicId}`);
+                break;
+              }
+            }
             
             if (subTopicId) {
               console.log('Extracted sub_topic_id from text:', subTopicId);
@@ -76,7 +105,7 @@ serve(async (req) => {
               };
             } else {
               console.error('Could not extract sub_topic_id from the text payload');
-              return createErrorResponse('Could not parse as JSON and no sub_topic_id was found in the text', 400);
+              return createErrorResponse('Could not parse as JSON and no sub_topic_id was found in the text. Please include sub_topic_id: UUID in the text.', 400);
             }
           } else {
             return createErrorResponse(`Invalid JSON payload: ${parseError.message}. Please ensure you're sending valid JSON.`, 400);
@@ -85,8 +114,25 @@ serve(async (req) => {
       } else if (contentType.includes('text/plain') || contentType.includes('text')) {
         // Handle plain text content - try to extract sub_topic_id
         console.log('Processing as plain text content');
-        const subTopicIdMatch = rawBody.match(/sub[_-]?topic[_-]?id:?\s*([a-f0-9-]{36})/i);
-        const subTopicId = subTopicIdMatch ? subTopicIdMatch[1] : null;
+        
+        // Look for various forms of sub_topic_id
+        const subTopicIdRegexes = [
+          /sub[_-]?topic[_-]?id:?\s*["']?([a-f0-9-]{36})["']?/i,
+          /subtopic[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i,
+          /subject[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i,
+          /"subtopic(?:UUID|Id|_id)"\s*:\s*"([a-f0-9-]{36})"/i,
+          /"sub_topic_id"\s*:\s*"([a-f0-9-]{36})"/i
+        ];
+        
+        let subTopicId = null;
+        for (const regex of subTopicIdRegexes) {
+          const match = rawBody.match(regex);
+          if (match && match[1]) {
+            subTopicId = match[1];
+            console.log(`Extracted sub_topic_id using pattern ${regex}: ${subTopicId}`);
+            break;
+          }
+        }
         
         if (subTopicId) {
           console.log('Extracted sub_topic_id from text:', subTopicId);
@@ -101,11 +147,32 @@ serve(async (req) => {
       } else {
         // For other content types, attempt JSON parse first
         try {
-          payload = JSON.parse(rawBody);
+          // Try to clean up the text by removing problematic characters
+          const cleanedText = rawBody
+            .replace(/###\s*[^#\n]+/g, '') // Remove "### Something" headings
+            .replace(/#/g, '') // Remove any remaining # characters
+            .trim();
+          
+          payload = JSON.parse(cleanedText);
         } catch (parseError) {
           // If that fails, check if it might be text with a sub_topic_id
-          const subTopicIdMatch = rawBody.match(/sub[_-]?topic[_-]?id:?\s*([a-f0-9-]{36})/i);
-          const subTopicId = subTopicIdMatch ? subTopicIdMatch[1] : null;
+          const subTopicIdRegexes = [
+            /sub[_-]?topic[_-]?id:?\s*["']?([a-f0-9-]{36})["']?/i,
+            /subtopic[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i,
+            /subject[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i,
+            /"subtopic(?:UUID|Id|_id)"\s*:\s*"([a-f0-9-]{36})"/i,
+            /"sub_topic_id"\s*:\s*"([a-f0-9-]{36})"/i
+          ];
+          
+          let subTopicId = null;
+          for (const regex of subTopicIdRegexes) {
+            const match = rawBody.match(regex);
+            if (match && match[1]) {
+              subTopicId = match[1];
+              console.log(`Extracted sub_topic_id using pattern ${regex}: ${subTopicId}`);
+              break;
+            }
+          }
           
           if (subTopicId) {
             payload = {

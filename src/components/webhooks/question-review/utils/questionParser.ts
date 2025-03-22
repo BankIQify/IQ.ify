@@ -8,13 +8,32 @@ export const parseRawQuestions = (rawText: string): QuestionItem[] => {
   
   // Try to extract sub-topic ID if present
   let subTopicId: string | undefined;
-  const subTopicMatch = rawText.match(/(?:sub[-_]?topic[-_]?id|subtopicid):\s*([a-f0-9-]{36})/i);
-  if (subTopicMatch && subTopicMatch[1]) {
-    subTopicId = subTopicMatch[1];
+  
+  // Look for various forms of sub_topic_id
+  const subTopicIdRegexes = [
+    /sub[_-]?topic[_-]?id:?\s*["']?([a-f0-9-]{36})["']?/i,
+    /subtopic[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i,
+    /subject[_-]?uuid:?\s*["']?([a-f0-9-]{36})["']?/i, // Sometimes mistakenly used
+    /"subtopic(?:UUID|Id|_id)"\s*:\s*"([a-f0-9-]{36})"/i,
+    /"sub_topic_id"\s*:\s*"([a-f0-9-]{36})"/i
+  ];
+    
+  for (const regex of subTopicIdRegexes) {
+    const match = rawText.match(regex);
+    if (match && match[1]) {
+      subTopicId = match[1];
+      break;
+    }
   }
 
+  // Clean the text by removing problematic characters
+  const cleanedText = rawText
+    .replace(/###\s*[^#\n]+/g, '\n') // Replace headings with newlines 
+    .replace(/#/g, '') // Remove any remaining # characters
+    .trim();
+
   // Normalize line endings
-  const normalizedText = rawText.replace(/\r\n/g, '\n');
+  const normalizedText = cleanedText.replace(/\r\n/g, '\n');
   
   // Try different question splitting strategies
   let questionBlocks: string[] = [];
@@ -32,9 +51,9 @@ export const parseRawQuestions = (rawText: string): QuestionItem[] => {
       questionBlocks = normalizedText.split(/\n\n+/);
     }
     
-    // Strategy 4: Look for markdown-style headings
+    // Strategy 4: Look for markdown-style headings or word "Easy:", "Medium:", "Hard:"
     if (questionBlocks.length <= 1) {
-      questionBlocks = normalizedText.split(/\n\s*#{1,3}\s+/);
+      questionBlocks = normalizedText.split(/\n\s*(?:#{1,3}\s+|Easy:|Medium:|Hard:|Difficulty:)/i);
     }
     
     // Strategy 5: Try to split by single question blocks with options
@@ -75,7 +94,41 @@ export const parseRawQuestions = (rawText: string): QuestionItem[] => {
     }
   }
   
-  // If we couldn't parse any questions, treat the whole text as one question
+  // If we couldn't parse any questions, look for sections based on difficulty levels
+  if (questions.length === 0) {
+    // Look for Easy/Medium/Hard sections
+    const difficultyBlocks = normalizedText.match(/(?:Easy|Medium|Hard):([\s\S]*?)(?=(?:Easy|Medium|Hard):|$)/gi);
+    
+    if (difficultyBlocks && difficultyBlocks.length > 0) {
+      for (const block of difficultyBlocks) {
+        // Extract difficulty from the heading
+        const difficultyMatch = block.match(/^(Easy|Medium|Hard):/i);
+        const difficulty = difficultyMatch ? difficultyMatch[1].toLowerCase() : 'medium';
+        
+        // Split the section into individual questions
+        const sectionText = block.replace(/^(Easy|Medium|Hard):/i, '').trim();
+        const sectionQuestions = sectionText.split(/\n\s*\d+\.\s+/);
+        
+        for (let i = 0; i < sectionQuestions.length; i++) {
+          const questionText = sectionQuestions[i]?.trim();
+          if (!questionText) continue;
+          
+          const item = parseQuestionBlock(questionText);
+          item.difficulty = difficulty;
+          
+          if (subTopicId) {
+            item.subTopicId = subTopicId;
+          }
+          
+          if (item.question) {
+            questions.push(item);
+          }
+        }
+      }
+    }
+  }
+  
+  // If we still couldn't parse any questions, treat the whole text as one question
   if (questions.length === 0 && normalizedText.trim()) {
     const item: QuestionItem = {
       question: normalizedText.trim(),

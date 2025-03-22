@@ -1,4 +1,3 @@
-
 import { createSuccessResponse } from "../_shared/webhook-utils.ts";
 
 export async function handleRawTextSubmission(supabaseAdmin, payload) {
@@ -18,6 +17,12 @@ export async function handleRawTextSubmission(supabaseAdmin, payload) {
       throw new Error('Missing or invalid raw_text in payload');
     }
     
+    // Clean the text by removing problematic characters that might interfere with parsing
+    const cleanedText = payload.raw_text
+      .replace(/###\s*[^#\n]+/g, '\n') // Replace headings with newlines
+      .replace(/#/g, '') // Remove any remaining # characters
+      .trim();
+    
     // Store the event but don't process it automatically - let the user edit it in the UI
     const { data: eventData, error: eventError } = await supabaseAdmin
       .from('webhook_events')
@@ -28,7 +33,7 @@ export async function handleRawTextSubmission(supabaseAdmin, payload) {
           sub_topic_id: payload.sub_topic_id,
           sub_topic_name: payload.sub_topic_name || null,
           prompt: payload.prompt || null,
-          raw_text: payload.raw_text,
+          raw_text: cleanedText, // Use the cleaned text
           questions: [] // Empty array to be filled after editing
         },
         processed: false
@@ -49,6 +54,25 @@ export async function handleRawTextSubmission(supabaseAdmin, payload) {
   } catch (error) {
     console.error('Error in handleRawTextSubmission:', error);
     throw error; // Let the main handler catch and format the error response
+  }
+}
+
+// Helper function to determine question type based on content
+export function determineQuestionType(questionContent) {
+  // If questionContent is a string, it's a simple text question
+  if (typeof questionContent === 'string') {
+    return 'text';
+  }
+  
+  // Otherwise, examine the properties to determine the type
+  if (questionContent.primaryOptions && questionContent.secondaryOptions) {
+    return 'multiple_choice';
+  } else if (questionContent.options && Array.isArray(questionContent.options)) {
+    return 'multiple_choice';
+  } else if (questionContent.imageUrl) {
+    return 'image';
+  } else {
+    return 'text';
   }
 }
 
@@ -140,23 +164,4 @@ export async function handleQuestionGenerated(supabase, payload) {
   
   // Call the extracted function to handle question insertion
   return await insertQuestions(supabase, questions, sub_topic_id, prompt);
-}
-
-// Helper function to determine question type based on content
-export function determineQuestionType(questionContent) {
-  // If questionContent is a string, it's a simple text question
-  if (typeof questionContent === 'string') {
-    return 'text';
-  }
-  
-  // Otherwise, examine the properties to determine the type
-  if (questionContent.primaryOptions && questionContent.secondaryOptions) {
-    return 'multiple_choice';
-  } else if (questionContent.options && Array.isArray(questionContent.options)) {
-    return 'multiple_choice';
-  } else if (questionContent.imageUrl) {
-    return 'image';
-  } else {
-    return 'text';
-  }
 }
