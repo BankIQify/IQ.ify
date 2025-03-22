@@ -1,6 +1,6 @@
-
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { AlertCircle } from "lucide-react";
 import type { QuestionContent } from "@/types/questions";
 import { QuestionWithDuplicateFlag } from "./utils/duplicationDetector";
@@ -37,14 +37,33 @@ export const QuestionsList = ({ questions }: QuestionsListProps) => {
                   {question.sub_topics?.name}
                 </span>
               </div>
-              <p>{content.question}</p>
-              {content.imageUrl && (
-                <img 
-                  src={content.imageUrl} 
-                  alt="Question" 
-                  className="max-w-full h-auto rounded-lg"
-                />
+              
+              {/* Similarity Progress Bar */}
+              {question.hasSimilar && question.similarityScore && (
+                <div className="mt-2">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Similarity Score</span>
+                    <span>{(question.similarityScore * 100).toFixed(0)}%</span>
+                  </div>
+                  <Progress 
+                    value={question.similarityScore * 100} 
+                    className={`h-2 ${
+                      question.similarityScore > 0.9 ? "bg-red-100" : 
+                      question.similarityScore > 0.8 ? "bg-orange-100" : "bg-yellow-100"
+                    }`}
+                  />
+                  <div className="flex gap-2 mt-1">
+                    {question.similarTo && question.similarTo.length > 0 && (
+                      <div className="text-xs text-gray-500">
+                        Similar to: Question {questions.findIndex(q => q.id === question.similarTo?.[0]) + 1}
+                        {question.similarTo.length > 1 && ` and ${question.similarTo.length - 1} more`}
+                      </div>
+                    )}
+                  </div>
+                </div>
               )}
+              
+              <p>{content.question}</p>
               
               {/* Standard multiple choice options */}
               {content.options && content.options.length > 0 && (
