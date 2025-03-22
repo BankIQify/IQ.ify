@@ -11,6 +11,7 @@ interface RawTextEditorProps {
   rawText: string;
   onRawTextChange: (value: string) => void;
   onParseQuestions: (text: string) => void;
+  onParseSelections?: (selections: string[]) => void;
   parseError: string | null;
   isParsing: boolean;
 }
@@ -19,6 +20,7 @@ export const RawTextEditor = ({
   rawText,
   onRawTextChange,
   onParseQuestions,
+  onParseSelections,
   parseError,
   isParsing
 }: RawTextEditorProps) => {
@@ -84,16 +86,13 @@ export const RawTextEditor = ({
   
   // Handle parsing each selection separately
   const parseAsIndividualQuestions = () => {
-    if (selections.length === 0) return;
+    if (selections.length === 0 || !onParseSelections) return;
     
-    // Parse each selection as a separate question
-    const questionItems: QuestionItem[] = selections.map(selection => {
-      return parseQuestionBlock(selection.text);
-    }).filter(item => item.question.trim().length > 0);
+    // Get all selected texts as an array
+    const selectionTexts = selections.map(selection => selection.text);
     
-    // We'll need to add this to the hook API
-    // For now just show a message
-    alert(`Parsed ${questionItems.length} individual questions. This feature needs to be connected to the state management.`);
+    // Pass the array of selections to the parent handler
+    onParseSelections(selectionTexts);
   };
   
   return (
@@ -162,7 +161,7 @@ export const RawTextEditor = ({
       )}
       
       <div className="flex justify-end space-x-2">
-        {selections.length > 0 && (
+        {selections.length > 0 && onParseSelections && (
           <Button 
             onClick={parseAsIndividualQuestions}
             disabled={isParsing || selections.length === 0}

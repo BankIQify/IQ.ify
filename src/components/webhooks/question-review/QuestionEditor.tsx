@@ -108,6 +108,7 @@ export const QuestionEditor = ({
             rawText={rawText}
             onRawTextChange={handleRawTextChange}
             onParseQuestions={handleParseRawText}
+            onParseSelections={handleParseIndividualSelections}
             parseError={parseError}
             isParsing={isParsing}
           />
@@ -117,6 +118,14 @@ export const QuestionEditor = ({
             category={category}
             selectedSubTopicId={selectedEvent.payload.sub_topic_id}
             onUpdateQuestion={onUpdateQuestion}
+            onDeleteQuestion={(index) => {
+              // Create a new array without the item at the specified index
+              const updatedQuestions = [
+                ...editedQuestions.slice(0, index),
+                ...editedQuestions.slice(index + 1)
+              ];
+              onSetQuestions(updatedQuestions);
+            }}
             isLoading={isDataLoading}
           />
         )}
