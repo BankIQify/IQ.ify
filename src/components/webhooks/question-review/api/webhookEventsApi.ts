@@ -25,17 +25,24 @@ export const fetchWebhookEvents = async () => {
 
 export const saveQuestion = async (
   question: QuestionItem, 
-  subTopicId: string,
+  defaultSubTopicId: string,
   generationPrompt: string | null
 ) => {
+  // Use the question's subTopicId if available, otherwise fall back to the default
+  const subTopicId = question.subTopicId || defaultSubTopicId;
+  
+  if (!subTopicId) {
+    throw new Error("No sub-topic ID provided");
+  }
+  
   // Base question content that all question types have
   const questionContent: QuestionContent = {
-    question: question.question,
+    question: question.question || "",
     explanation: question.explanation || "No explanation provided",
   };
   
   // Add type-specific properties
-  if ('options' in question && question.options && 'correctAnswer' in question && question.correctAnswer) {
+  if ('options' in question && question.options && Array.isArray(question.options) && 'correctAnswer' in question && question.correctAnswer) {
     questionContent.options = question.options;
     questionContent.correctAnswer = question.correctAnswer;
   } else if ('primaryOptions' in question && question.primaryOptions && 
@@ -46,11 +53,14 @@ export const saveQuestion = async (
     questionContent.secondaryOptions = question.secondaryOptions;
     questionContent.correctPrimaryAnswer = question.correctPrimaryAnswer;
     questionContent.correctSecondaryAnswer = question.correctSecondaryAnswer;
+  } else if ('correctAnswer' in question && question.correctAnswer) {
+    // Text answer question
+    questionContent.correctAnswer = question.correctAnswer;
   }
   
   // Determine question type
   let questionType: QuestionType = 'text';
-  if ('options' in question && question.options) {
+  if ('options' in question && question.options && Array.isArray(question.options)) {
     questionType = "multiple_choice";
   } else if ('imageUrl' in question && question.imageUrl) {
     questionType = "image";
@@ -60,6 +70,20 @@ export const saveQuestion = async (
     questionType = "multiple_choice";
   }
   
+  // Only include difficulty for brain training questions
+  // The backend will set a default if needed
+  const { data: subTopicData } = await supabase
+    .from('sub_topics')
+    .select(`
+      question_sections:section_id (
+        category
+      )
+    `)
+    .eq('id', subTopicId)
+    .single();
+  
+  const isBrainTraining = subTopicData?.question_sections?.category === 'brain_training';
+  
   const { error } = await supabase
     .from("questions")
     .insert({
@@ -68,7 +92,7 @@ export const saveQuestion = async (
       ai_generated: true,
       question_type: questionType,
       generation_prompt: generationPrompt,
-      difficulty: question.difficulty || 'medium', // Add difficulty with default
+      ...(isBrainTraining ? { difficulty: question.difficulty || 'medium' } : {})
     });
     
   if (error) throw error;

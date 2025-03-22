@@ -8,6 +8,8 @@ import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { parseRawQuestions } from "./utils/questionParser";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuestionEditorProps {
   selectedEvent: WebhookEvent;
@@ -31,6 +33,37 @@ export const QuestionEditor = ({
   const [showRawEditor, setShowRawEditor] = useState(false);
   const [rawText, setRawText] = useState(selectedEvent.payload.raw_text || "");
   const [parseError, setParseError] = useState<string | null>(null);
+  
+  // Get subject category if we have a sub_topic_id
+  const { data: subTopicDetails } = useQuery({
+    queryKey: ['subTopicDetails', selectedEvent.payload.sub_topic_id],
+    queryFn: async () => {
+      if (!selectedEvent.payload.sub_topic_id) return null;
+      
+      const { data: subTopic, error } = await supabase
+        .from('sub_topics')
+        .select(`
+          id,
+          name,
+          section_id,
+          question_sections:section_id (
+            category
+          )
+        `)
+        .eq('id', selectedEvent.payload.sub_topic_id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching sub topic details:', error);
+        return null;
+      }
+      
+      return subTopic;
+    },
+    enabled: !!selectedEvent.payload.sub_topic_id
+  });
+
+  const category = subTopicDetails?.question_sections?.category || 'verbal';
 
   const handleParseRawText = () => {
     try {
@@ -39,7 +72,14 @@ export const QuestionEditor = ({
         setParseError("No questions could be parsed from the text. Please check the format.");
         return;
       }
-      onSetQuestions(parsedQuestions);
+      
+      // Add subTopicId to each question
+      const questionsWithSubTopic = parsedQuestions.map(q => ({
+        ...q,
+        subTopicId: selectedEvent.payload.sub_topic_id
+      }));
+      
+      onSetQuestions(questionsWithSubTopic);
       setShowRawEditor(false);
       setParseError(null);
     } catch (error) {
@@ -111,6 +151,8 @@ export const QuestionEditor = ({
                 key={index}
                 question={question}
                 index={index}
+                category={category}
+                selectedSubTopicId={selectedEvent.payload.sub_topic_id}
                 onUpdateQuestion={(updatedQuestion) => onUpdateQuestion(index, updatedQuestion)}
               />
             ))}

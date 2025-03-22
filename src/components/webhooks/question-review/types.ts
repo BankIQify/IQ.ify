@@ -9,6 +9,7 @@ export interface QuestionItem {
   correctPrimaryAnswer?: string;
   correctSecondaryAnswer?: string;
   difficulty?: string;
+  subTopicId?: string;
   [key: string]: any;
 }
 
