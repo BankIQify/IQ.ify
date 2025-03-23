@@ -10,6 +10,7 @@ export const useQuestionUpload = (
   subTopicId: string,
   questionType: QuestionType,
   manualQuestion: string,
+  explanation: string,
   questionImage: File | null,
   answerImage: File | null,
   options: string[],
@@ -44,11 +45,11 @@ export const useQuestionUpload = (
       const questionContent: QuestionContent = {
         question: manualQuestion,
         imageUrl: questionImageUrl,
-        explanation: "", // Initialize with empty string, will be filled by AI
+        explanation: explanation || "No explanation provided", // Use provided explanation
       };
 
       if (questionType === "multiple_choice") {
-        questionContent.options = options;
+        questionContent.options = options.filter(option => option.trim() !== "");
         questionContent.correctAnswer = options[correctAnswerIndex];
       } else if (questionType === "dual_choice") {
         questionContent.primaryOptions = primaryOptions;
@@ -61,14 +62,19 @@ export const useQuestionUpload = (
         questionContent.answerImageUrl = answerImageUrl;
       }
 
-      const { data: explanationData, error: explanationError } = await supabase.functions.invoke('generate-explanation', {
-        body: {
-          ...questionContent,
-          type: questionType,
-        }
-      });
+      // Only generate an explanation if one wasn't provided
+      let finalExplanation = explanation;
+      if (!explanation.trim()) {
+        const { data: explanationData, error: explanationError } = await supabase.functions.invoke('generate-explanation', {
+          body: {
+            ...questionContent,
+            type: questionType,
+          }
+        });
 
-      if (explanationError) throw explanationError;
+        if (explanationError) throw explanationError;
+        finalExplanation = explanationData.explanation;
+      }
 
       // Use type assertion to ensure compatibility with Supabase's expected types
       const { error: insertError } = await supabase
@@ -76,7 +82,7 @@ export const useQuestionUpload = (
         .insert({
           content: {
             ...questionContent,
-            explanation: explanationData.explanation,
+            explanation: finalExplanation,
           },
           sub_topic_id: subTopicId,
           ai_generated: false,
@@ -87,7 +93,7 @@ export const useQuestionUpload = (
 
       toast({
         title: "Success!",
-        description: "Question uploaded successfully with AI-generated explanation.",
+        description: explanation ? "Question uploaded successfully." : "Question uploaded successfully with AI-generated explanation.",
       });
 
       resetForm();

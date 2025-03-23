@@ -1,6 +1,8 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionTypeSelector } from "./upload/QuestionTypeSelector";
 import { QuestionText } from "./upload/QuestionText";
@@ -21,6 +23,7 @@ export const ManualQuestionUpload = () => {
   const {
     questionType,
     manualQuestion,
+    explanation,
     questionImage,
     answerImage,
     options,
@@ -37,12 +40,15 @@ export const ManualQuestionUpload = () => {
     setCorrectSecondaryIndex,
     setQuestionType,
     setManualQuestion,
+    setExplanation,
     setQuestionImage,
     setAnswerImage,
     handleOptionChange,
     setCorrectAnswerIndex,
     setCorrectTextAnswer,
-    handleManualUpload
+    handleManualUpload,
+    addOption,
+    removeOption
   } = useManualQuestionUpload(subTopicId);
 
   return (
@@ -98,6 +104,17 @@ export const ManualQuestionUpload = () => {
         value={manualQuestion}
         onChange={setManualQuestion}
       />
+      
+      <div className="space-y-2">
+        <Label htmlFor="explanation">Explanation</Label>
+        <Textarea
+          id="explanation"
+          value={explanation}
+          onChange={(e) => setExplanation(e.target.value)}
+          placeholder="Provide an explanation for the answer"
+          rows={3}
+        />
+      </div>
 
       <ImageUpload
         id="questionImage"
@@ -112,6 +129,8 @@ export const ManualQuestionUpload = () => {
           correctAnswerIndex={correctAnswerIndex}
           onOptionChange={handleOptionChange}
           onCorrectAnswerChange={setCorrectAnswerIndex}
+          onAddOption={addOption}
+          onRemoveOption={removeOption}
         />
       )}
 

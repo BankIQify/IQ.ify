@@ -27,6 +27,26 @@ export const useOptionsHandlers = () => {
     setSecondaryOptions(newOptions);
   };
   
+  const addOption = () => {
+    if (options.length < 6) {
+      setOptions([...options, ""]);
+    }
+  };
+  
+  const removeOption = (index: number) => {
+    if (options.length > 2) {
+      const newOptions = options.filter((_, i) => i !== index);
+      setOptions(newOptions);
+      
+      // Adjust correct answer index if needed
+      if (correctAnswerIndex === index) {
+        setCorrectAnswerIndex(0);
+      } else if (correctAnswerIndex > index) {
+        setCorrectAnswerIndex(correctAnswerIndex - 1);
+      }
+    }
+  };
+  
   const resetOptions = () => {
     setOptions(["", "", "", ""]);
     setPrimaryOptions(["", "", "", ""]);
@@ -49,6 +69,8 @@ export const useOptionsHandlers = () => {
     handleOptionChange,
     handlePrimaryOptionChange,
     handleSecondaryOptionChange,
+    addOption,
+    removeOption,
     resetOptions
   };
 };

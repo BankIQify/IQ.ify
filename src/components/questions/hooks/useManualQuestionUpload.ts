@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import type { QuestionType } from "@/types/questions";
 import { useOptionsHandlers } from "./useOptionsHandlers";
@@ -7,6 +8,7 @@ import { useQuestionUpload } from "./useQuestionUpload";
 export const useManualQuestionUpload = (subTopicId: string) => {
   const [questionType, setQuestionType] = useState<QuestionType>("multiple_choice");
   const [manualQuestion, setManualQuestion] = useState("");
+  const [explanation, setExplanation] = useState("");
   const [questionImage, setQuestionImage] = useState<File | null>(null);
   const [answerImage, setAnswerImage] = useState<File | null>(null);
   const [correctTextAnswer, setCorrectTextAnswer] = useState("");
@@ -24,6 +26,8 @@ export const useManualQuestionUpload = (subTopicId: string) => {
     handleOptionChange,
     handlePrimaryOptionChange,
     handleSecondaryOptionChange,
+    addOption,
+    removeOption,
     resetOptions
   } = useOptionsHandlers();
   
@@ -45,6 +49,7 @@ export const useManualQuestionUpload = (subTopicId: string) => {
 
   const resetForm = () => {
     setManualQuestion("");
+    setExplanation("");
     setQuestionImage(null);
     setAnswerImage(null);
     setCorrectTextAnswer("");
@@ -58,6 +63,7 @@ export const useManualQuestionUpload = (subTopicId: string) => {
     subTopicId,
     questionType,
     manualQuestion,
+    explanation,
     questionImage,
     answerImage,
     options,
@@ -74,6 +80,7 @@ export const useManualQuestionUpload = (subTopicId: string) => {
   return {
     questionType,
     manualQuestion,
+    explanation,
     questionImage,
     answerImage,
     options,
@@ -90,11 +97,14 @@ export const useManualQuestionUpload = (subTopicId: string) => {
     setCorrectSecondaryIndex,
     setQuestionType,
     setManualQuestion,
+    setExplanation,
     setQuestionImage,
     setAnswerImage,
     handleOptionChange,
     setCorrectAnswerIndex,
     setCorrectTextAnswer,
-    handleManualUpload
+    handleManualUpload,
+    addOption,
+    removeOption
   };
 };
