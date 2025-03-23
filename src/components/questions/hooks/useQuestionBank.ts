@@ -13,6 +13,7 @@ export const useQuestionBank = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showDuplicatesOnly, setShowDuplicatesOnly] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
 
   // Function to force refresh
   const refreshQuestions = useCallback(() => {
@@ -42,6 +43,42 @@ export const useQuestionBank = () => {
       return data;
     },
     enabled: category !== "all",
+  });
+
+  // Fetch total count of questions matching filters
+  useQuery({
+    queryKey: ['bank-questions-count', category, subTopicId, searchQuery, showDuplicatesOnly, refreshTrigger],
+    queryFn: async () => {
+      let query = supabase
+        .from('questions')
+        .select(`
+          id,
+          sub_topics (
+            question_sections (
+              category
+            )
+          )
+        `, { count: 'exact' });
+
+      if (category !== "all") {
+        query = query.eq('sub_topics.question_sections.category', category);
+      }
+
+      if (subTopicId !== "all") {
+        query = query.eq('sub_topic_id', subTopicId);
+      }
+
+      if (searchQuery) {
+        query = query.textSearch('content->>question', searchQuery);
+      }
+
+      const { count, error } = await query;
+
+      if (error) throw error;
+      
+      setTotalCount(count || 0);
+      return count;
+    }
   });
 
   // Fetch questions with filters and pagination
@@ -74,12 +111,11 @@ export const useQuestionBank = () => {
         query = query.textSearch('content->>question', searchQuery);
       }
 
-      // If we're only showing duplicates, we need to fetch more items to analyze
-      const effectiveItemsPerPage = showDuplicatesOnly ? itemsPerPage * 5 : itemsPerPage;
-
+      // Calculate pagination range
+      const start = (currentPage - 1) * itemsPerPage;
+      const end = start + itemsPerPage - 1;
+      
       // Add pagination
-      const start = (currentPage - 1) * effectiveItemsPerPage;
-      const end = start + effectiveItemsPerPage - 1;
       query = query.range(start, end);
 
       const { data, error } = await query;
@@ -126,6 +162,7 @@ export const useQuestionBank = () => {
     subTopics,
     isLoading,
     processedQuestions,
-    refreshQuestions
+    refreshQuestions,
+    totalCount
   };
 };

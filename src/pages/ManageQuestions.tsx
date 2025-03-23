@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { HomepageEditor } from "@/components/homepage/HomepageEditor";
-import { CategoriesTable } from "@/components/questions/sections/CategoriesTable";
 import { GamePuzzlesManager } from "@/components/puzzles/GamePuzzlesManager";
 import { supabase } from "@/integrations/supabase/client";
 import { WebhookManagement } from "@/components/webhooks/WebhookManagement";
@@ -68,7 +67,7 @@ const ManageQuestions = () => {
       <h1 className="section-title">Question Management</h1>
 
       <Tabs defaultValue="bank" className="w-full">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="bank" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Complete Question Bank
           </TabsTrigger>
@@ -83,9 +82,6 @@ const ManageQuestions = () => {
           </TabsTrigger>
           <TabsTrigger value="homepage" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Edit Homepage
-          </TabsTrigger>
-          <TabsTrigger value="summary" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
-            Games Summary
           </TabsTrigger>
           <TabsTrigger value="webhooks" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             AI Webhooks
@@ -110,10 +106,6 @@ const ManageQuestions = () => {
 
         <TabsContent value="homepage">
           <HomepageEditor />
-        </TabsContent>
-
-        <TabsContent value="summary">
-          <CategoriesTable sections={sections} />
         </TabsContent>
 
         <TabsContent value="webhooks">
