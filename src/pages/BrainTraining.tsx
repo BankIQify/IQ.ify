@@ -8,10 +8,11 @@ import { SudokuGame } from "@/components/games/SudokuGame";
 import { TwentyFourGame } from "@/components/games/TwentyFourGame";
 import { MemoryGame } from "@/components/games/MemoryGame";
 import { GeographyGame } from "@/components/games/GeographyGame";
+import { RopeUntangleGame } from "@/components/games/RopeUntangleGame";
 import IQTestGame from "@/components/games/IQTestGame";
 import { useState } from "react";
 import type { Difficulty } from "@/components/games/GameSettings";
-import { Puzzle, BookOpen, Grid, Calculator, Hash, Brain, Globe, Lightbulb } from "lucide-react";
+import { Puzzle, BookOpen, Grid, Calculator, Hash, Brain, Globe, Lightbulb, Link2 } from "lucide-react";
 
 export default function BrainTraining() {
   const defaultDifficulty: Difficulty = "easy";
@@ -36,6 +37,8 @@ export default function BrainTraining() {
         return <GeographyGame difficulty={defaultDifficulty} />;
       case "iq-test":
         return <IQTestGame difficulty={defaultDifficulty} />;
+      case "rope-untangle":
+        return <RopeUntangleGame difficulty={defaultDifficulty} />;
       default:
         return null;
     }
@@ -89,6 +92,12 @@ export default function BrainTraining() {
       title: "Geography Quiz",
       description: "Challenge your knowledge of world geography",
       icon: <Globe className="h-8 w-8 text-indigo-500" />,
+    },
+    {
+      id: "rope-untangle",
+      title: "Rope Untangle",
+      description: "Untangle colorful ropes by moving pins to their matching holes",
+      icon: <Link2 className="h-8 w-8 text-blue-600" />,
     },
     {
       id: "iq-test",
