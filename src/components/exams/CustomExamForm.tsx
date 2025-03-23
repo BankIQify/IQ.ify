@@ -7,6 +7,7 @@ import { SubTopicSelector } from "./SubTopicSelector";
 import { ExamNameInput } from "./custom-exam/ExamNameInput";
 import { QuestionConfig } from "./custom-exam/QuestionConfig";
 import { useCustomExamForm } from "./custom-exam/useCustomExamForm";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
@@ -33,7 +34,7 @@ export function CustomExamForm() {
     handleCreateCustomExam
   } = useCustomExamForm();
 
-  const { data: sections } = useQuery({
+  const { data: sections = [], isLoading: isLoadingSections } = useQuery({
     queryKey: ['sections'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,11 +42,11 @@ export function CustomExamForm() {
         .select('*');
       
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 
-  const { data: subTopics } = useQuery({
+  const { data: subTopics = [], isLoading: isLoadingSubTopics } = useQuery({
     queryKey: ['sub_topics'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -53,14 +54,14 @@ export function CustomExamForm() {
         .select('*');
       
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 
-  const availableSubTopics = subTopics?.filter(subTopic => {
-    const section = sections?.find(s => s.id === subTopic.section_id);
+  const availableSubTopics = subTopics.filter(subTopic => {
+    const section = sections.find(s => s.id === subTopic.section_id);
     return section && selectedTopics.includes(section.category as QuestionCategory);
-  }) || [];
+  });
 
   const handleSubTopicChange = (subTopicId: string, checked: boolean) => {
     if (checked) {
@@ -69,6 +70,17 @@ export function CustomExamForm() {
       setSelectedSubTopics(selectedSubTopics.filter(id => id !== subTopicId));
     }
   };
+
+  if (isLoadingSections || isLoadingSubTopics) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
