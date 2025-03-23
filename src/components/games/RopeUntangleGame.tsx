@@ -68,7 +68,7 @@ export const RopeUntangleGame = ({ difficulty: initialDifficulty = "easy" }: { d
 
   return (
     <GameLayout
-      title="Rope Untangle"
+      title="Untangled"
       description="Untangle the ropes by moving the pins to their matching pin-holes"
       score={gameState.score}
       timer={gameState.isActive ? gameState.timer : undefined}

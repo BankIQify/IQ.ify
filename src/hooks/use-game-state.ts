@@ -111,6 +111,9 @@ export const useGameState = ({
       if (gameType === "twenty_four") {
         // We can use word_scramble as a fallback since "twenty_four" isn't in game_type enum
         dbGameType = "word_scramble";
+      } else if (gameType === "rope_untangle") {
+        // Use memory_game as fallback for rope_untangle
+        dbGameType = "memory_game";
       } else {
         // For standard game types that exist in the database enum
         dbGameType = gameType as DatabaseGameType;

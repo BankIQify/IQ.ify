@@ -52,10 +52,10 @@ export const GameCompletedModal = ({
         <DialogHeader>
           <div className="flex items-center gap-3">
             {getDifficultyIcon()}
-            <DialogTitle>Game Completed!</DialogTitle>
+            <DialogTitle>Untangled Completed!</DialogTitle>
           </div>
           <DialogDescription>
-            Here's how you did in the Rope Untangling challenge.
+            Here's how you did in the Untangled challenge.
           </DialogDescription>
         </DialogHeader>
 

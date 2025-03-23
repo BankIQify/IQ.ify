@@ -10,7 +10,7 @@ export const GameInstructions = ({ onStart }: GameInstructionsProps) => {
   return (
     <div className="flex flex-col items-center justify-center space-y-8 py-8">
       <div className="text-center max-w-2xl">
-        <h2 className="text-2xl font-bold mb-4">Rope Untangle Challenge</h2>
+        <h2 className="text-2xl font-bold mb-4">Untangled Challenge</h2>
         <p className="text-gray-600 mb-6">
           Untangle the colorful ropes by moving pins to their matching pin-holes. 
           The more difficult the level, the more complex the tangles!

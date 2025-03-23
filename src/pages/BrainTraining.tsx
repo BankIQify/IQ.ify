@@ -95,7 +95,7 @@ export default function BrainTraining() {
     },
     {
       id: "rope-untangle",
-      title: "Rope Untangle",
+      title: "Untangled",
       description: "Untangle colorful ropes by moving pins to their matching holes",
       icon: <Link2 className="h-8 w-8 text-blue-600" />,
     },
