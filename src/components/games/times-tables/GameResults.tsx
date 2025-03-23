@@ -1,8 +1,8 @@
 
 import { Button } from "@/components/ui/button";
 import { X, Check } from "lucide-react";
-import { Question } from "./types";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import type { Question } from "./types";
 
 interface GameResultsProps {
   answeredQuestions: Question[];

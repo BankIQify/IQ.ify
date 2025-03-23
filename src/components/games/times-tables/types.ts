@@ -1,5 +1,13 @@
 
-import type { Question } from "./types";
+export interface Question {
+  num1: number;
+  num2: number;
+  answer: number;
+  operation: "multiply" | "divide";
+  explanation: string;
+  userAnswer?: number;
+  isCorrect?: boolean;
+}
 
 export interface AnswerInputProps {
   userAnswer: string;
@@ -30,5 +38,3 @@ export interface ActiveGameProps {
   isCorrect: boolean;
   progressPercentage: number;
 }
-
-// Note: Reusing the existing Question interface from types.ts
