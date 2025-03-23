@@ -1,6 +1,8 @@
 
 import { WebhookSetupCard } from "./webhook/WebhookSetupCard";
 import { WebhookKeysCard } from "./webhook/WebhookKeysCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WebhookKeyGenerator } from "../webhooks/WebhookKeyGenerator";
 
 export function WebhookKeyManager() {
   // Get the Supabase URL from environment variable
@@ -40,11 +42,26 @@ export function WebhookKeyManager() {
 
   return (
     <div className="space-y-6">
-      <WebhookSetupCard 
-        webhookUrl={webhookUrl} 
-        functionEndpoint={functionEndpoint} 
-      />
-      <WebhookKeysCard />
+      <Tabs defaultValue="setup" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="setup">Webhook Setup</TabsTrigger>
+          <TabsTrigger value="keys">Active Keys</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="setup">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <WebhookSetupCard 
+              webhookUrl={webhookUrl} 
+              functionEndpoint={functionEndpoint} 
+            />
+            <WebhookKeyGenerator />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="keys">
+          <WebhookKeysCard />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
