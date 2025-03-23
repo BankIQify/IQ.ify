@@ -34,6 +34,11 @@ export const useManualQuestionUpload = (subTopicId: string) => {
   const { validateQuestionData: validateData } = useQuestionValidation();
   
   const validateQuestionData = (): boolean => {
+    // Make sure explanation is not empty
+    if (!explanation.trim()) {
+      return false;
+    }
+    
     return validateData(
       questionType,
       subTopicId,

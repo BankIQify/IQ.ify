@@ -1,10 +1,10 @@
 
-export type Question = {
+export interface Question {
   num1: number;
   num2: number;
-  operation: "multiply" | "divide";
   answer: number;
+  operation: "multiply" | "divide";
   userAnswer?: number;
   isCorrect?: boolean;
-};
-
+  explanation?: string;
+}

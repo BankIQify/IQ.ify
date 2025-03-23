@@ -20,6 +20,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
   const [answeredQuestions, setAnsweredQuestions] = useState<number[]>([]);
   const [gameQuestions, setGameQuestions] = useState<Question[]>([]);
   const [questionTypes, setQuestionTypes] = useState<Record<string, number>>({});
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const { toast } = useToast();
 
   const gameState = useGameState({
@@ -78,26 +79,31 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
 
     const currentQuestion = gameQuestions[currentQuestionIndex];
     const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+    setIsAnswerCorrect(isCorrect);
     
     if (isCorrect) {
       gameState.updateScore(10);
       toast({
         title: "Correct!",
-        description: "Well done! Let's see the explanation.",
+        description: "Moving to next question...",
       });
+      
+      // For correct answers, move to next question without showing explanation
+      moveToNextQuestion();
     } else {
+      // Only show explanation for incorrect answers
       toast({
         title: "Incorrect",
-        description: "Let's see why. Don't worry, learning from mistakes is part of improving!",
+        description: "Let's see why before moving on.",
         variant: "destructive",
       });
+      setShowExplanation(true);
     }
 
-    setShowExplanation(true);
     setAnsweredQuestions([...answeredQuestions, currentQuestion.id]);
   };
 
-  const handleNext = () => {
+  const moveToNextQuestion = () => {
     if (currentQuestionIndex < gameQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer("");
@@ -212,7 +218,7 @@ const IQTestGame = ({ difficulty }: { difficulty: Difficulty }) => {
                 </p>
               </div>
               <Button
-                onClick={handleNext}
+                onClick={moveToNextQuestion}
                 className="w-full bg-gradient-to-r from-pastel-purple to-pastel-blue hover:opacity-90"
               >
                 {currentQuestionIndex < gameQuestions.length - 1 ? (

@@ -33,20 +33,38 @@ export const TimesTablesGame = () => {
     const numericAnswer = parseInt(userAnswer);
     const isAnswerCorrect = numericAnswer === currentQuestion.answer;
     setIsCorrect(isAnswerCorrect);
-    setShowFeedback(true);
-
-    const answeredQuestion = {
-      ...currentQuestion,
-      userAnswer: numericAnswer,
-      isCorrect: isAnswerCorrect,
-    };
-
-    setTimeout(() => {
-      setAnsweredQuestions((prev) => [...prev, answeredQuestion]);
+    
+    // Only show feedback if answer is incorrect
+    if (!isAnswerCorrect) {
+      setShowFeedback(true);
+      
+      // For incorrect answers, set a timer to move to the next question after showing explanation
+      setTimeout(() => {
+        setAnsweredQuestions((prev) => [...prev, {
+          ...currentQuestion,
+          userAnswer: numericAnswer,
+          isCorrect: isAnswerCorrect,
+        }]);
+        setUserAnswer("");
+        setCurrentQuestion(generateQuestion(selectedTables));
+        setShowFeedback(false);
+      }, 3000); // Show explanation for 3 seconds
+    } else {
+      // For correct answers, immediately move to next question without showing explanation
+      setAnsweredQuestions((prev) => [...prev, {
+        ...currentQuestion,
+        userAnswer: numericAnswer,
+        isCorrect: isAnswerCorrect,
+      }]);
       setUserAnswer("");
       setCurrentQuestion(generateQuestion(selectedTables));
-      setShowFeedback(false);
-    }, 1000);
+      
+      // Show a brief flash of feedback for correct answers
+      setShowFeedback(true);
+      setTimeout(() => {
+        setShowFeedback(false);
+      }, 500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -172,9 +190,16 @@ export const TimesTablesGame = () => {
                     <span>Correct!</span>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center gap-1">
-                    <XCircle className="h-4 w-4" />
-                    <span>Incorrect! The answer is {currentQuestion.answer}</span>
+                  <div className="flex flex-col items-center justify-center gap-1">
+                    <div className="flex items-center gap-1">
+                      <XCircle className="h-4 w-4" />
+                      <span>Incorrect! The answer is {currentQuestion.answer}</span>
+                    </div>
+                    {currentQuestion.explanation && (
+                      <p className="text-sm mt-1 max-w-md">
+                        {currentQuestion.explanation}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
