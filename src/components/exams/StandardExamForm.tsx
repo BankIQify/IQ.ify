@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,9 @@ type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
 export function StandardExamForm() {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [standardCategory, setStandardCategory] = useState<QuestionCategory | ''>('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateStandardExam = async () => {
     if (!standardCategory) {
@@ -22,15 +25,21 @@ export function StandardExamForm() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      const { error } = await supabase
+      const examName = `Standard ${standardCategory.replace('_', ' ')} Test`;
+      
+      const { data, error } = await supabase
         .from('exams')
         .insert({
-          name: `Standard ${standardCategory.replace('_', ' ')} Test`,
+          name: examName,
           category: standardCategory,
           question_count: 20,
           is_standard: true
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -38,6 +47,13 @@ export function StandardExamForm() {
         title: "Success",
         description: "Standard exam created successfully"
       });
+
+      // Navigate to the practice page for this exam
+      if (data) {
+        // For now, just navigate to the Practice page
+        // In a future enhancement, this could go directly to the exam
+        navigate(`/practice/${standardCategory}`);
+      }
 
       setStandardCategory('');
     } catch (error) {
@@ -47,6 +63,8 @@ export function StandardExamForm() {
         description: "Failed to create standard exam",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,8 +87,12 @@ export function StandardExamForm() {
         </Select>
       </div>
 
-      <Button onClick={handleCreateStandardExam} className="w-full">
-        Create Standard Exam
+      <Button 
+        onClick={handleCreateStandardExam} 
+        className="w-full"
+        disabled={isLoading}
+      >
+        {isLoading ? "Creating..." : "Create Standard Exam"}
       </Button>
     </div>
   );

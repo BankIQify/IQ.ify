@@ -25,7 +25,7 @@ const ManageExams = () => {
 
   return (
     <div className="page-container">
-      <h1 className="section-title">Practice Creation</h1>
+      <h1 className="section-title">Create Practice Tests</h1>
       
       <Tabs defaultValue="standard" className="w-full">
         <TabsList className="grid w-full grid-cols-2">

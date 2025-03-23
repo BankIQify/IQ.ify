@@ -14,6 +14,7 @@ import BrainTraining from "./pages/BrainTraining";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SubjectProgress from "./pages/SubjectProgress";
+import Practice from "./pages/Practice"; 
 import { useAuth } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/lets-practice" element={<ManageExams />} />
               <Route path="/brain-training" element={<BrainTraining />} />
               <Route path="/progress/:subject" element={<SubjectProgress />} />
+              <Route path="/practice/:category" element={<Practice />} />
               <Route 
                 path="/manage-questions" 
                 element={
