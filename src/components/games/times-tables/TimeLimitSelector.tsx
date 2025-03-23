@@ -7,6 +7,10 @@ interface TimeLimitSelectorProps {
   onTimeLimitChange: (limit: number) => void;
 }
 
+/**
+ * TimeLimitSelector component provides options for selecting the
+ * game duration (1, 2, or 3 minutes).
+ */
 export const TimeLimitSelector = ({
   timeLimit,
   onTimeLimitChange,
@@ -37,4 +41,3 @@ export const TimeLimitSelector = ({
     </div>
   );
 };
-

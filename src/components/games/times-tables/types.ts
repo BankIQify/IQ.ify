@@ -1,4 +1,14 @@
 
+/**
+ * Question represents a single math problem in the Times Tables game.
+ * It includes:
+ * - The two numbers in the question (num1, num2)
+ * - The expected answer
+ * - The operation (multiplication or division)
+ * - An explanation of the solution
+ * - The user's answer (after answering)
+ * - Whether the user's answer was correct
+ */
 export interface Question {
   num1: number;
   num2: number;
@@ -9,6 +19,9 @@ export interface Question {
   isCorrect?: boolean;
 }
 
+/**
+ * Props for the AnswerInput component
+ */
 export interface AnswerInputProps {
   userAnswer: string;
   setUserAnswer: (answer: string) => void;
@@ -19,6 +32,9 @@ export interface AnswerInputProps {
   currentQuestion: Question | null;
 }
 
+/**
+ * Props for the GameControls component
+ */
 export interface GameControlsProps {
   selectedTables: number[];
   timeLimit: number;
@@ -27,6 +43,9 @@ export interface GameControlsProps {
   onStart: () => void;
 }
 
+/**
+ * Props for the ActiveGame component
+ */
 export interface ActiveGameProps {
   timer: number;
   currentQuestion: Question | null;

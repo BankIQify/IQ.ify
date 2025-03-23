@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AnswerInputProps } from "./types";
 
+/**
+ * AnswerInput component handles the user input for answering questions
+ * and displays feedback after submission.
+ */
 export const AnswerInput = ({
   userAnswer,
   setUserAnswer,
@@ -16,6 +20,7 @@ export const AnswerInput = ({
 }: AnswerInputProps) => {
   return (
     <div className="relative">
+      {/* Answer input field and submit button */}
       <div className="flex gap-3">
         <Input
           type="number"
@@ -40,6 +45,7 @@ export const AnswerInput = ({
         </Button>
       </div>
       
+      {/* Feedback display - shows after answer submission */}
       {showFeedback && (
         <div className={cn(
           "absolute top-full left-0 right-0 text-center mt-2 py-1 px-2 rounded font-medium",

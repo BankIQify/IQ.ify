@@ -4,6 +4,10 @@ import { Progress } from "@/components/ui/progress";
 import { AnswerInput } from "./AnswerInput";
 import type { ActiveGameProps } from "./types";
 
+/**
+ * ActiveGame component displays the current question and answer input
+ * during an active times tables game session.
+ */
 export const ActiveGame = ({
   timer,
   currentQuestion,
@@ -19,12 +23,14 @@ export const ActiveGame = ({
 
   return (
     <div className="p-6 rounded-xl bg-white shadow-md space-y-6 animate-fade-in">
+      {/* Timer and progress display */}
       <div className="flex items-center gap-3 mb-6">
         <Timer className="h-5 w-5 text-primary animate-pulse" />
         <span className="font-bold">{timer}s remaining</span>
         <Progress value={progressPercentage} className="flex-1 h-2" />
       </div>
       
+      {/* Question display */}
       <div className="text-center py-8 px-4 rounded-lg bg-gradient-to-r from-pastel-blue/10 to-pastel-purple/10">
         <div className="text-3xl font-bold mb-2">
           {currentQuestion.operation === "multiply"
@@ -38,6 +44,7 @@ export const ActiveGame = ({
         </p>
       </div>
       
+      {/* Answer input component */}
       <AnswerInput
         userAnswer={userAnswer}
         setUserAnswer={setUserAnswer}

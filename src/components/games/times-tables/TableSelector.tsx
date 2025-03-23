@@ -7,6 +7,10 @@ interface TableSelectorProps {
   onToggleTable: (table: number) => void;
 }
 
+/**
+ * TableSelector component provides a grid of checkboxes for selecting
+ * which times tables to practice (1-25).
+ */
 export const TableSelector = ({
   selectedTables,
   onToggleTable,
@@ -26,4 +30,3 @@ export const TableSelector = ({
     </div>
   );
 };
-

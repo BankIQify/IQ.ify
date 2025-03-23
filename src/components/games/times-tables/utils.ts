@@ -1,12 +1,18 @@
 
 import type { Question } from "./types";
 
+/**
+ * Generates a random multiplication or division question based on the selected times tables.
+ * 
+ * @param tablesArray - Array of numbers representing the selected times tables
+ * @returns A Question object containing the question details
+ */
 export const generateQuestion = (tablesArray: number[]): Question => {
-  // Get a random table from the selected tables
+  // Select a random times table from the user's selection
   const randomIndex = Math.floor(Math.random() * tablesArray.length);
   const selectedTable = tablesArray[randomIndex];
   
-  // Decide if this will be multiplication or division
+  // Randomly choose between multiplication and division
   const operation = Math.random() > 0.5 ? "multiply" : "divide";
   
   let num1: number;
@@ -15,13 +21,18 @@ export const generateQuestion = (tablesArray: number[]): Question => {
   let explanation: string;
   
   if (operation === "multiply") {
-    // For multiplication, one number is the selected table, the other is 1-12
+    // For multiplication questions:
+    // First number is the selected times table
+    // Second number is a random number between 1-12
     num1 = selectedTable;
     num2 = Math.floor(Math.random() * 12) + 1;
     answer = num1 * num2;
     explanation = `To find ${num1} × ${num2}, multiply ${num1} by ${num2}. ${num1} × ${num2} = ${answer}`;
   } else {
-    // For division, the answer will be the divisor (1-12)
+    // For division questions:
+    // The divisor is the selected times table
+    // The answer will be a random number between 1-12
+    // The dividend (num1) is calculated as divisor × answer
     num2 = selectedTable;
     answer = Math.floor(Math.random() * 12) + 1;
     num1 = num2 * answer;

@@ -9,15 +9,22 @@ interface GameResultsProps {
   onReset: () => void;
 }
 
+/**
+ * GameResults component displays the final score and a summary of incorrect answers
+ * when the game is completed. It also provides an option to restart the game.
+ */
 export const GameResults = ({ answeredQuestions, onReset }: GameResultsProps) => {
+  // Calculate statistics
   const correctAnswers = answeredQuestions.filter((q) => q.isCorrect).length;
   const totalQuestions = answeredQuestions.length;
   const percentageCorrect = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
   
+  // Filter to get only incorrect questions for review
   const incorrectQuestions = answeredQuestions.filter((q) => !q.isCorrect);
   
   return (
     <div className="space-y-6">
+      {/* Game summary and score */}
       <div className="space-y-2 text-center">
         <h3 className="text-2xl font-bold">Game Complete!</h3>
         <div className="flex items-center justify-center gap-2 text-xl">
@@ -27,6 +34,7 @@ export const GameResults = ({ answeredQuestions, onReset }: GameResultsProps) =>
         </div>
       </div>
       
+      {/* Display incorrect answers if any exist */}
       {incorrectQuestions.length > 0 ? (
         <div className="space-y-3">
           <h4 className="font-semibold text-lg">Incorrect Answers:</h4>
@@ -61,6 +69,7 @@ export const GameResults = ({ answeredQuestions, onReset }: GameResultsProps) =>
           </Table>
         </div>
       ) : (
+        // Perfect score message (if user answered at least one question)
         totalQuestions > 0 && (
           <div className="flex flex-col items-center justify-center p-4 bg-green-50 rounded-lg border border-green-200">
             <Check className="h-8 w-8 text-green-500 mb-2" />
@@ -69,6 +78,7 @@ export const GameResults = ({ answeredQuestions, onReset }: GameResultsProps) =>
         )
       )}
       
+      {/* Try again button */}
       <div className="flex justify-center">
         <Button onClick={onReset} size="lg">
           Try Again

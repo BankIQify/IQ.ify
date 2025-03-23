@@ -1,13 +1,22 @@
 
+/**
+ * TimesTablesGame is the main component that orchestrates the times tables 
+ * practice game. It manages the different game states (setup, active game, 
+ * and results) and renders the appropriate UI for each state.
+ */
 import { GameControls } from "./GameControls";
 import { ActiveGame } from "./ActiveGame";
 import { GameResults } from "./GameResults";
 import { useTimesTablesGame } from "./useTimesTablesGame";
 
 const TimesTablesGame = () => {
+  // Use the custom hook to manage all game state and logic
   const {
+    // Game configuration state
     selectedTables,
     timeLimit,
+    
+    // Active game state
     currentQuestion,
     userAnswer,
     answeredQuestions,
@@ -16,27 +25,31 @@ const TimesTablesGame = () => {
     timer,
     isActive,
     progressPercentage,
+    
+    // Event handlers
     setUserAnswer,
     handleAnswer,
     handleKeyPress,
-    handleStart,
-    toggleTable,
+    handleStartGame,
+    toggleTimesTable,
     handleTimeLimitChange,
     resetGame,
   } = useTimesTablesGame();
 
   return (
     <div className="space-y-6">
+      {/* Game setup screen - shown when game is not active */}
       {!isActive && (
         <GameControls
           selectedTables={selectedTables}
           timeLimit={timeLimit}
-          onToggleTable={toggleTable}
+          onToggleTable={toggleTimesTable}
           onTimeLimitChange={handleTimeLimitChange}
-          onStart={handleStart}
+          onStart={handleStartGame}
         />
       )}
 
+      {/* Active game screen - shown when game is in progress */}
       {isActive && currentQuestion && (
         <ActiveGame
           timer={timer}
@@ -51,6 +64,7 @@ const TimesTablesGame = () => {
         />
       )}
 
+      {/* Results screen - shown when time is up */}
       {timer === 0 && (
         <div className="animate-fade-in">
           <GameResults
