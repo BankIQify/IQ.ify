@@ -17,7 +17,7 @@ type DatabaseGameType = Database["public"]["Enums"]["game_type"];
 type DatabasePuzzleType = Database["public"]["Enums"]["game_puzzle_type"];
 
 // Create a union type for all valid game types
-export type GameType = DatabaseGameType | "twenty_four";
+export type GameType = DatabaseGameType | "twenty_four" | "rope_untangle";
 
 interface UseGameStateProps {
   initialTimer?: number;
