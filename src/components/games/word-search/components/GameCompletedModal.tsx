@@ -1,20 +1,11 @@
 
 import { Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useWordSearchContext } from "../context/WordSearchContext";
 
-interface GameCompletedModalProps {
-  wordCount: number;
-  score: number;
-  timeTaken: number;
-  handleNewPuzzle: () => void;
-}
+export const GameCompletedModal = () => {
+  const { totalWordsCount, score, timeTaken, handleNewPuzzle } = useWordSearchContext();
 
-export const GameCompletedModal = ({ 
-  wordCount, 
-  score, 
-  timeTaken, 
-  handleNewPuzzle 
-}: GameCompletedModalProps) => {
   return (
     <div className="animate-scale-in fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full">
@@ -22,7 +13,7 @@ export const GameCompletedModal = ({
           <Trophy className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
           <h3 className="text-2xl font-bold mb-2">Congratulations!</h3>
           <p className="text-gray-600 mb-6">
-            You found all {wordCount} words and scored {score} points!
+            You found all {totalWordsCount} words and scored {score} points!
           </p>
           
           <div className="grid grid-cols-2 gap-4 mb-6">

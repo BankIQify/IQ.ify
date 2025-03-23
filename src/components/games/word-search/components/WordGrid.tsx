@@ -1,21 +1,11 @@
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
-import type { GameContextProps } from "../types";
+import { useWordSearchContext } from "../context/WordSearchContext";
 
-interface WordGridProps {
-  grid: string[][];
-  gridDimensions: GameContextProps["gridDimensions"];
-  selectedCells: GameContextProps["selectedCells"];
-  handleCellClick: GameContextProps["handleCellClick"];
-}
+export const WordGrid = () => {
+  const { grid, gridDimensions, selectedCells, handleCellClick } = useWordSearchContext();
 
-export const WordGrid = ({
-  grid,
-  gridDimensions,
-  selectedCells,
-  handleCellClick,
-}: WordGridProps) => {
   // Function to determine cell color based on various conditions
   const getCellColor = (rowIndex: number, colIndex: number) => {
     const isSelected = selectedCells.some(([r, c]) => r === rowIndex && c === colIndex);

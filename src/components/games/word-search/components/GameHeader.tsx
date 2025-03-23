@@ -3,30 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Clock } from "lucide-react";
+import { useWordSearchContext } from "../context/WordSearchContext";
 
-interface GameHeaderProps {
-  themes: { id: string; name: string }[];
-  selectedTheme: string;
-  handleSelectTheme: (themeId: string) => void;
-  handleNewPuzzle: () => void;
-  isGameActive: boolean;
-  timer: number;
-  wordsFoundCount: number;
-  totalWordsCount: number;
-  score: number;
-}
-
-export const GameHeader = ({
-  themes,
-  selectedTheme,
-  handleSelectTheme,
-  handleNewPuzzle,
-  isGameActive,
-  timer,
-  wordsFoundCount,
-  totalWordsCount,
-  score
-}: GameHeaderProps) => {
+export const GameHeader = () => {
+  const {
+    themes,
+    selectedTheme,
+    handleSelectTheme,
+    handleNewPuzzle,
+    isGameActive,
+    timer,
+    wordsFoundCount,
+    totalWordsCount,
+    score
+  } = useWordSearchContext();
+  
   const wordsFoundPercentage = (wordsFoundCount / totalWordsCount) * 100 || 0;
 
   return (

@@ -3,19 +3,12 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import type { WordToFind } from "../types";
+import { useWordSearchContext } from "../context/WordSearchContext";
 
-interface WordListProps {
-  words: WordToFind[];
-  checkSelection: () => void;
-  selectedCellsCount: number;
-}
+export const WordList = () => {
+  const { words, checkSelection, selectedCells } = useWordSearchContext();
+  const selectedCellsCount = selectedCells.length;
 
-export const WordList = ({ 
-  words, 
-  checkSelection,
-  selectedCellsCount
-}: WordListProps) => {
   return (
     <Card className="border-none shadow-lg overflow-hidden">
       <div className="p-4 bg-gradient-to-r from-pastel-blue/30 to-pastel-purple/30 border-b">
