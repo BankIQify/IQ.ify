@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,7 +9,7 @@ export const useAdminStatus = () => {
     try {
       console.log('Checking admin status for user:', userId);
       
-      // Check for admin role first
+      // Only check for admin role - no longer treat data_input as admin equivalent
       const { data: adminRoleCheck, error: adminCheckError } = await supabase
         .from('user_roles')
         .select('*')
@@ -21,32 +22,9 @@ export const useAdminStatus = () => {
         return;
       }
 
-      // If user already has admin role, set isAdmin to true
-      if (adminRoleCheck) {
-        console.log('User has admin role');
-        setIsAdmin(true);
-        return;
-      }
-
-      // Otherwise check if user has data_input role (which may have some admin privileges)
-      const { data: dataInputRoleCheck, error: dataInputCheckError } = await supabase
-        .from('user_roles')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('role', 'data_input')
-        .maybeSingle();
-
-      if (dataInputCheckError) {
-        console.error('Error checking data_input role status:', dataInputCheckError);
-        return;
-      }
-
-      console.log('Admin check result:', adminRoleCheck);
-      console.log('Data input role check result:', dataInputRoleCheck);
-      
-      // Set isAdmin based on having either role
-      setIsAdmin(!!(adminRoleCheck || dataInputRoleCheck));
-      console.log('Setting isAdmin to:', !!(adminRoleCheck || dataInputRoleCheck));
+      // Set isAdmin based only on admin role
+      setIsAdmin(!!adminRoleCheck);
+      console.log('Setting isAdmin to:', !!adminRoleCheck);
 
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);

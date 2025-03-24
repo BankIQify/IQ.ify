@@ -23,8 +23,8 @@ import AvatarCreator from "./pages/AvatarCreator";
 
 const queryClient = new QueryClient();
 
-// Protected route component
-const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
+// Component for routes that require either admin or data_input role
+const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAdmin } = useAuthContext();
   const [hasDataInputRole, setHasDataInputRole] = useState(false);
   
@@ -54,9 +54,22 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
     checkDataInputRole();
   }, [user]);
   
-  console.log('ProtectedAdminRoute check:', { user, isAdmin, hasDataInputRole }); // Debug log
+  console.log('ProtectedDataRoute check:', { user, isAdmin, hasDataInputRole }); // Debug log
   
   if (!user || (!isAdmin && !hasDataInputRole)) {
+    return <NotFound />;
+  }
+
+  return <>{children}</>;
+};
+
+// Component for routes that require strictly admin role
+const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, isAdmin } = useAuthContext();
+  
+  console.log('ProtectedAdminRoute check:', { user, isAdmin }); // Debug log
+  
+  if (!user || !isAdmin) {
     return <NotFound />;
   }
 
@@ -74,7 +87,14 @@ const App = () => (
             <Navigation />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedAdminRoute>
+                    <Dashboard />
+                  </ProtectedAdminRoute>
+                } 
+              />
               <Route path="/lets-practice" element={<ManageExams />} />
               <Route path="/brain-training" element={<BrainTraining />} />
               <Route path="/profile" element={<Profile />} />
@@ -83,9 +103,9 @@ const App = () => (
               <Route 
                 path="/manage-questions" 
                 element={
-                  <ProtectedAdminRoute>
+                  <ProtectedDataRoute>
                     <ManageQuestions />
-                  </ProtectedAdminRoute>
+                  </ProtectedDataRoute>
                 } 
               />
               <Route path="/auth" element={<Auth />} />

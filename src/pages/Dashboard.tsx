@@ -24,7 +24,7 @@ const Dashboard = () => {
       return;
     }
 
-    // If the user doesn't have admin privileges, redirect them
+    // Only allow users with admin role (not data_input) to access the admin dashboard
     if (!isAdmin) {
       toast({
         title: "Access Denied",

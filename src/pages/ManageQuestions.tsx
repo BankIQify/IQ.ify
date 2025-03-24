@@ -150,7 +150,7 @@ const ManageQuestions = () => {
     }, { replace: true });
   };
 
-  // Restrict certain tabs based on role
+  // Restrict certain tabs based on role - only admins can edit homepage and access webhooks
   const showHomepageTab = isAdmin; // Only true admins can edit homepage
   const showWebhooksTab = isAdmin; // Only true admins can access webhooks
 
