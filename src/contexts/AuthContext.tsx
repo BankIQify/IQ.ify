@@ -4,6 +4,7 @@ import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { FocusArea } from "@/types/auth";
+import { Json } from "@/integrations/supabase/types";
 
 type Profile = {
   id: string;
@@ -128,9 +129,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           data.focus_areas = focusAreasData?.map(fa => fa.focus_area) || [];
         }
-      }
 
-      setProfile(data);
+        // Convert avatar_config from Json to Record<string, any>
+        const typedProfile: Profile = {
+          ...data,
+          avatar_config: data.avatar_config as Record<string, any> || null
+        };
+        
+        setProfile(typedProfile);
+      }
     } catch (error) {
       console.error("Error in getProfile:", error);
       setProfile(null);
