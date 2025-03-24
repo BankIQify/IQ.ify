@@ -30,21 +30,21 @@ const Navigation = () => {
     <>
       <Link 
         to="/dashboard" 
-        className="block px-4 py-2 text-sm hover:bg-iqify-blue/20 rounded-md font-medium text-iqify-navy"
+        className="block px-4 py-2 text-sm hover:bg-iqify-blue/20 rounded-md font-medium text-[#001F3F]"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Dashboard
       </Link>
       <Link 
         to="/lets-practice" 
-        className="block px-4 py-2 text-sm hover:bg-iqify-pink/20 rounded-md font-medium text-iqify-navy"
+        className="block px-4 py-2 text-sm hover:bg-iqify-pink/20 rounded-md font-medium text-[#001F3F]"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Let's Practice!
       </Link>
       <Link 
         to="/brain-training" 
-        className="block px-4 py-2 text-sm hover:bg-iqify-yellow/20 rounded-md font-medium text-iqify-navy"
+        className="block px-4 py-2 text-sm hover:bg-iqify-yellow/20 rounded-md font-medium text-[#001F3F]"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Brain Training Games
@@ -52,7 +52,7 @@ const Navigation = () => {
       {isAdmin && (
         <Link 
           to="/manage-questions" 
-          className="block px-4 py-2 text-sm hover:bg-iqify-green/20 rounded-md font-medium text-iqify-navy"
+          className="block px-4 py-2 text-sm hover:bg-iqify-green/20 rounded-md font-medium text-[#001F3F]"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           Manage Questions

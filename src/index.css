@@ -43,7 +43,7 @@
 }
 
 .section-title {
-  @apply text-2xl font-bold text-iqify-navy mb-6;
+  @apply text-2xl font-bold text-[#001F3F] mb-6;
 }
 
 .page-container {
@@ -64,7 +64,7 @@
 }
 
 .btn-iqify-yellow {
-  @apply bg-iqify-yellow text-iqify-navy hover:bg-opacity-80 transition-colors;
+  @apply bg-iqify-yellow text-[#001F3F] hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-pink {
