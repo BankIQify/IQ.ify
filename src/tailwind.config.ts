@@ -53,6 +53,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        iqify: {
+          blue: "#1EAEDB",
+          yellow: "#FFD700",
+          green: "#00FF7F",
+          pink: "#FF69B4",
+          orange: "#FF7F00",
+          navy: "#001F3F"
+        },
         pastel: {
           green: "#F2FCE2",
           yellow: "#FEF7CD",
@@ -95,6 +103,7 @@ export default {
       },
       backgroundImage: {
         'gradient-pastel': 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
+        'gradient-iqify': 'linear-gradient(to right, #1EAEDB, #00FF7F, #FFD700, #FF7F00, #FF69B4)',
       },
     },
   },

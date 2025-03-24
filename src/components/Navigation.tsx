@@ -30,21 +30,21 @@ const Navigation = () => {
     <>
       <Link 
         to="/dashboard" 
-        className="block px-4 py-2 text-sm hover:bg-pastel-blue/20 rounded-md"
+        className="block px-4 py-2 text-sm hover:bg-iqify-blue/20 rounded-md font-medium text-iqify-navy"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Dashboard
       </Link>
       <Link 
         to="/lets-practice" 
-        className="block px-4 py-2 text-sm hover:bg-pastel-pink/20 rounded-md"
+        className="block px-4 py-2 text-sm hover:bg-iqify-pink/20 rounded-md font-medium text-iqify-navy"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Let's Practice!
       </Link>
       <Link 
         to="/brain-training" 
-        className="block px-4 py-2 text-sm hover:bg-pastel-yellow/20 rounded-md"
+        className="block px-4 py-2 text-sm hover:bg-iqify-yellow/20 rounded-md font-medium text-iqify-navy"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Brain Training Games
@@ -52,7 +52,7 @@ const Navigation = () => {
       {isAdmin && (
         <Link 
           to="/manage-questions" 
-          className="block px-4 py-2 text-sm hover:bg-pastel-yellow/20 rounded-md"
+          className="block px-4 py-2 text-sm hover:bg-iqify-green/20 rounded-md font-medium text-iqify-navy"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           Manage Questions
@@ -62,13 +62,15 @@ const Navigation = () => {
   );
 
   return (
-    <nav className="border-b bg-gradient-to-r from-pastel-blue via-pastel-pink to-pastel-purple shadow-sm">
+    <nav className="border-b bg-gradient-to-r from-iqify-blue via-iqify-yellow to-iqify-pink shadow-sm">
       <div className="container mx-auto px-4 py-2">
         <div className="flex justify-between items-center">
-          <Link to="/" className="text-xl font-bold text-education-600 hover:scale-105 transition-transform">
-            <span className="bg-gradient-to-r from-education-600 to-education-800 bg-clip-text text-transparent">
-              11+ Learning
-            </span>
+          <Link to="/" className="hover:scale-105 transition-transform">
+            <img 
+              src="/lovable-uploads/fa3e7201-848d-4ab9-a19d-74319434852e.png" 
+              alt="iQify Logo" 
+              className="h-12 md:h-14"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -96,12 +98,12 @@ const Navigation = () => {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <div className="flex items-center gap-3">
-                <Link to="/profile" className="flex items-center gap-2 hover:bg-pastel-purple/20 py-1 px-2 rounded">
+                <Link to="/profile" className="flex items-center gap-2 hover:bg-iqify-blue/20 py-1 px-2 rounded">
                   <Avatar className="h-8 w-8">
                     {profile?.avatar_url ? (
                       <AvatarImage src={profile.avatar_url} alt="User avatar" />
                     ) : (
-                      <AvatarFallback>
+                      <AvatarFallback className="bg-iqify-green text-white">
                         {profile?.name?.charAt(0) || profile?.username?.charAt(0) || "U"}
                       </AvatarFallback>
                     )}
@@ -113,7 +115,7 @@ const Navigation = () => {
                 <Button 
                   variant="outline" 
                   onClick={handleSignOut}
-                  className="hover:bg-pastel-purple/20 border-education-600"
+                  className="hover:bg-iqify-pink/20 border-iqify-pink text-iqify-navy"
                 >
                   Sign Out
                 </Button>
@@ -122,7 +124,7 @@ const Navigation = () => {
               location.pathname !== "/auth" && (
                 <Button 
                   onClick={() => navigate("/auth")}
-                  className="bg-education-600 hover:bg-education-700"
+                  className="bg-iqify-green hover:bg-iqify-green/80 text-white"
                 >
                   Sign In
                 </Button>
@@ -133,13 +135,13 @@ const Navigation = () => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t animate-fade-in">
+          <div className="md:hidden bg-white border-t animate-fadeIn">
             <div className="py-2 space-y-1">
               <NavLinks />
               {user && (
                 <Link 
                   to="/profile" 
-                  className="flex items-center px-4 py-2 text-sm hover:bg-pastel-purple/20 rounded-md"
+                  className="flex items-center px-4 py-2 text-sm hover:bg-iqify-purple/20 rounded-md"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <User className="w-4 h-4 mr-2" />
@@ -150,7 +152,7 @@ const Navigation = () => {
                 <Button 
                   variant="outline" 
                   onClick={handleSignOut}
-                  className="w-full mt-2 hover:bg-pastel-purple/20 border-education-600"
+                  className="w-full mt-2 hover:bg-iqify-pink/20 border-iqify-pink text-iqify-navy"
                 >
                   Sign Out
                 </Button>
@@ -158,7 +160,7 @@ const Navigation = () => {
                 location.pathname !== "/auth" && (
                   <Button 
                     onClick={() => navigate("/auth")}
-                    className="w-full mt-2 bg-education-600 hover:bg-education-700"
+                    className="w-full mt-2 bg-iqify-green hover:bg-iqify-green/80 text-white"
                   >
                     Sign In
                   </Button>

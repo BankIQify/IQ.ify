@@ -57,7 +57,7 @@ const Dashboard = () => {
   const displayName = profile.name || profile.username || user.email?.split('@')[0] || "Scholar";
 
   return (
-    <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn bg-gradient-to-b from-pastel-blue/30 to-pastel-purple/20 rounded-xl">
+    <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn bg-gradient-to-b from-iqify-blue/20 to-iqify-pink/20 rounded-xl">
       <DashboardHeader profile={{...profile, name: displayName}} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">

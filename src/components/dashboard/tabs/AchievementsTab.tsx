@@ -1,202 +1,167 @@
 
-import { UserBadges } from "@/components/dashboard/UserBadges";
-import { AchievementsSummary } from "@/components/dashboard/AchievementsSummary";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Trophy as TrophyIcon, Medal, Star, Crown, Zap, TrendingUp } from "lucide-react";
+import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Trophy } from "@/components/ui/child-friendly/Trophy";
+import { Award, Medal, Trophy, BadgeCheck, Star, Brain } from "lucide-react";
+import { Trophy as TrophyComponent } from "@/components/ui/child-friendly/Trophy";
 import { ColorfulBadge } from "@/components/ui/child-friendly/ColorfulBadge";
 
 export const AchievementsTab = () => {
-  // Mock data for leaderboard
-  const leaderboardData = [
-    { rank: 1, name: "Alex Johnson", avatar: null, score: 4350, isUser: false },
-    { rank: 2, name: "Sarah Williams", avatar: null, score: 4120, isUser: false },
-    { rank: 3, name: "David Chen", avatar: null, score: 3980, isUser: false },
-    { rank: 4, name: "Emma Davis", avatar: null, score: 3870, isUser: false },
-    { rank: 5, name: "You", avatar: null, score: 3740, isUser: true },
+  const [activeTab, setActiveTab] = useState("badges");
+
+  // Sample badges data
+  const badges = [
+    { id: 1, name: "Reading Master", icon: Award, color: "blue", earned: true },
+    { id: 2, name: "Math Genius", icon: Brain, color: "green", earned: true },
+    { id: 3, name: "Science Whiz", icon: Star, color: "yellow", earned: true },
+    { id: 4, name: "Writing Expert", icon: BadgeCheck, color: "pink", earned: true },
+    { id: 5, name: "Verbal Reasoning Pro", icon: Medal, color: "purple", earned: false },
+    { id: 6, name: "Non-verbal Pro", icon: Trophy, color: "orange", earned: false },
   ];
 
-  // Mock data for achievement milestones
-  const milestoneData = {
-    currentLevel: 12,
-    nextLevel: 13,
-    progress: 68,
-    pointsToNext: 120,
-    totalPoints: 3740,
-  };
+  // Sample trophies data
+  const trophies = [
+    { id: 1, name: "Perfect Score", value: "5", description: "Get 100% on any test", color: "gold" },
+    { id: 2, name: "Quick Thinker", value: "3", description: "Complete test in record time", color: "silver" },
+    { id: 3, name: "Consistent Learner", value: "10", description: "Practice for 10 days in a row", color: "bronze" },
+  ];
 
-  // Mock data for streaks
-  const streakData = {
-    current: 4,
-    longest: 15,
-    thisWeek: 4,
-    lastWeek: 7,
-  };
+  // Recent achievements
+  const recentAchievements = [
+    { id: 1, name: "Reading Comprehension Level 3", date: "2 days ago", points: 50, type: "badge" },
+    { id: 2, name: "Completed 10 Math Problems", date: "5 days ago", points: 30, type: "milestone" },
+    { id: 3, name: "First Perfect Score", date: "1 week ago", points: 100, type: "trophy" },
+  ];
+
+  // Progress towards next achievements
+  const upcomingAchievements = [
+    { id: 1, name: "Vocabulary Master", progress: 75, total: 100, type: "Complete 100 vocabulary questions" },
+    { id: 2, name: "Math Explorer", progress: 40, total: 50, type: "Solve 50 math problems" },
+    { id: 3, name: "Perfect Attendance", progress: 12, total: 30, type: "Practice for 30 days" },
+  ];
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <UserBadges />
-        <AchievementsSummary />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 bg-gradient-to-b from-purple-50 to-blue-50 border-purple-100">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="col-span-1 md:col-span-3 card-iqify card-iqify-blue">
           <CardHeader>
-            <CardTitle className="text-purple-700">Achievement Milestones</CardTitle>
-            <CardDescription>Your journey to mastery</CardDescription>
+            <CardTitle className="text-xl text-iqify-navy">Your Achievement Progress</CardTitle>
+            <CardDescription>
+              Track your learning journey and earn cool badges and trophies!
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
-              <div className="p-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg border border-amber-100">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex items-center justify-center h-12 w-12 bg-gradient-to-r from-amber-400 to-yellow-300 rounded-full text-white">
-                    <Star className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <div className="font-medium text-lg">Level {milestoneData.currentLevel}</div>
-                    <div className="text-sm text-muted-foreground">Intermediate Reasoner</div>
-                  </div>
-                  <div className="ml-auto">
-                    <div className="text-right">
-                      <div className="font-bold text-amber-600">{milestoneData.totalPoints}</div>
-                      <div className="text-xs text-muted-foreground">Total Points</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span>Progress to Level {milestoneData.nextLevel}</span>
-                    <span className="font-medium">{milestoneData.progress}%</span>
-                  </div>
-                  <Progress value={milestoneData.progress} className="h-2 bg-amber-100" indicatorClassName="bg-amber-500" />
-                  <div className="text-xs text-right text-muted-foreground">
-                    {milestoneData.pointsToNext} points needed
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-iqify-blue/10 to-iqify-blue/30 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-iqify-blue">{badges.filter(b => b.earned).length}</div>
+                <div className="text-sm text-muted-foreground">Badges Earned</div>
               </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Trophy 
-                  label="Tests Completed" 
-                  value={18} 
-                  color="blue"
-                />
-                <Trophy 
-                  label="Average Score" 
-                  value="82%" 
-                  color="silver"
-                />
-                <Trophy 
-                  label="Perfect Scores" 
-                  value={3} 
-                  color="gold"
-                />
-                <Trophy 
-                  label="Current Level" 
-                  value={12} 
-                  color="purple"
-                />
+              <div className="bg-gradient-to-br from-iqify-green/10 to-iqify-green/30 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-iqify-green">{trophies.length}</div>
+                <div className="text-sm text-muted-foreground">Trophies Won</div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-b from-blue-50 to-cyan-50 border-blue-100">
-          <CardHeader>
-            <CardTitle className="text-blue-700">Your Streaks</CardTitle>
-            <CardDescription>Consistency builds success</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-blue-100 rounded-md border border-blue-200">
-                <div className="p-2 bg-blue-200 rounded-full">
-                  <TrendingUp className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <div className="text-lg font-bold">{streakData.current} Days</div>
-                  <div className="text-xs text-muted-foreground">Current Streak</div>
-                </div>
+              <div className="bg-gradient-to-br from-iqify-yellow/10 to-iqify-yellow/30 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-iqify-yellow">215</div>
+                <div className="text-sm text-muted-foreground">Total Points</div>
               </div>
-
-              <div className="grid grid-cols-7 gap-2 text-center">
-                {Array.from({ length: 7 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`p-2 rounded-md ${i < streakData.thisWeek ? 'bg-blue-200 text-blue-700 shadow-sm' : 'bg-gray-100 text-gray-400'}`}
-                  >
-                    <div className="text-xs">{['M','T','W','T','F','S','S'][i]}</div>
-                    {i < streakData.thisWeek && <div className="text-xs mt-1">✓</div>}
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-3 border-t border-blue-100">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm">Longest Streak</span>
-                  <span className="font-medium">{streakData.longest} days</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Last Week</span>
-                  <span className="font-medium">{streakData.lastWeek}/7 days</span>
-                </div>
+              <div className="bg-gradient-to-br from-iqify-pink/10 to-iqify-pink/30 p-4 rounded-lg text-center">
+                <div className="text-3xl font-bold text-iqify-pink">4</div>
+                <div className="text-sm text-muted-foreground">Weekly Streak</div>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-100">
-        <CardHeader>
-          <CardTitle className="text-amber-700">Leaderboard</CardTitle>
-          <CardDescription>See how you compare to other learners</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {leaderboardData.map((user) => (
-              <div 
-                key={user.rank} 
-                className={`flex items-center p-3 rounded-md ${user.isUser ? 'bg-gradient-to-r from-amber-100 to-yellow-100 border border-amber-200 shadow-md' : 'hover:bg-amber-50'} transition-colors`}
-              >
-                <div className={`flex items-center justify-center h-8 w-8 rounded-full font-medium ${
-                  user.rank === 1 ? 'bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-900' :
-                  user.rank === 2 ? 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-800' :
-                  user.rank === 3 ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-amber-100' :
-                  'bg-gray-100'
-                } mr-3`}>
-                  {user.rank}
-                </div>
-                <Avatar className="h-10 w-10 mr-3 border-2 border-white shadow-sm">
-                  {user.avatar ? (
-                    <AvatarImage src={user.avatar} alt={user.name} />
-                  ) : (
-                    <AvatarFallback className={
-                      user.rank === 1 ? 'bg-amber-200 text-amber-800' :
-                      user.rank === 2 ? 'bg-gray-200 text-gray-800' :
-                      user.rank === 3 ? 'bg-amber-700 text-amber-100' :
-                      user.isUser ? 'bg-blue-200 text-blue-800' :
-                      'bg-gray-100'
-                    }>{user.name.charAt(0)}</AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="flex-1">
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {user.isUser ? 'You' : `Rank #${user.rank}`}
-                  </div>
-                </div>
-                <div className="font-bold">{user.score}</div>
-              </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid grid-cols-2 md:w-1/3">
+          <TabsTrigger value="badges" className="text-sm">
+            Badges
+          </TabsTrigger>
+          <TabsTrigger value="trophies" className="text-sm">
+            Trophies
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="badges" className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {badges.map((badge) => (
+              <ColorfulBadge
+                key={badge.id}
+                icon={badge.icon}
+                label={badge.name}
+                color={badge.color as any}
+                earned={badge.earned}
+              />
             ))}
           </div>
-          <div className="mt-4 text-sm text-center text-muted-foreground">
-            Leaderboard updates weekly based on test scores and activity
+        </TabsContent>
+
+        <TabsContent value="trophies" className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {trophies.map((trophy) => (
+              <TrophyComponent
+                key={trophy.id}
+                label={trophy.name}
+                value={trophy.value}
+                description={trophy.description}
+                color={trophy.color as any}
+              />
+            ))}
           </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="card-iqify card-iqify-green">
+          <CardHeader>
+            <CardTitle className="text-lg text-iqify-navy">Recent Achievements</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {recentAchievements.map((achievement) => (
+                <li key={achievement.id} className="flex justify-between items-center p-3 bg-white/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    {achievement.type === 'badge' && <BadgeCheck className="h-5 w-5 text-iqify-green" />}
+                    {achievement.type === 'trophy' && <Trophy className="h-5 w-5 text-iqify-yellow" />}
+                    {achievement.type === 'milestone' && <Star className="h-5 w-5 text-iqify-pink" />}
+                    <div>
+                      <div className="font-medium">{achievement.name}</div>
+                      <div className="text-xs text-muted-foreground">{achievement.date}</div>
+                    </div>
+                  </div>
+                  <div className="bg-iqify-green/20 text-iqify-green px-2 py-1 rounded-md text-sm font-medium">
+                    +{achievement.points} pts
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+
+        <Card className="card-iqify card-iqify-pink">
+          <CardHeader>
+            <CardTitle className="text-lg text-iqify-navy">Up Next Achievements</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-4">
+              {upcomingAchievements.map((achievement) => (
+                <li key={achievement.id} className="space-y-2 p-3 bg-white/50 rounded-lg">
+                  <div className="flex justify-between">
+                    <div className="font-medium">{achievement.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {achievement.progress}/{achievement.total}
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">{achievement.type}</div>
+                  <Progress value={(achievement.progress / achievement.total) * 100} className="h-2 bg-slate-200" />
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

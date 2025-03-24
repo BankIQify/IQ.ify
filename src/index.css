@@ -11,13 +11,13 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 190 82% 50%;  /* iQify blue */
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 330 81% 60%;  /* iQify pink */
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -33,7 +33,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-gradient-to-b from-[#D3E4FD]/10 to-[#FFDEE2]/10 min-h-screen text-foreground;
+    @apply bg-gradient-to-b from-iqify-blue/10 to-iqify-pink/10 min-h-screen text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -43,7 +43,7 @@
 }
 
 .section-title {
-  @apply text-2xl font-bold text-gray-800 mb-6;
+  @apply text-2xl font-bold text-iqify-navy mb-6;
 }
 
 .page-container {
@@ -52,4 +52,49 @@
 
 .grid-responsive {
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+/* UI components with iQify colors */
+.btn-iqify-blue {
+  @apply bg-iqify-blue text-white hover:bg-iqify-blue/80 transition-colors;
+}
+
+.btn-iqify-green {
+  @apply bg-iqify-green text-white hover:bg-iqify-green/80 transition-colors;
+}
+
+.btn-iqify-yellow {
+  @apply bg-iqify-yellow text-iqify-navy hover:bg-iqify-yellow/80 transition-colors;
+}
+
+.btn-iqify-pink {
+  @apply bg-iqify-pink text-white hover:bg-iqify-pink/80 transition-colors;
+}
+
+.btn-iqify-orange {
+  @apply bg-iqify-orange text-white hover:bg-iqify-orange/80 transition-colors;
+}
+
+.card-iqify {
+  @apply border rounded-xl shadow-md overflow-hidden;
+}
+
+.card-iqify-blue {
+  @apply border-iqify-blue/20 bg-gradient-to-br from-white to-iqify-blue/10;
+}
+
+.card-iqify-green {
+  @apply border-iqify-green/20 bg-gradient-to-br from-white to-iqify-green/10;
+}
+
+.card-iqify-yellow {
+  @apply border-iqify-yellow/20 bg-gradient-to-br from-white to-iqify-yellow/10;
+}
+
+.card-iqify-pink {
+  @apply border-iqify-pink/20 bg-gradient-to-br from-white to-iqify-pink/10;
+}
+
+.card-iqify-orange {
+  @apply border-iqify-orange/20 bg-gradient-to-br from-white to-iqify-orange/10;
 }
