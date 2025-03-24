@@ -21,13 +21,39 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Search, Star, Shield, User, Edit } from "lucide-react";
+import { 
+  MoreHorizontal, 
+  Search, 
+  Star, 
+  ShieldCheck, 
+  User, 
+  Edit,
+  Mail,
+  Clock,
+  Ban,
+  Lock,
+  Unlock
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const AdminUsersList = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [subscriptionFilter, setSubscriptionFilter] = useState("all");
+  const [userDetailsOpen, setUserDetailsOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   
   // Query to fetch users
   const { data: users, isLoading, refetch } = useQuery({
@@ -46,14 +72,14 @@ export const AdminUsersList = () => {
           subscription_expires_at
         `)
         .order('created_at', { ascending: false })
-        .limit(10); // For demo purposes, limit to 10
+        .limit(20); // For demo purposes, limit to 20
       
       if (error) throw error;
       
       // Mock additional user role data
       return data.map(user => ({
         ...user,
-        role: user.id === '1' ? 'admin' : 'user' // Mock role assignment
+        role: user.id === '1' ? 'admin' : user.id === '2' || user.id === '3' ? 'data_input' : 'user' // Mock role assignment
       }));
     },
   });
@@ -68,7 +94,10 @@ export const AdminUsersList = () => {
       subscription_tier: 'annual',
       subscription_status: 'active',
       subscription_expires_at: '2024-05-01',
-      role: 'admin'
+      role: 'admin',
+      email: 'admin@example.com',
+      last_login: '2023-06-25T14:30:00',
+      created_at: '2023-01-15T09:00:00'
     },
     { 
       id: '2', 
@@ -78,7 +107,10 @@ export const AdminUsersList = () => {
       subscription_tier: 'monthly',
       subscription_status: 'active',
       subscription_expires_at: '2023-07-15',
-      role: 'user'
+      role: 'data_input',
+      email: 'john.doe@example.com',
+      last_login: '2023-06-24T10:15:00',
+      created_at: '2023-02-10T11:30:00'
     },
     { 
       id: '3', 
@@ -88,7 +120,10 @@ export const AdminUsersList = () => {
       subscription_tier: 'free',
       subscription_status: null,
       subscription_expires_at: null,
-      role: 'data_input'
+      role: 'data_input',
+      email: 'jane.smith@example.com',
+      last_login: '2023-06-23T16:45:00',
+      created_at: '2023-03-05T14:20:00'
     },
     { 
       id: '4', 
@@ -98,32 +133,105 @@ export const AdminUsersList = () => {
       subscription_tier: 'annual',
       subscription_status: 'active',
       subscription_expires_at: '2024-01-10',
-      role: 'user'
+      role: 'user',
+      email: 'alex.johnson@example.com',
+      last_login: '2023-06-20T09:30:00',
+      created_at: '2023-03-15T10:00:00'
+    },
+    { 
+      id: '5', 
+      name: 'Sarah Williams', 
+      username: 'sarahw',
+      avatar_url: null,
+      subscription_tier: 'monthly',
+      subscription_status: 'active',
+      subscription_expires_at: '2023-07-05',
+      role: 'user',
+      email: 'sarah.williams@example.com',
+      last_login: '2023-06-22T11:20:00',
+      created_at: '2023-04-02T09:15:00'
+    },
+    { 
+      id: '6', 
+      name: 'Michael Brown', 
+      username: 'michaelb',
+      avatar_url: null,
+      subscription_tier: 'monthly',
+      subscription_status: 'cancelled',
+      subscription_expires_at: '2023-06-30',
+      role: 'user',
+      email: 'michael.brown@example.com',
+      last_login: '2023-06-18T15:10:00',
+      created_at: '2023-04-10T14:30:00'
+    },
+    { 
+      id: '7', 
+      name: 'Emily Davis', 
+      username: 'emilyd',
+      avatar_url: null,
+      subscription_tier: 'free',
+      subscription_status: null,
+      subscription_expires_at: null,
+      role: 'user',
+      email: 'emily.davis@example.com',
+      last_login: '2023-06-21T13:45:00',
+      created_at: '2023-04-15T16:20:00'
     }
   ];
 
   const displayUsers = users || mockUsers;
   
-  // Filter users based on search term and role filter
+  // Filter users based on search term, role filter, and subscription filter
   const filteredUsers = displayUsers.filter(user => {
+    // Search filter (name, username, email)
     const matchesSearch = 
       (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()));
+      (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
     
+    // Role filter
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
-    return matchesSearch && matchesRole;
+    // Subscription filter
+    const matchesSubscription = 
+      subscriptionFilter === 'all' || 
+      (subscriptionFilter === 'free' && user.subscription_tier === 'free') ||
+      (subscriptionFilter === 'paid' && (user.subscription_tier === 'monthly' || user.subscription_tier === 'annual')) ||
+      (subscriptionFilter === 'active' && user.subscription_status === 'active') ||
+      (subscriptionFilter === 'cancelled' && user.subscription_status === 'cancelled');
+    
+    return matchesSearch && matchesRole && matchesSubscription;
   });
 
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'admin':
-        return <Shield className="h-4 w-4 text-red-500" />;
+        return <ShieldCheck className="h-4 w-4 text-red-500" />;
       case 'data_input':
         return <Edit className="h-4 w-4 text-amber-500" />;
       default:
         return <User className="h-4 w-4 text-blue-500" />;
     }
+  };
+
+  const getSubscriptionBadge = (tier?: string, status?: string) => {
+    if (!tier || tier === 'free') {
+      return <Badge variant="outline" className="bg-gray-100">Free</Badge>;
+    }
+
+    if (status === 'cancelled') {
+      return <Badge variant="outline" className="bg-red-100 text-red-800">Cancelled</Badge>;
+    }
+
+    if (tier === 'monthly') {
+      return <Badge variant="outline" className="bg-blue-100 text-blue-800">Monthly</Badge>;
+    }
+
+    if (tier === 'annual') {
+      return <Badge variant="outline" className="bg-green-100 text-green-800">Annual</Badge>;
+    }
+
+    return <Badge variant="outline">Unknown</Badge>;
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
@@ -134,6 +242,45 @@ export const AdminUsersList = () => {
     });
     // After updating, refetch the user list
     refetch();
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const handleViewUserDetails = (user: any) => {
+    setSelectedUser(user);
+    setUserDetailsOpen(true);
+  };
+
+  const handleResetPassword = (userId: string) => {
+    toast({
+      title: "Password Reset Email Sent",
+      description: "A password reset email has been sent to the user.",
+    });
+  };
+
+  const handleSuspendUser = (userId: string) => {
+    toast({
+      title: "User Suspended",
+      description: "The user has been suspended.",
+    });
   };
 
   return (
@@ -149,17 +296,32 @@ export const AdminUsersList = () => {
           />
         </div>
         
-        <Select defaultValue={roleFilter} onValueChange={setRoleFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Roles</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="data_input">Data Input</SelectItem>
-            <SelectItem value="user">User</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Select defaultValue={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="data_input">Data Input</SelectItem>
+              <SelectItem value="user">User</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select defaultValue={subscriptionFilter} onValueChange={setSubscriptionFilter}>
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Filter by subscription" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Subscriptions</SelectItem>
+              <SelectItem value="free">Free</SelectItem>
+              <SelectItem value="paid">Paid</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       <div className="border rounded-md">
@@ -169,7 +331,7 @@ export const AdminUsersList = () => {
               <TableHead>User</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Subscription</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Expires</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -185,15 +347,15 @@ export const AdminUsersList = () => {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                      <Avatar className="h-8 w-8">
                         {user.avatar_url ? (
-                          <img src={user.avatar_url} alt={user.name} className="h-8 w-8 rounded-full" />
+                          <AvatarImage src={user.avatar_url} alt={user.name} />
                         ) : (
-                          <span>{user.name?.charAt(0)}</span>
+                          <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                         )}
-                      </div>
+                      </Avatar>
                       <div>
-                        <div>{user.name}</div>
+                        <div className="font-medium">{user.name}</div>
                         <div className="text-sm text-muted-foreground">@{user.username}</div>
                       </div>
                     </div>
@@ -205,20 +367,13 @@ export const AdminUsersList = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {user.subscription_tier ? (
-                      <span className="capitalize">{user.subscription_tier}</span>
-                    ) : (
-                      <span className="text-muted-foreground">Free</span>
-                    )}
+                    {getSubscriptionBadge(user.subscription_tier, user.subscription_status)}
                   </TableCell>
                   <TableCell>
-                    {user.subscription_status === 'active' ? (
-                      <div className="flex items-center">
-                        <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-                        <span>Active</span>
-                      </div>
+                    {user.subscription_expires_at ? (
+                      <span>{formatDate(user.subscription_expires_at)}</span>
                     ) : (
-                      <div className="text-muted-foreground">Inactive</div>
+                      <span className="text-muted-foreground">N/A</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -231,9 +386,14 @@ export const AdminUsersList = () => {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => handleViewUserDetails(user)}>
+                          <User className="h-4 w-4 mr-2" />
+                          <span>View Details</span>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Change Role</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'admin')}>
-                          <Shield className="h-4 w-4 mr-2" />
+                          <ShieldCheck className="h-4 w-4 mr-2" />
                           <span>Make Admin</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'data_input')}>
@@ -243,6 +403,18 @@ export const AdminUsersList = () => {
                         <DropdownMenuItem onClick={() => handleRoleChange(user.id, 'user')}>
                           <User className="h-4 w-4 mr-2" />
                           <span>Make User</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleResetPassword(user.id)}>
+                          <Lock className="h-4 w-4 mr-2" />
+                          <span>Reset Password</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleSuspendUser(user.id)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Ban className="h-4 w-4 mr-2" />
+                          <span>Suspend User</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -259,6 +431,175 @@ export const AdminUsersList = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* User Details Dialog */}
+      {selectedUser && (
+        <Dialog open={userDetailsOpen} onOpenChange={setUserDetailsOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>User Details</DialogTitle>
+              <DialogDescription>
+                Detailed information about {selectedUser.name}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="flex flex-col md:flex-row gap-6">
+              <div className="md:w-1/3 flex flex-col items-center space-y-4">
+                <Avatar className="h-24 w-24">
+                  {selectedUser.avatar_url ? (
+                    <AvatarImage src={selectedUser.avatar_url} alt={selectedUser.name} />
+                  ) : (
+                    <AvatarFallback className="text-3xl">{selectedUser.name?.charAt(0)}</AvatarFallback>
+                  )}
+                </Avatar>
+                
+                <div className="text-center">
+                  <h3 className="text-xl font-bold">{selectedUser.name}</h3>
+                  <p className="text-sm text-muted-foreground">@{selectedUser.username}</p>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {getRoleIcon(selectedUser.role)}
+                  <span className="capitalize">{selectedUser.role}</span>
+                </div>
+                
+                <div>
+                  {getSubscriptionBadge(selectedUser.subscription_tier, selectedUser.subscription_status)}
+                </div>
+              </div>
+              
+              <div className="md:w-2/3">
+                <Tabs defaultValue="info">
+                  <TabsList className="w-full grid grid-cols-3">
+                    <TabsTrigger value="info">Information</TabsTrigger>
+                    <TabsTrigger value="activity">Activity</TabsTrigger>
+                    <TabsTrigger value="settings">Settings</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="info" className="space-y-4 mt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-sm text-muted-foreground">Email</label>
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedUser.email}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <label className="text-sm text-muted-foreground">Account Created</label>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>{formatDateTime(selectedUser.created_at)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <label className="text-sm text-muted-foreground">Last Login</label>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>{formatDateTime(selectedUser.last_login)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <label className="text-sm text-muted-foreground">Subscription Expires</label>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedUser.subscription_expires_at ? formatDate(selectedUser.subscription_expires_at) : 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <label className="text-sm text-muted-foreground">User Notes</label>
+                      <p className="text-sm">
+                        No additional notes for this user.
+                      </p>
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="activity" className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-2 border-b">
+                        <div>
+                          <span className="text-sm font-medium">Last Login</span>
+                          <p className="text-xs text-muted-foreground">{formatDateTime(selectedUser.last_login)}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between p-2 border-b">
+                        <div>
+                          <span className="text-sm font-medium">Completed Tests</span>
+                          <p className="text-xs text-muted-foreground">8 tests completed</p>
+                        </div>
+                        <Badge>12 points</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 border-b">
+                        <div>
+                          <span className="text-sm font-medium">Account Created</span>
+                          <p className="text-xs text-muted-foreground">{formatDateTime(selectedUser.created_at)}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">Showing 3 most recent activities</p>
+                  </TabsContent>
+                  
+                  <TabsContent value="settings" className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start"
+                        onClick={() => handleRoleChange(selectedUser.id, 'admin')}
+                      >
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        Make Admin
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start"
+                        onClick={() => handleRoleChange(selectedUser.id, 'data_input')}
+                      >
+                        <Edit className="mr-2 h-4 w-4" />
+                        Make Data Input
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start"
+                        onClick={() => handleRoleChange(selectedUser.id, 'user')}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Make User
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full justify-start"
+                        onClick={() => handleResetPassword(selectedUser.id)}
+                      >
+                        <Lock className="mr-2 h-4 w-4" />
+                        Reset Password
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        className="w-full justify-start"
+                        onClick={() => handleSuspendUser(selectedUser.id)}
+                      >
+                        <Ban className="mr-2 h-4 w-4" />
+                        Suspend User
+                      </Button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setUserDetailsOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
