@@ -40,17 +40,28 @@ export const moods = [
 ];
 
 export const generateAvatarUrl = (config: AvatarConfig): string => {
-  // Create URL for DiceBear Micah avatar
-  const queryParams = new URLSearchParams({
-    gender: config.gender,
-    hair: config.hairColor,
-    earrings: config.earrings ? 'true' : 'false',
-    glasses: config.glasses ? 'true' : 'false',
-    // Add skin color as baseColor parameter
-    baseColor: config.skinColor === 'light' ? 'f8d5b8' : 
-               config.skinColor === 'medium' ? 'e3b085' : '8d5524',
-    mood: config.mood
-  });
+  // Create URL for DiceBear Micah avatar with explicit parameters
+  const queryParams = new URLSearchParams();
   
-  return `https://api.dicebear.com/6.x/micah/svg?${queryParams.toString()}`;
+  // Set all parameters explicitly with correct values
+  queryParams.set('gender', config.gender);
+  queryParams.set('hair', config.hairColor);
+  queryParams.set('earrings', config.earrings ? 'true' : 'false');
+  queryParams.set('glasses', config.glasses ? 'true' : 'false');
+  queryParams.set('mood', config.mood);
+  
+  // Add skin color as baseColor parameter with hex values
+  if (config.skinColor === 'light') {
+    queryParams.set('baseColor', 'f8d5b8');
+  } else if (config.skinColor === 'medium') {
+    queryParams.set('baseColor', 'e3b085');
+  } else {
+    queryParams.set('baseColor', '8d5524');
+  }
+  
+  // Log the generated URL to help with debugging
+  const url = `https://api.dicebear.com/6.x/micah/svg?${queryParams.toString()}`;
+  console.log('Generated avatar URL:', url);
+  
+  return url;
 };

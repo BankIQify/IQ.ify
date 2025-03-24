@@ -33,6 +33,11 @@ export const AvatarPreview = ({
             </AvatarFallback>
           )}
         </Avatar>
+        
+        {/* Debug info - will help troubleshoot */}
+        {!avatarUrl && (
+          <p className="text-xs text-red-500 mt-2">No avatar URL available</p>
+        )}
       </div>
       
       <Button 

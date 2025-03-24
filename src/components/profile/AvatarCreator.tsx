@@ -17,6 +17,8 @@ export const AvatarCreator = () => {
     profile
   } = useAvatarCreator();
 
+  console.log("Avatar Creator rendering with URL:", avatarUrl);
+
   return (
     <Card className="p-6">
       <div className="flex flex-col md:flex-row gap-6">
