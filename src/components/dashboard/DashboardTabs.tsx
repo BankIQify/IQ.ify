@@ -1,6 +1,6 @@
 
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings } from "lucide-react";
+import { Settings, Users, FileText } from "lucide-react";
 
 interface DashboardTabsProps {
   isAdmin: boolean;
@@ -15,7 +15,7 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
     }
   };
 
-  // For admin users, only show the admin tab
+  // For admin users, show admin tabs
   if (isAdmin) {
     return (
       <TabsList className="grid grid-cols-1 gap-2">

@@ -16,7 +16,9 @@ import NotFound from "./pages/NotFound";
 import SubjectProgress from "./pages/SubjectProgress";
 import Practice from "./pages/Practice"; 
 import Profile from "./pages/Profile";
+import { useState, useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import AvatarCreator from "./pages/AvatarCreator";
 
 const queryClient = new QueryClient();
@@ -24,10 +26,37 @@ const queryClient = new QueryClient();
 // Protected route component
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAdmin } = useAuthContext();
+  const [hasDataInputRole, setHasDataInputRole] = useState(false);
   
-  console.log('ProtectedAdminRoute check:', { user, isAdmin }); // Debug log
+  useEffect(() => {
+    const checkDataInputRole = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('role', 'data_input')
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error checking data_input role:', error);
+          return;
+        }
+
+        setHasDataInputRole(!!data);
+      } catch (error) {
+        console.error('Error in checkDataInputRole:', error);
+      }
+    };
+
+    checkDataInputRole();
+  }, [user]);
   
-  if (!user || !isAdmin) {
+  console.log('ProtectedAdminRoute check:', { user, isAdmin, hasDataInputRole }); // Debug log
+  
+  if (!user || (!isAdmin && !hasDataInputRole)) {
     return <NotFound />;
   }
 

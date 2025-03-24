@@ -24,11 +24,11 @@ const Dashboard = () => {
       return;
     }
 
-    // If the user is not an admin, redirect them to another page
+    // If the user doesn't have admin privileges, redirect them
     if (!isAdmin) {
       toast({
         title: "Access Denied",
-        description: "Only administrators can access this page.",
+        description: "You need administrative privileges to access this page.",
         variant: "destructive"
       });
       navigate("/");

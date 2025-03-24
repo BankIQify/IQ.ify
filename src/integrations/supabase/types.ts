@@ -710,7 +710,7 @@ export type Database = {
         | "sudoku"
       question_category: "verbal" | "non_verbal" | "brain_training"
       question_type: "multiple_choice" | "text" | "image"
-      user_role: "admin" | "user"
+      user_role: "admin" | "user" | "data_input"
     }
     CompositeTypes: {
       [_ in never]: never

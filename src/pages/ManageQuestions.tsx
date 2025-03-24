@@ -21,6 +21,7 @@ const ManageQuestions = () => {
   const [sections, setSections] = useState<any[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [activeTab, setActiveTab] = useState("bank");
+  const [hasDataInputRole, setHasDataInputRole] = useState(false);
 
   // Extract the tab from URL parameters
   useEffect(() => {
@@ -31,17 +32,54 @@ const ManageQuestions = () => {
     }
   }, [location]);
 
-  // Redirect if not admin
+  // Check for data_input role specifically
   useEffect(() => {
-    if (!user || !isAdmin) {
+    const checkDataInputRole = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('role', 'data_input')
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error checking data_input role:', error);
+          return;
+        }
+
+        setHasDataInputRole(!!data);
+      } catch (error) {
+        console.error('Error in checkDataInputRole:', error);
+      }
+    };
+
+    checkDataInputRole();
+  }, [user]);
+
+  // Redirect if not admin or data_input role
+  useEffect(() => {
+    if (!user) {
       toast({
         title: "Access Denied",
-        description: "You must be an admin to access this page.",
+        description: "You must be logged in to access this page.",
+        variant: "destructive",
+      });
+      navigate("/auth");
+      return;
+    }
+
+    if (!isAdmin && !hasDataInputRole) {
+      toast({
+        title: "Access Denied",
+        description: "You need admin or data team privileges to access this page.",
         variant: "destructive",
       });
       navigate("/");
     }
-  }, [user, isAdmin, navigate, toast]);
+  }, [user, isAdmin, hasDataInputRole, navigate, toast]);
 
   // Fetch sections for the CategoriesTable
   useEffect(() => {
@@ -92,14 +130,14 @@ const ManageQuestions = () => {
       }
     };
     
-    if (user && isAdmin) {
+    if (user && (isAdmin || hasDataInputRole)) {
       fetchPendingCount();
       
       // Set up a polling interval to refresh the count
       const interval = setInterval(fetchPendingCount, 30000); // every 30 seconds
       return () => clearInterval(interval);
     }
-  }, [user, isAdmin]);
+  }, [user, isAdmin, hasDataInputRole]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -112,7 +150,11 @@ const ManageQuestions = () => {
     }, { replace: true });
   };
 
-  if (!user || !isAdmin) {
+  // Restrict certain tabs based on role
+  const showHomepageTab = isAdmin; // Only true admins can edit homepage
+  const showWebhooksTab = isAdmin; // Only true admins can access webhooks
+
+  if (!user || (!isAdmin && !hasDataInputRole)) {
     return null;
   }
 
@@ -121,7 +163,7 @@ const ManageQuestions = () => {
       <h1 className="section-title">Question Management</h1>
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className={`grid w-full ${showHomepageTab && showWebhooksTab ? 'grid-cols-6' : showHomepageTab || showWebhooksTab ? 'grid-cols-5' : 'grid-cols-4'}`}>
           <TabsTrigger value="bank" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Complete Question Bank
           </TabsTrigger>
@@ -134,17 +176,23 @@ const ManageQuestions = () => {
           <TabsTrigger value="puzzles" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Puzzle Games
           </TabsTrigger>
-          <TabsTrigger value="homepage" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
-            Edit Homepage
-          </TabsTrigger>
-          <TabsTrigger value="webhooks" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2 relative">
-            AI Webhooks
-            {pendingCount > 0 && (
-              <Badge variant="destructive" className="ml-1 px-1.5 py-0.5 text-xs absolute -top-2 -right-2">
-                {pendingCount}
-              </Badge>
-            )}
-          </TabsTrigger>
+          
+          {showHomepageTab && (
+            <TabsTrigger value="homepage" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+              Edit Homepage
+            </TabsTrigger>
+          )}
+          
+          {showWebhooksTab && (
+            <TabsTrigger value="webhooks" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2 relative">
+              AI Webhooks
+              {pendingCount > 0 && (
+                <Badge variant="destructive" className="ml-1 px-1.5 py-0.5 text-xs absolute -top-2 -right-2">
+                  {pendingCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+          )}
         </TabsList>
 
         <TabsContent value="categories">
@@ -163,13 +211,17 @@ const ManageQuestions = () => {
           <GamePuzzlesManager />
         </TabsContent>
 
-        <TabsContent value="homepage">
-          <HomepageEditor />
-        </TabsContent>
+        {showHomepageTab && (
+          <TabsContent value="homepage">
+            <HomepageEditor />
+          </TabsContent>
+        )}
 
-        <TabsContent value="webhooks">
-          <WebhookManagement />
-        </TabsContent>
+        {showWebhooksTab && (
+          <TabsContent value="webhooks">
+            <WebhookManagement />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
