@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { AuthError } from "@supabase/supabase-js";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -12,7 +12,7 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onToggleMode, onGoogleSignIn }: LoginFormProps) => {
-  const { signInWithEmail } = useAuth();
+  const { signInWithEmail } = useAuthContext();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);

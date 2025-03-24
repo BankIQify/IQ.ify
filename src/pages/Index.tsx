@@ -1,11 +1,10 @@
-
 import { Link } from "react-router-dom";
 import { BookOpen, Brain, Trophy, Lock, CheckCircle, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user } = useAuthContext();
 
   const features = [
     {

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -50,7 +50,7 @@ const moods = [
 ];
 
 export const AvatarCreator = () => {
-  const { profile, updateProfile } = useAuth();
+  const { profile, updateProfile } = useAuthContext();
   const { toast } = useToast();
   const [config, setConfig] = useState<AvatarConfig>(defaultConfig);
   const [loading, setLoading] = useState(false);

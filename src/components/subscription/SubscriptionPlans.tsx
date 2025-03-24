@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
@@ -11,7 +11,7 @@ const MONTHLY_PRICE_ID = 'price_monthly'; // Replace with real Stripe price ID
 const ANNUAL_PRICE_ID = 'price_annual';   // Replace with real Stripe price ID
 
 export const SubscriptionPlans = () => {
-  const { user, profile } = useAuth();
+  const { user, profile } = useAuthContext();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
 
