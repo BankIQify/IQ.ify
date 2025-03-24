@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -7,10 +7,10 @@ import { AvatarCreator } from "@/components/profile/AvatarCreator";
 import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
-  const { user, profile } = useAuth();
+  const { user, profile } = useAuthContext();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   

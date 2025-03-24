@@ -5,15 +5,15 @@ import { ManualQuestionUpload } from "@/components/questions/ManualQuestionUploa
 import { CategoryManager } from "@/components/questions/CategoryManager";
 import { CompleteQuestionBank } from "@/components/questions/CompleteQuestionBank";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { HomepageEditor } from "@/components/homepage/HomepageEditor";
 import { GamePuzzlesManager } from "@/components/puzzles/GamePuzzlesManager";
 import { supabase } from "@/integrations/supabase/client";
 import { WebhookManagement } from "@/components/webhooks/WebhookManagement";
 
 const ManageQuestions = () => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuthContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [sections, setSections] = useState<any[]>([]);

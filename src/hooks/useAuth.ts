@@ -86,7 +86,7 @@ export const useAuth = () => {
 
   return {
     user,
-    setUser,
+    setUser, // Make sure we're exposing this
     signInWithEmail,
     signInWithGoogle,
     signUp,

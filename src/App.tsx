@@ -16,13 +16,13 @@ import NotFound from "./pages/NotFound";
 import SubjectProgress from "./pages/SubjectProgress";
 import Practice from "./pages/Practice"; 
 import Profile from "./pages/Profile";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 // Protected route component
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuthContext();
   
   console.log('ProtectedAdminRoute check:', { user, isAdmin }); // Debug log
   
