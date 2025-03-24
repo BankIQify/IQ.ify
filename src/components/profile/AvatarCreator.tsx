@@ -6,6 +6,7 @@ import { BasicTab } from "./avatar/BasicTab";
 import { AccessoriesTab } from "./avatar/AccessoriesTab";
 import { ExpressionTab } from "./avatar/ExpressionTab";
 import { useAvatarCreator } from "./avatar/useAvatarCreator";
+import { useEffect } from "react";
 
 export const AvatarCreator = () => {
   const {
@@ -17,7 +18,10 @@ export const AvatarCreator = () => {
     profile
   } = useAvatarCreator();
 
-  console.log("Avatar Creator rendering with URL:", avatarUrl);
+  // Log whenever avatar URL changes
+  useEffect(() => {
+    console.log("Avatar Creator received URL:", avatarUrl);
+  }, [avatarUrl]);
 
   return (
     <Card className="p-6">

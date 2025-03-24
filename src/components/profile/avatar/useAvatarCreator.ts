@@ -17,11 +17,11 @@ export const useAvatarCreator = () => {
 
   // Initialize with user's existing avatar config if available
   useEffect(() => {
-    console.log("Profile data:", profile);
+    console.log("Profile data loaded:", profile);
     
     if (profile?.avatar_config) {
       try {
-        console.log("Avatar config from profile:", profile.avatar_config);
+        console.log("Found avatar config in profile:", profile.avatar_config);
         const savedConfig = profile.avatar_config as AvatarConfig;
         setConfig(prevConfig => ({
           ...prevConfig,
@@ -33,11 +33,13 @@ export const useAvatarCreator = () => {
     }
     
     // Generate URL based on config or use existing one
+    // Use setTimeout to ensure config is updated before generating URL
     setTimeout(() => {
-      if (profile?.avatar_url) {
-        console.log("Using existing avatar URL:", profile.avatar_url);
+      if (profile?.avatar_url && profile.avatar_url.length > 10) {
+        console.log("Using existing avatar URL from profile:", profile.avatar_url);
         setAvatarUrl(profile.avatar_url);
       } else {
+        // Force a new URL generation if none exists or it's invalid
         const url = generateAvatarUrl(config);
         console.log("Generated new avatar URL:", url);
         setAvatarUrl(url);
@@ -49,7 +51,7 @@ export const useAvatarCreator = () => {
     setConfig(prev => {
       const newConfig = { ...prev, [key]: value };
       const url = generateAvatarUrl(newConfig);
-      console.log(`Updated ${key} to ${value}, new URL:`, url);
+      console.log(`Updated ${key} to ${value}, new avatar URL:`, url);
       setAvatarUrl(url);
       return newConfig;
     });
@@ -60,6 +62,10 @@ export const useAvatarCreator = () => {
     try {
       console.log("Saving avatar with URL:", avatarUrl);
       console.log("Config being saved:", config);
+      
+      if (!avatarUrl) {
+        throw new Error("No avatar URL to save");
+      }
       
       await updateProfile({
         avatar_url: avatarUrl,
