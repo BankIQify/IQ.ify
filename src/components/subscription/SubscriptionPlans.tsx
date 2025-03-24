@@ -7,8 +7,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 // Replace these with your actual Stripe price IDs from your Stripe dashboard
-const MONTHLY_PRICE_ID = 'price_1OoBMdJELBQzh1GnK4YNsm11'; // Replace with real Stripe price ID
-const ANNUAL_PRICE_ID = 'price_1OoBMHJELBQzh1GnoDdp0pzf';   // Replace with real Stripe price ID
+const MONTHLY_PRICE_ID = 'price_1R6ByNRsB8SZfizzEasQoB3t'; 
+const ANNUAL_PRICE_ID = 'price_1R6Cj5RsB8SZfizzC3lMgOtO';   
 
 export const SubscriptionPlans = () => {
   const { user, profile } = useAuthContext();
