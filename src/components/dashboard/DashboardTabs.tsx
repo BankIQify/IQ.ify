@@ -1,6 +1,6 @@
 
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Award, BarChart3, ChartLine, Settings, User } from "lucide-react";
+import { Settings } from "lucide-react";
 
 interface DashboardTabsProps {
   isAdmin: boolean;
@@ -15,39 +15,10 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
     }
   };
 
-  return (
-    <TabsList className="grid grid-cols-2 md:grid-cols-4 gap-2">
-      <TabsTrigger 
-        value="overview" 
-        className="flex items-center gap-2"
-        data-state={activeTab === "overview" ? "active" : "inactive"}
-        onClick={() => handleTabClick("overview")}
-      >
-        <BarChart3 className="h-4 w-4" />
-        <span>Overview</span>
-      </TabsTrigger>
-      
-      <TabsTrigger 
-        value="progress" 
-        className="flex items-center gap-2"
-        data-state={activeTab === "progress" ? "active" : "inactive"}
-        onClick={() => handleTabClick("progress")}
-      >
-        <ChartLine className="h-4 w-4" />
-        <span>Progress</span>
-      </TabsTrigger>
-      
-      <TabsTrigger 
-        value="achievements" 
-        className="flex items-center gap-2"
-        data-state={activeTab === "achievements" ? "active" : "inactive"}
-        onClick={() => handleTabClick("achievements")}
-      >
-        <Award className="h-4 w-4" />
-        <span>Achievements</span>
-      </TabsTrigger>
-      
-      {isAdmin && (
+  // For admin users, only show the admin tab
+  if (isAdmin) {
+    return (
+      <TabsList className="grid grid-cols-1 gap-2">
         <TabsTrigger 
           value="admin" 
           className="flex items-center gap-2"
@@ -57,7 +28,10 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
           <Settings className="h-4 w-4" />
           <span>Admin</span>
         </TabsTrigger>
-      )}
-    </TabsList>
-  );
+      </TabsList>
+    );
+  }
+
+  // For non-admin users, don't render any tabs (this component won't be used anyway after our Dashboard changes)
+  return null;
 };
