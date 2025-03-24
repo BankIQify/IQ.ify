@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Brain, BookOpen, Award, CheckCircle } from "lucide-react";
@@ -50,11 +49,21 @@ export const RecentActivity = () => {
     }
   ];
 
+  // Define the activity type with a proper interface that includes optional category
+  type ActivityItem = {
+    id: number | string;
+    type: 'exam' | 'game';
+    name: string;
+    date: Date;
+    score: number;
+    category?: string; // Make category optional since games don't have it
+  };
+
   // Combine and sort recent activities
-  const activities = [
+  const activities: ActivityItem[] = [
     ...(recentExams || []).map((exam) => ({
       id: exam.id,
-      type: 'exam',
+      type: 'exam' as const,
       name: exam.exams?.name || 'Practice Test',
       date: new Date(exam.created_at),
       score: exam.score,
@@ -62,10 +71,11 @@ export const RecentActivity = () => {
     })),
     ...mockGames.map(game => ({
       id: game.id,
-      type: 'game',
+      type: 'game' as const,
       name: game.name,
       date: new Date(game.completedAt),
       score: game.score
+      // No category for games
     }))
   ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
 
