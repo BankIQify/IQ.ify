@@ -1,131 +1,77 @@
 
 import React from 'react';
-import type { QuestionContent } from '@/types/questions';
+import type { QuestionContent as QuestionContentType } from "@/types/questions";
 
 interface QuestionContentProps {
-  content: QuestionContent;
+  content: QuestionContentType;
 }
 
-export const QuestionContent = ({ content }: QuestionContentProps) => {
-  // Function to safely render HTML content
-  const renderHTML = (html: string) => {
-    return { __html: html };
-  };
-
+export const QuestionContent: React.FC<QuestionContentProps> = ({ content }) => {
+  // Display options if they exist
+  const hasOptions = content.options && content.options.length > 0;
+  
   return (
-    <div className="space-y-4">
-      {/* Question text - support for HTML content */}
-      <div className="question-content">
-        {content.question.includes('<table') || content.question.includes('<div') ? (
-          <div dangerouslySetInnerHTML={renderHTML(content.question)} />
-        ) : (
-          <p>{content.question}</p>
-        )}
-      </div>
+    <div className="space-y-2">
+      <div className="text-base font-medium">{content.question}</div>
       
-      {/* Question image */}
-      {content.imageUrl && (
-        <div className="my-3">
-          <img 
-            src={content.imageUrl} 
-            alt="Question visual" 
-            className="max-w-full h-auto rounded-lg border"
-          />
-        </div>
-      )}
-      
-      {/* Standard multiple choice options */}
-      {content.options && content.options.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {content.options.map((option: string, i: number) => (
-            <div
-              key={i}
-              className={`p-3 rounded-lg border ${
-                option === content.correctAnswer
-                  ? "border-green-500 bg-green-50"
-                  : "border-gray-200"
-              }`}
+      {hasOptions && (
+        <div className="grid gap-2">
+          {content.options.map((option, index) => (
+            <div 
+              key={index} 
+              className={`p-2 border rounded ${option === content.correctAnswer ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}
             >
-              {option.includes('<') && option.includes('>') ? (
-                <div dangerouslySetInnerHTML={renderHTML(option)} />
-              ) : (
-                option
+              {option}
+              {option === content.correctAnswer && (
+                <span className="ml-2 text-green-600 text-sm">(Correct)</span>
               )}
             </div>
           ))}
         </div>
       )}
       
-      {/* Dual choice options */}
+      {/* For dual choice questions */}
       {content.primaryOptions && content.secondaryOptions && (
         <div className="space-y-4">
-          <div>
-            <h4 className="font-medium mb-2">Primary Options:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {content.primaryOptions.map((option: string, i: number) => (
-                <div
-                  key={i}
-                  className={`p-3 rounded-lg border ${
-                    option === content.correctPrimaryAnswer
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200"
-                  }`}
-                >
-                  {option.includes('<') && option.includes('>') ? (
-                    <div dangerouslySetInnerHTML={renderHTML(option)} />
-                  ) : (
-                    option
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="grid gap-2">
+            <h4 className="font-medium">Primary Options:</h4>
+            {content.primaryOptions.map((option, index) => (
+              <div 
+                key={index} 
+                className={`p-2 border rounded ${option === content.correctPrimaryAnswer ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}
+              >
+                {option}
+                {option === content.correctPrimaryAnswer && (
+                  <span className="ml-2 text-green-600 text-sm">(Correct)</span>
+                )}
+              </div>
+            ))}
           </div>
           
-          <div>
-            <h4 className="font-medium mb-2">Secondary Options:</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {content.secondaryOptions.map((option: string, i: number) => (
-                <div
-                  key={i}
-                  className={`p-3 rounded-lg border ${
-                    option === content.correctSecondaryAnswer
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200"
-                  }`}
-                >
-                  {option.includes('<') && option.includes('>') ? (
-                    <div dangerouslySetInnerHTML={renderHTML(option)} />
-                  ) : (
-                    option
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="grid gap-2">
+            <h4 className="font-medium">Secondary Options:</h4>
+            {content.secondaryOptions.map((option, index) => (
+              <div 
+                key={index} 
+                className={`p-2 border rounded ${option === content.correctSecondaryAnswer ? 'border-green-500 bg-green-50' : 'border-gray-200'}`}
+              >
+                {option}
+                {option === content.correctSecondaryAnswer && (
+                  <span className="ml-2 text-green-600 text-sm">(Correct)</span>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
       
-      {/* Answer image (if present) */}
-      {content.answerImageUrl && (
-        <div className="my-3">
-          <p className="font-medium mb-2">Answer:</p>
-          <img 
-            src={content.answerImageUrl} 
-            alt="Answer visual" 
-            className="max-w-full h-auto rounded-lg border"
-          />
+      {/* Explanation */}
+      {content.explanation && (
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded">
+          <h4 className="font-medium">Explanation:</h4>
+          <p className="text-sm">{content.explanation}</p>
         </div>
       )}
-      
-      {/* Explanation section - support for HTML content */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <p className="font-medium mb-2">Explanation:</p>
-        {content.explanation.includes('<table') || content.explanation.includes('<div') ? (
-          <div dangerouslySetInnerHTML={renderHTML(content.explanation)} />
-        ) : (
-          <p>{content.explanation}</p>
-        )}
-      </div>
     </div>
   );
 };
