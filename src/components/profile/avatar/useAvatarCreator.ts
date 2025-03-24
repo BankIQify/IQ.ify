@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { 
@@ -14,48 +14,69 @@ export const useAvatarCreator = () => {
   const [config, setConfig] = useState<AvatarConfig>(defaultConfig);
   const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string>('');
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Generate a new avatar URL based on the current config
+  const generateNewAvatarUrl = useCallback(() => {
+    try {
+      const url = generateAvatarUrl(config);
+      console.log("Generated fresh avatar URL:", url);
+      setAvatarUrl(url);
+      return url;
+    } catch (error) {
+      console.error("Error generating avatar URL:", error);
+      return '';
+    }
+  }, [config]);
 
   // Initialize with user's existing avatar config if available
   useEffect(() => {
     console.log("Profile data loaded:", profile);
     
-    if (profile?.avatar_config) {
-      try {
-        console.log("Found avatar config in profile:", profile.avatar_config);
-        const savedConfig = profile.avatar_config as AvatarConfig;
-        setConfig(prevConfig => ({
-          ...prevConfig,
-          ...savedConfig
-        }));
-      } catch (e) {
-        console.error("Error parsing avatar config:", e);
+    if (!isInitialized && profile) {
+      if (profile?.avatar_config) {
+        try {
+          console.log("Found avatar config in profile:", profile.avatar_config);
+          const savedConfig = profile.avatar_config as AvatarConfig;
+          setConfig(prevConfig => ({
+            ...prevConfig,
+            ...savedConfig
+          }));
+        } catch (e) {
+          console.error("Error parsing avatar config:", e);
+        }
       }
+      
+      // Short delay to ensure config is updated before URL generation
+      setTimeout(() => {
+        if (profile?.avatar_url && profile.avatar_url.length > 10) {
+          console.log("Using existing avatar URL from profile:", profile.avatar_url);
+          setAvatarUrl(profile.avatar_url);
+        } else {
+          // Force a new URL generation if none exists or it's invalid
+          generateNewAvatarUrl();
+        }
+        setIsInitialized(true);
+      }, 100);
     }
-    
-    // Generate URL based on config or use existing one
-    // Use setTimeout to ensure config is updated before generating URL
-    setTimeout(() => {
-      if (profile?.avatar_url && profile.avatar_url.length > 10) {
-        console.log("Using existing avatar URL from profile:", profile.avatar_url);
-        setAvatarUrl(profile.avatar_url);
-      } else {
-        // Force a new URL generation if none exists or it's invalid
-        const url = generateAvatarUrl(config);
-        console.log("Generated new avatar URL:", url);
-        setAvatarUrl(url);
-      }
-    }, 100);
-  }, [profile]);
+  }, [profile, isInitialized, generateNewAvatarUrl]);
 
-  const updateAvatarConfig = (key: keyof AvatarConfig, value: any) => {
+  const refreshAvatar = useCallback(() => {
+    generateNewAvatarUrl();
+  }, [generateNewAvatarUrl]);
+
+  const updateAvatarConfig = useCallback((key: keyof AvatarConfig, value: any) => {
     setConfig(prev => {
       const newConfig = { ...prev, [key]: value };
-      const url = generateAvatarUrl(newConfig);
-      console.log(`Updated ${key} to ${value}, new avatar URL:`, url);
-      setAvatarUrl(url);
+      // Generate new URL after config update
+      setTimeout(() => {
+        const url = generateAvatarUrl(newConfig);
+        console.log(`Updated ${key} to ${value}, new avatar URL:`, url);
+        setAvatarUrl(url);
+      }, 0);
       return newConfig;
     });
-  };
+  }, []);
 
   const saveAvatar = async () => {
     setLoading(true);
@@ -94,6 +115,7 @@ export const useAvatarCreator = () => {
     loading,
     updateAvatarConfig,
     saveAvatar,
+    refreshAvatar,
     profile
   };
 };

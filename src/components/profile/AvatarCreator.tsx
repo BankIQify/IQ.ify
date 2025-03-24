@@ -15,6 +15,7 @@ export const AvatarCreator = () => {
     loading,
     updateAvatarConfig,
     saveAvatar,
+    refreshAvatar,
     profile
   } = useAvatarCreator();
 
@@ -31,6 +32,7 @@ export const AvatarCreator = () => {
           loading={loading}
           saveAvatar={saveAvatar}
           profile={profile}
+          refreshAvatar={refreshAvatar}
         />
         
         <div className="md:w-2/3">

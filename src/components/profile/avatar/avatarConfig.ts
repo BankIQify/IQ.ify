@@ -42,32 +42,54 @@ export const moods = [
 export const generateAvatarUrl = (config: AvatarConfig): string => {
   // Create URL for DiceBear Avatars API explicitly
   // Using Micah style from DiceBear
-  const queryParams = new URLSearchParams();
-  
-  // Set all parameters with their correct values
-  queryParams.set('seed', Math.random().toString(36).substring(7)); // Add random seed to prevent caching
-  queryParams.set('radius', '50');
-  queryParams.set('size', '150');
-  
-  // Map our config values to DiceBear parameters
-  queryParams.set('gender', config.gender);
-  queryParams.set('hair', config.hairColor);
-  queryParams.set('earrings', config.earrings ? 'true' : 'false');
-  queryParams.set('glasses', config.glasses ? 'true' : 'false');
-  queryParams.set('mood', config.mood);
-  
-  // Map skin colors to hex values for the baseColor parameter
-  if (config.skinColor === 'light') {
-    queryParams.set('baseColor', 'f8d5b8');
-  } else if (config.skinColor === 'medium') {
-    queryParams.set('baseColor', 'e3b085');
-  } else {
-    queryParams.set('baseColor', '8d5524');
+  try {
+    const baseUrl = "https://api.dicebear.com/6.x/micah/svg";
+    const queryParams = new URLSearchParams();
+    
+    // Generate a predictable but unique seed to ensure consistency
+    const seed = `seed-${config.gender}-${config.hairColor}-${config.skinColor}-${Date.now().toString(36)}`;
+    queryParams.set('seed', seed);
+    
+    // Set common parameters
+    queryParams.set('radius', '50');
+    queryParams.set('size', '200');
+    
+    // Map our config values to DiceBear parameters
+    if (config.gender === 'male' || config.gender === 'female') {
+      queryParams.set('gender', config.gender);
+    }
+    
+    // Set hair color if available
+    if (config.hairColor) {
+      queryParams.set('hair', config.hairColor);
+    }
+    
+    // Set accessories
+    queryParams.set('earrings', config.earrings ? 'true' : 'false');
+    queryParams.set('glasses', config.glasses ? 'true' : 'false');
+    
+    // Set mood if available
+    if (config.mood) {
+      queryParams.set('mood', config.mood);
+    }
+    
+    // Map skin colors to hex values for the baseColor parameter
+    if (config.skinColor === 'light') {
+      queryParams.set('baseColor', 'f8d5b8');
+    } else if (config.skinColor === 'medium') {
+      queryParams.set('baseColor', 'e3b085');
+    } else {
+      queryParams.set('baseColor', '8d5524');
+    }
+    
+    // Build the full URL with the correct API endpoint
+    const url = `${baseUrl}?${queryParams.toString()}`;
+    console.log('Generated DiceBear URL:', url);
+    
+    return url;
+  } catch (error) {
+    console.error('Error generating avatar URL:', error);
+    // Return a fallback URL if there's an error
+    return 'https://api.dicebear.com/6.x/micah/svg?seed=fallback';
   }
-  
-  // Build the full URL with the correct API endpoint
-  const url = `https://api.dicebear.com/6.x/micah/svg?${queryParams.toString()}`;
-  console.log('Generated DiceBear URL:', url);
-  
-  return url;
 };
