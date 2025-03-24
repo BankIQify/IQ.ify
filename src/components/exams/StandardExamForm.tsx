@@ -30,6 +30,8 @@ export function StandardExamForm() {
     try {
       const examName = `Standard ${standardCategory.replace('_', ' ')} Test`;
       
+      console.log('Creating standard exam:', { examName, category: standardCategory });
+      
       const { data, error } = await supabase
         .from('exams')
         .insert({
@@ -39,28 +41,32 @@ export function StandardExamForm() {
           is_standard: true
         })
         .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating standard exam:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
         description: "Standard exam created successfully"
       });
 
-      // Navigate to the practice page for this exam
+      // Navigate to the practice page for this category
       if (data) {
-        // For now, just navigate to the Practice page
-        // In a future enhancement, this could go directly to the exam
+        navigate(`/practice/${standardCategory}`);
+      } else {
+        // Fallback if data isn't returned but no error occurred
         navigate(`/practice/${standardCategory}`);
       }
 
       setStandardCategory('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating standard exam:', error);
       toast({
         title: "Error",
-        description: "Failed to create standard exam",
+        description: error.message || "Failed to create standard exam",
         variant: "destructive"
       });
     } finally {

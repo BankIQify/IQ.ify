@@ -1,18 +1,37 @@
 
-import { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { AuthError } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignUpForm } from "@/components/auth/SignUpForm";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const { user, signInWithGoogle } = useAuthContext();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // Handle redirects and initial session
+  useEffect(() => {
+    // Check for redirect errors in URL
+    const query = new URLSearchParams(window.location.search);
+    const error = query.get('error');
+    const errorDescription = query.get('error_description');
+    
+    if (error) {
+      console.error("Auth redirect error:", error, errorDescription);
+      toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: errorDescription || "There was a problem with authentication",
+      });
+    }
+  }, [toast]);
 
   // Redirect if already authenticated
   if (user) {
