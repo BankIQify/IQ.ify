@@ -1,34 +1,42 @@
 
+import { useState } from "react";
 import { QuestionItem } from "../types";
 import { useToast } from "@/hooks/use-toast";
 
 export const useBulkQuestionOperations = (
   setEditedQuestions: (questions: QuestionItem[]) => void
 ) => {
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
-  const handleBulkUpdate = (updatedQuestions: QuestionItem[]) => {
+  const handleBulkUpdate = async (operation: 'split' | 'merge' | 'reformat' | 'generateExplanations', selectedIndices?: number[]) => {
     try {
-      if (!Array.isArray(updatedQuestions)) {
-        throw new Error("Invalid questions data");
-      }
+      setIsProcessing(true);
       
-      setEditedQuestions(updatedQuestions);
+      // Implementation would be customized based on the operation
+      // For now we'll just show a toast with the operation
       toast({
-        title: "Questions updated",
-        description: `${updatedQuestions.length} questions updated successfully`,
+        title: "Bulk operation",
+        description: `${operation} operation would be applied to ${selectedIndices ? selectedIndices.length : 'all'} questions`,
       });
+      
+      // In a real implementation, we would fetch the AI generated content
+      // and update the edited questions
+      
+      setIsProcessing(false);
     } catch (error) {
-      console.error("Error updating questions:", error);
+      console.error(`Error in bulk ${operation} operation:`, error);
       toast({
-        title: "Error updating questions",
-        description: error instanceof Error ? error.message : "An unknown error occurred",
+        title: "Error",
+        description: `Failed to ${operation} questions: ${error instanceof Error ? error.message : "Unknown error"}`,
         variant: "destructive",
       });
+      setIsProcessing(false);
     }
   };
 
   return {
-    handleBulkUpdate
+    handleBulkUpdate,
+    isProcessing
   };
 };

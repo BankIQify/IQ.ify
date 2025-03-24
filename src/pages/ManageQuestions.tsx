@@ -4,30 +4,44 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ManualQuestionUpload } from "@/components/questions/ManualQuestionUpload";
 import { CategoryManager } from "@/components/questions/CategoryManager";
 import { CompleteQuestionBank } from "@/components/questions/CompleteQuestionBank";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { HomepageEditor } from "@/components/homepage/HomepageEditor";
 import { GamePuzzlesManager } from "@/components/puzzles/GamePuzzlesManager";
 import { supabase } from "@/integrations/supabase/client";
 import { WebhookManagement } from "@/components/webhooks/WebhookManagement";
+import { Badge } from "@/components/ui/badge";
 
 const ManageQuestions = () => {
   const { user, isAdmin } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [sections, setSections] = useState<any[]>([]);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [activeTab, setActiveTab] = useState("bank");
+
+  // Extract the tab from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab && ["bank", "manual", "categories", "puzzles", "homepage", "webhooks"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [location]);
 
   // Redirect if not admin
-  if (!user || !isAdmin) {
-    toast({
-      title: "Access Denied",
-      description: "You must be an admin to access this page.",
-      variant: "destructive",
-    });
-    navigate("/");
-    return null;
-  }
+  useEffect(() => {
+    if (!user || !isAdmin) {
+      toast({
+        title: "Access Denied",
+        description: "You must be an admin to access this page.",
+        variant: "destructive",
+      });
+      navigate("/");
+    }
+  }, [user, isAdmin, navigate, toast]);
 
   // Fetch sections for the CategoriesTable
   useEffect(() => {
@@ -62,11 +76,51 @@ const ManageQuestions = () => {
     fetchSections();
   }, [toast]);
 
+  // Fetch pending webhook events count
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const { count, error } = await supabase
+          .from("webhook_events")
+          .select("*", { count: "exact" })
+          .eq("processed", false);
+          
+        if (error) throw error;
+        setPendingCount(count || 0);
+      } catch (error) {
+        console.error("Error fetching pending webhook count:", error);
+      }
+    };
+    
+    if (user && isAdmin) {
+      fetchPendingCount();
+      
+      // Set up a polling interval to refresh the count
+      const interval = setInterval(fetchPendingCount, 30000); // every 30 seconds
+      return () => clearInterval(interval);
+    }
+  }, [user, isAdmin]);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Update URL with current tab
+    const params = new URLSearchParams(location.search);
+    params.set("tab", value);
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    }, { replace: true });
+  };
+
+  if (!user || !isAdmin) {
+    return null;
+  }
+
   return (
     <div className="page-container">
       <h1 className="section-title">Question Management</h1>
 
-      <Tabs defaultValue="bank" className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="bank" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Complete Question Bank
@@ -83,8 +137,13 @@ const ManageQuestions = () => {
           <TabsTrigger value="homepage" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
             Edit Homepage
           </TabsTrigger>
-          <TabsTrigger value="webhooks" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
+          <TabsTrigger value="webhooks" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2 relative">
             AI Webhooks
+            {pendingCount > 0 && (
+              <Badge variant="destructive" className="ml-1 px-1.5 py-0.5 text-xs absolute -top-2 -right-2">
+                {pendingCount}
+              </Badge>
+            )}
           </TabsTrigger>
         </TabsList>
 

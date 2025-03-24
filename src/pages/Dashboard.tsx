@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
@@ -14,8 +14,18 @@ import { AdminTab } from "@/components/dashboard/tabs/AdminTab";
 const Dashboard = () => {
   const { user, profile, isAdmin } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<string>("overview");
+
+  // Check for tab parameter in URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get("tab");
+    if (tabParam && ["overview", "progress", "achievements", "admin"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (!user) {
@@ -28,6 +38,17 @@ const Dashboard = () => {
     }
   }, [user, navigate, toast]);
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    // Update URL with current tab
+    const params = new URLSearchParams(location.search);
+    params.set("tab", tab);
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    }, { replace: true });
+  };
+
   if (!user || !profile) {
     return null;
   }
@@ -36,8 +57,8 @@ const Dashboard = () => {
     <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn">
       <DashboardHeader profile={profile} />
 
-      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-8">
-        <DashboardTabs isAdmin={isAdmin} activeTab={activeTab} />
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+        <DashboardTabs isAdmin={isAdmin} activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* Overview Tab Content */}
         <TabsContent value="overview" className="space-y-6">
