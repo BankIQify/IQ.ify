@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +6,9 @@ import { CheckCircle2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-const MONTHLY_PRICE_ID = 'price_monthly'; // Replace with real Stripe price ID
-const ANNUAL_PRICE_ID = 'price_annual';   // Replace with real Stripe price ID
+// Replace these with your actual Stripe price IDs from your Stripe dashboard
+const MONTHLY_PRICE_ID = 'price_1OoBMdJELBQzh1GnK4YNsm11'; // Replace with real Stripe price ID
+const ANNUAL_PRICE_ID = 'price_1OoBMHJELBQzh1GnoDdp0pzf';   // Replace with real Stripe price ID
 
 export const SubscriptionPlans = () => {
   const { user, profile } = useAuthContext();
