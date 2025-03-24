@@ -3,7 +3,14 @@ import { Card } from "@/components/ui/card";
 import { EditableQuestionsList } from "@/components/questions/editable-questions";
 import { QuestionWithDuplicateFlag } from "../utils/duplicationDetector";
 import { Dispatch, SetStateAction } from "react";
-import { Pagination } from "@/components/ui/pagination";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 interface QuestionBankResultsProps {
   questions: QuestionWithDuplicateFlag[];
@@ -48,25 +55,31 @@ export const QuestionBankResults = ({
       {totalPages > 1 && (
         <div className="flex justify-center mt-6">
           <Pagination>
-            <Pagination.Content>
-              <Pagination.Item
-                onClick={() => onPageChange && onPageChange(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage <= 1}
-              >
-                Previous
-              </Pagination.Item>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => onPageChange && onPageChange(prev => Math.max(prev - 1, 1))}
+                  aria-disabled={currentPage <= 1}
+                  tabIndex={currentPage <= 1 ? -1 : 0}
+                  className={currentPage <= 1 ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
               
-              <Pagination.Item className="hidden sm:inline-flex">
-                Page {currentPage} of {totalPages}
-              </Pagination.Item>
+              <PaginationItem className="hidden sm:inline-flex">
+                <span className="flex h-9 items-center justify-center px-4">
+                  Page {currentPage} of {totalPages}
+                </span>
+              </PaginationItem>
               
-              <Pagination.Item
-                onClick={() => onPageChange && onPageChange(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage >= totalPages}
-              >
-                Next
-              </Pagination.Item>
-            </Pagination.Content>
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => onPageChange && onPageChange(prev => Math.min(prev + 1, totalPages))}
+                  aria-disabled={currentPage >= totalPages}
+                  tabIndex={currentPage >= totalPages ? -1 : 0}
+                  className={currentPage >= totalPages ? "pointer-events-none opacity-50" : ""}
+                />
+              </PaginationItem>
+            </PaginationContent>
           </Pagination>
         </div>
       )}
