@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -10,23 +10,80 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { AuthError } from "@supabase/supabase-js";
 import { FocusArea, focusAreaLabels } from "@/types/auth";
 import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const Auth = () => {
   const { user, signInWithEmail, signInWithGoogle, signUp } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [checkingUsername, setCheckingUsername] = useState(false);
   const { toast } = useToast();
 
   // Form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameAvailable, setUsernameAvailable] = useState(true);
+  const [alternativeUsernames, setAlternativeUsernames] = useState<string[]>([]);
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<FocusArea[]>([]);
 
   // Redirect if already authenticated
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  // Handle username change and check availability
+  const handleUsernameChange = async (value: string) => {
+    setUsername(value);
+    
+    if (!value) {
+      setUsernameAvailable(true);
+      setAlternativeUsernames([]);
+      return;
+    }
+    
+    if (value.length < 3) {
+      return;
+    }
+
+    setCheckingUsername(true);
+    try {
+      // Check if username exists
+      const { data, error } = await supabase
+        .rpc('username_exists', { 
+          username_to_check: value 
+        });
+      
+      if (error) throw error;
+      
+      setUsernameAvailable(!data);
+      
+      if (data) {
+        // If username is taken, get alternatives
+        const { data: alternatives, error: altError } = await supabase
+          .rpc('generate_alternative_usernames', { 
+            base_username: value 
+          });
+          
+        if (altError) throw altError;
+        setAlternativeUsernames(alternatives || []);
+      } else {
+        setAlternativeUsernames([]);
+      }
+    } catch (error) {
+      console.error("Error checking username:", error);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  const selectAlternativeUsername = (alt: string) => {
+    setUsername(alt);
+    setUsernameAvailable(true);
+    setAlternativeUsernames([]);
+  };
 
   const handleAuthError = (error: AuthError) => {
     console.error("Authentication error:", error);
@@ -66,13 +123,33 @@ const Auth = () => {
     }
 
     // Additional validation for registration
-    if (!isLogin && !name) {
-      toast({
-        variant: "destructive",
-        title: "Validation Error",
-        description: "Please fill in all required fields",
-      });
-      return;
+    if (!isLogin) {
+      if (!name) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Please fill in all required fields",
+        });
+        return;
+      }
+
+      if (!username) {
+        toast({
+          variant: "destructive",
+          title: "Validation Error",
+          description: "Please enter a username",
+        });
+        return;
+      }
+
+      if (!usernameAvailable) {
+        toast({
+          variant: "destructive",
+          title: "Username Error",
+          description: "This username is already taken. Please choose another or select one of the suggested alternatives.",
+        });
+        return;
+      }
     }
 
     setLoading(true);
@@ -80,7 +157,10 @@ const Auth = () => {
       if (isLogin) {
         await signInWithEmail(email, password);
       } else {
-        await signUp(email, password, { name });
+        await signUp(email, password, { 
+          name,
+          username
+        });
       }
     } catch (error) {
       handleAuthError(error as AuthError);
@@ -146,24 +226,66 @@ const Auth = () => {
           </div>
 
           {!isLogin && (
-            <div>
-              <Input
-                type="text"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                disabled={loading}
-                aria-label="Name"
-              />
-            </div>
+            <>
+              <div>
+                <Input
+                  type="text"
+                  placeholder="Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={loading}
+                  aria-label="Name"
+                />
+              </div>
+              <div>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Username"
+                    value={username}
+                    onChange={(e) => handleUsernameChange(e.target.value)}
+                    required
+                    disabled={loading || checkingUsername}
+                    aria-label="Username"
+                    className={!usernameAvailable ? "border-red-500" : ""}
+                  />
+                  {checkingUsername && (
+                    <div className="absolute right-3 top-2">
+                      <div className="animate-spin h-5 w-5 border-2 border-education-600 rounded-full border-t-transparent"></div>
+                    </div>
+                  )}
+                </div>
+                {!usernameAvailable && username && (
+                  <div className="mt-2">
+                    <p className="text-red-500 text-sm mb-1">Username is already taken. Try one of these:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {alternativeUsernames.map((alt, idx) => (
+                        <Button 
+                          key={idx} 
+                          type="button" 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => selectAlternativeUsername(alt)}
+                        >
+                          {alt}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {username && usernameAvailable && username.length >= 3 && (
+                  <p className="text-green-500 text-sm mt-1">Username is available!</p>
+                )}
+              </div>
+            </>
           )}
 
           <Button
             type="submit"
             className="w-full"
             variant="default"
-            disabled={loading}
+            disabled={loading || (!isLogin && !usernameAvailable)}
           >
             {loading
               ? "Loading..."

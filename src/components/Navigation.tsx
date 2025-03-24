@@ -2,19 +2,20 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu as MenuIcon, X as CloseIcon } from "lucide-react";
+import { Menu as MenuIcon, X as CloseIcon, User } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Navigation = () => {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, profile, signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // For debugging
   useEffect(() => {
-    console.log('Current auth state:', { user, isAdmin });
-  }, [user, isAdmin]);
+    console.log('Current auth state:', { user, isAdmin, profile });
+  }, [user, isAdmin, profile]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -91,16 +92,32 @@ const Navigation = () => {
             </Button>
           </div>
 
-          {/* Auth Button */}
-          <div className="hidden md:block">
+          {/* Auth/Profile Button */}
+          <div className="hidden md:flex items-center gap-2">
             {user ? (
-              <Button 
-                variant="outline" 
-                onClick={handleSignOut}
-                className="hover:bg-pastel-purple/20 border-education-600"
-              >
-                Sign Out
-              </Button>
+              <div className="flex items-center gap-3">
+                <Link to="/profile" className="flex items-center gap-2 hover:bg-pastel-purple/20 py-1 px-2 rounded">
+                  <Avatar className="h-8 w-8">
+                    {profile?.avatar_url ? (
+                      <AvatarImage src={profile.avatar_url} alt="User avatar" />
+                    ) : (
+                      <AvatarFallback>
+                        {profile?.name?.charAt(0) || profile?.username?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <span className="text-sm font-medium">
+                    {profile?.username || profile?.name || "Profile"}
+                  </span>
+                </Link>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSignOut}
+                  className="hover:bg-pastel-purple/20 border-education-600"
+                >
+                  Sign Out
+                </Button>
+              </div>
             ) : (
               location.pathname !== "/auth" && (
                 <Button 
@@ -119,6 +136,16 @@ const Navigation = () => {
           <div className="md:hidden bg-white border-t animate-fade-in">
             <div className="py-2 space-y-1">
               <NavLinks />
+              {user && (
+                <Link 
+                  to="/profile" 
+                  className="flex items-center px-4 py-2 text-sm hover:bg-pastel-purple/20 rounded-md"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Link>
+              )}
               {user ? (
                 <Button 
                   variant="outline" 

@@ -8,9 +8,24 @@ import { FocusArea } from "@/types/auth";
 type Profile = {
   id: string;
   name: string | null;
+  username: string | null;
+  avatar_url: string | null;
+  avatar_config: Record<string, any> | null;
   created_at: string;
   updated_at: string;
   focus_areas: FocusArea[];
+  subscription_tier: string | null;
+  subscription_status: string | null;
+  subscription_id: string | null;
+  subscription_expires_at: string | null;
+};
+
+type ProfileData = {
+  name: string | null;
+  username?: string | null;
+  avatar_url?: string | null;
+  avatar_config?: Record<string, any>;
+  focus_areas?: FocusArea[];
 };
 
 type AuthContextType = {
@@ -19,8 +34,9 @@ type AuthContextType = {
   isAdmin: boolean;
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  signUp: (email: string, password: string, profileData: { name: string | null }) => Promise<void>;
+  signUp: (email: string, password: string, profileData: ProfileData) => Promise<void>;
   signOut: () => Promise<void>;
+  updateProfile: (data: Partial<ProfileData>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -142,7 +158,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, profileData: { name: string | null }) => {
+  const updateProfile = async (profileData: Partial<ProfileData>) => {
+    if (!user) throw new Error("User not authenticated");
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', user.id);
+
+      if (error) throw error;
+      
+      // Refresh profile data
+      await getProfile(user.id);
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been successfully updated.",
+      });
+    } catch (error: any) {
+      console.error("Error updating profile:", error);
+      toast({
+        variant: "destructive",
+        title: "Update failed",
+        description: error.message || "Failed to update profile.",
+      });
+      throw error;
+    }
+  };
+
+  const signUp = async (email: string, password: string, profileData: ProfileData) => {
     const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password,
@@ -151,17 +196,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (signUpError) throw signUpError;
 
     if (data.user) {
-      // Update profile
+      // Update profile with username and other data
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
           name: profileData.name,
+          username: profileData.username,
+          avatar_url: profileData.avatar_url,
+          avatar_config: profileData.avatar_config,
         })
         .eq('id', data.user.id);
 
       if (profileError) {
         console.error("Error updating profile:", profileError);
         throw profileError;
+      }
+
+      // If focus areas are provided, insert them
+      if (profileData.focus_areas && profileData.focus_areas.length > 0) {
+        const focusAreasToInsert = profileData.focus_areas.map(area => ({
+          user_id: data.user!.id,
+          focus_area: area
+        }));
+
+        const { error: focusAreasError } = await supabase
+          .from('user_focus_areas')
+          .insert(focusAreasToInsert);
+
+        if (focusAreasError) {
+          console.error("Error inserting focus areas:", focusAreasError);
+          // Non-blocking error - don't throw to avoid blocking signup
+        }
       }
 
       toast({
@@ -186,6 +251,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signInWithGoogle,
         signUp,
         signOut,
+        updateProfile,
       }}
     >
       {children}
@@ -200,4 +266,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

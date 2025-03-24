@@ -338,25 +338,46 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_config: Json | null
+          avatar_url: string | null
           created_at: string
           focus_areas: Database["public"]["Enums"]["focus_area"][] | null
           id: string
           name: string | null
+          subscription_expires_at: string | null
+          subscription_id: string | null
+          subscription_status: string | null
+          subscription_tier: string | null
           updated_at: string
+          username: string | null
         }
         Insert: {
+          avatar_config?: Json | null
+          avatar_url?: string | null
           created_at?: string
           focus_areas?: Database["public"]["Enums"]["focus_area"][] | null
           id: string
           name?: string | null
+          subscription_expires_at?: string | null
+          subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
+          avatar_config?: Json | null
+          avatar_url?: string | null
           created_at?: string
           focus_areas?: Database["public"]["Enums"]["focus_area"][] | null
           id?: string
           name?: string | null
+          subscription_expires_at?: string | null
+          subscription_id?: string | null
+          subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -572,6 +593,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_alternative_usernames: {
+        Args: {
+          base_username: string
+        }
+        Returns: string[]
+      }
       get_puzzle_counts: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -579,6 +606,36 @@ export type Database = {
           difficulty: string
           count: number
         }[]
+      }
+      gtrgm_compress: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: {
+          "": unknown
+        }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
       }
       is_admin: {
         Args: {
@@ -592,12 +649,34 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_limit: {
+        Args: {
+          "": number
+        }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: {
+          "": string
+        }
+        Returns: string[]
+      }
       start_game_session: {
         Args: {
           p_user_id: number
           p_challenge_id: number
         }
         Returns: undefined
+      }
+      username_exists: {
+        Args: {
+          username_to_check: string
+        }
+        Returns: boolean
       }
     }
     Enums: {
