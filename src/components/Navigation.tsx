@@ -2,7 +2,7 @@
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu as MenuIcon, X as CloseIcon, User } from "lucide-react";
+import { Menu as MenuIcon, X as CloseIcon, User, Settings } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -98,7 +98,7 @@ const Navigation = () => {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <div className="flex items-center gap-3">
-                <Link to="/profile" className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-1 px-2 rounded">
+                <Link to="/avatar-creator" className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-1 px-2 rounded">
                   <Avatar className="h-8 w-8">
                     {profile?.avatar_url ? (
                       <AvatarImage src={profile.avatar_url} alt="User avatar" />
@@ -109,8 +109,17 @@ const Navigation = () => {
                     )}
                   </Avatar>
                   <span className="text-sm font-medium">
-                    {profile?.username || profile?.name || "Profile"}
+                    Character
                   </span>
+                </Link>
+                <Link to="/profile">
+                  <Button 
+                    variant="outline"
+                    className="hover:bg-[rgba(0,255,127,0.2)] border-[#00FF7F] text-[#001F3F]"
+                  >
+                    <Settings className="h-4 w-4 mr-1" />
+                    Profile
+                  </Button>
                 </Link>
                 <Button 
                   variant="outline" 
@@ -139,14 +148,24 @@ const Navigation = () => {
             <div className="py-2 space-y-1">
               <NavLinks />
               {user && (
-                <Link 
-                  to="/profile" 
-                  className="flex items-center px-4 py-2 text-sm hover:bg-[rgba(139,92,246,0.2)] rounded-md"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
-                </Link>
+                <>
+                  <Link 
+                    to="/avatar-creator" 
+                    className="flex items-center px-4 py-2 text-sm hover:bg-[rgba(0,255,127,0.2)] rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Character Creation
+                  </Link>
+                  <Link 
+                    to="/profile" 
+                    className="flex items-center px-4 py-2 text-sm hover:bg-[rgba(139,92,246,0.2)] rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Profile Settings
+                  </Link>
+                </>
               )}
               {user ? (
                 <Button 

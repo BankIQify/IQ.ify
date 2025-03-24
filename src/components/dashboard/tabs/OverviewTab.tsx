@@ -38,9 +38,9 @@ export const OverviewTab = ({ profile }: OverviewTabProps) => {
               {profile.username && <p className="text-muted-foreground">@{profile.username}</p>}
               
               <div className="mt-4 w-full">
-                <Link to="/profile">
+                <Link to="/avatar-creator">
                   <Button variant="outline" className="w-full bg-white hover:bg-blue-50">
-                    Edit Profile
+                    Character Creation
                   </Button>
                 </Link>
               </div>
