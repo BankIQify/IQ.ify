@@ -53,16 +53,19 @@ const Dashboard = () => {
     return null;
   }
 
+  // Determine display name - use username or email if name is not available
+  const displayName = profile.name || profile.username || user.email?.split('@')[0] || "Scholar";
+
   return (
-    <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn">
-      <DashboardHeader profile={profile} />
+    <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn bg-gradient-to-b from-pastel-blue/30 to-pastel-purple/20 rounded-xl">
+      <DashboardHeader profile={{...profile, name: displayName}} />
 
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
         <DashboardTabs isAdmin={isAdmin} activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* Overview Tab Content */}
         <TabsContent value="overview" className="space-y-6">
-          <OverviewTab profile={profile} />
+          <OverviewTab profile={{...profile, name: displayName}} />
         </TabsContent>
 
         {/* Progress Tab Content */}

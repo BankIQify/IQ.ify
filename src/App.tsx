@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,7 @@ import SubjectProgress from "./pages/SubjectProgress";
 import Practice from "./pages/Practice"; 
 import Profile from "./pages/Profile";
 import { useAuthContext } from "@/contexts/AuthContext";
+import AvatarCreator from "./pages/AvatarCreator";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +59,7 @@ const App = () => (
                 } 
               />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/avatar-creator" element={<AvatarCreator />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
