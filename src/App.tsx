@@ -19,7 +19,8 @@ import Profile from "./pages/Profile";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AvatarCreator from "./pages/AvatarCreator";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,14 +36,29 @@ const AuthLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="flex flex-col items-center gap-2">
       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      <p className="text-sm text-muted-foreground">Loading...</p>
+      <p className="text-sm text-muted-foreground">Loading authentication...</p>
     </div>
+  </div>
+);
+
+// Error component for auth errors
+const AuthError = ({ error }: { error: Error }) => (
+  <div className="flex items-center justify-center min-h-screen p-4">
+    <Alert variant="destructive" className="max-w-md">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Authentication Error</AlertTitle>
+      <AlertDescription>
+        <p>There was a problem initializing authentication:</p>
+        <p className="mt-2 font-mono text-xs break-all">{error.message}</p>
+        <p className="mt-4">Try refreshing the page or clearing your browser cache.</p>
+      </AlertDescription>
+    </Alert>
   </div>
 );
 
 // Component for routes that require either admin or data_input role
 const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin, authInitialized } = useAuthContext();
+  const { user, isAdmin, authInitialized, authError } = useAuthContext();
   const [hasDataInputRole, setHasDataInputRole] = useState(false);
   const [loading, setLoading] = useState(true);
   
@@ -80,6 +96,10 @@ const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
   
   console.log('ProtectedDataRoute check:', { user, isAdmin, hasDataInputRole, loading, authInitialized });
   
+  if (authError) {
+    return <AuthError error={authError} />;
+  }
+  
   if (!authInitialized || loading) {
     return <AuthLoader />;
   }
@@ -93,9 +113,13 @@ const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Component for routes that require strictly admin role
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin, authInitialized } = useAuthContext();
+  const { user, isAdmin, authInitialized, authError } = useAuthContext();
   
   console.log('ProtectedAdminRoute check:', { user, isAdmin, authInitialized });
+  
+  if (authError) {
+    return <AuthError error={authError} />;
+  }
   
   if (!authInitialized) {
     return <AuthLoader />;

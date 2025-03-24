@@ -42,6 +42,9 @@ export const useAuth = () => {
     try {
       const { error, data } = await supabase.auth.signInWithOAuth({
         provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        }
       });
 
       if (error) {
@@ -69,6 +72,13 @@ export const useAuth = () => {
       const { error: signUpError, data } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: {
+            name: profileData.name,
+            username: profileData.username,
+          }
+        }
       });
 
       if (signUpError) {
