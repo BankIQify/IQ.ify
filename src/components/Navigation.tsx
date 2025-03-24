@@ -2,39 +2,103 @@
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu as MenuIcon, X as CloseIcon, User, Settings } from "lucide-react";
+import { Menu as MenuIcon, X as CloseIcon, User, Settings, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { supabase } from "@/integrations/supabase/client";
 
 const Navigation = () => {
-  const { user, profile, signOut, isAdmin } = useAuthContext();
+  const { user, profile, signOut, isAdmin, authInitialized } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasDataInputRole, setHasDataInputRole] = useState(false);
+  const [checkingRoles, setCheckingRoles] = useState(true);
 
   // For debugging
   useEffect(() => {
-    console.log('Current auth state:', { user, isAdmin, profile });
-  }, [user, isAdmin, profile]);
+    console.log('Current auth state:', { user, isAdmin, profile, authInitialized });
+  }, [user, isAdmin, profile, authInitialized]);
+
+  // Check for data_input role
+  useEffect(() => {
+    const checkDataInputRole = async () => {
+      if (!user) {
+        setHasDataInputRole(false);
+        setCheckingRoles(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('role', 'data_input')
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error checking data_input role:', error);
+        }
+
+        setHasDataInputRole(!!data);
+      } catch (error) {
+        console.error('Error in checkDataInputRole:', error);
+      } finally {
+        setCheckingRoles(false);
+      }
+    };
+
+    if (authInitialized && user) {
+      checkDataInputRole();
+    } else if (authInitialized) {
+      setCheckingRoles(false);
+    }
+  }, [user, authInitialized]);
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+    try {
+      await signOut();
+      navigate("/auth");
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  if (!authInitialized) {
+    return (
+      <nav className="border-b bg-gradient-to-r from-[#1EAEDB] via-[#FFD700] to-[#FF69B4] shadow-sm">
+        <div className="container mx-auto px-4 py-2">
+          <div className="flex justify-between items-center">
+            <Link to="/" className="hover:scale-105 transition-transform">
+              <img 
+                src="/lovable-uploads/fa3e7201-848d-4ab9-a19d-74319434852e.png" 
+                alt="iQify Logo" 
+                className="h-12 md:h-14"
+              />
+            </Link>
+            <Loader2 className="h-5 w-5 animate-spin text-white" />
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
   const NavLinks = () => (
     <>
-      <Link 
-        to="/dashboard" 
-        className="block px-4 py-2 text-sm hover:bg-[rgba(30,174,219,0.2)] rounded-md font-medium text-[#001F3F]"
-        onClick={() => setIsMobileMenuOpen(false)}
-      >
-        Dashboard
-      </Link>
+      {user && (
+        <Link 
+          to="/dashboard" 
+          className="block px-4 py-2 text-sm hover:bg-[rgba(30,174,219,0.2)] rounded-md font-medium text-[#001F3F]"
+          onClick={() => setIsMobileMenuOpen(false)}
+        >
+          Dashboard
+        </Link>
+      )}
       <Link 
         to="/lets-practice" 
         className="block px-4 py-2 text-sm hover:bg-[rgba(255,105,180,0.2)] rounded-md font-medium text-[#001F3F]"
@@ -49,7 +113,7 @@ const Navigation = () => {
       >
         Brain Training Games
       </Link>
-      {isAdmin && (
+      {!checkingRoles && (isAdmin || hasDataInputRole) && (
         <Link 
           to="/manage-questions" 
           className="block px-4 py-2 text-sm hover:bg-[rgba(0,255,127,0.2)] rounded-md font-medium text-[#001F3F]"
@@ -96,7 +160,9 @@ const Navigation = () => {
 
           {/* Auth/Profile Button */}
           <div className="hidden md:flex items-center gap-2">
-            {user ? (
+            {checkingRoles ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : user ? (
               <div className="flex items-center gap-3">
                 <Link to="/avatar-creator" className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-1 px-2 rounded">
                   <Avatar className="h-8 w-8">

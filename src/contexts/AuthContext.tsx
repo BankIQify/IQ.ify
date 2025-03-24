@@ -15,7 +15,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { profile, getProfile, updateProfile } = useProfile(user);
   const { isAdmin, checkAdminStatus } = useAdminStatus();
   const [session, setSession] = useState<Session | null>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
+  const [authError, setAuthError] = useState<Error | null>(null);
   const { toast } = useToast();
+
+  // Function to handle errors consistently
+  const handleError = (error: unknown, context: string) => {
+    console.error(`Auth error (${context}):`, error);
+    
+    let errorMessage = "An unknown error occurred";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      setAuthError(error);
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+      setAuthError(new Error(error));
+    }
+    
+    toast({
+      variant: "destructive",
+      title: "Authentication Error",
+      description: `${context}: ${errorMessage}`
+    });
+  };
 
   useEffect(() => {
     try {
@@ -38,23 +60,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               getProfile(newSession.user.id),
               checkAdminStatus(newSession.user.id)
             ]).catch(error => {
-              console.error('Error during profile/admin status check:', error);
-              toast({
-                variant: "destructive",
-                title: "Authentication Error",
-                description: "Failed to load user profile data. Please try refreshing the page."
-              });
+              handleError(error, "Failed to load user data after authentication");
             });
           } else {
             console.log('User logged out or no session');
           }
         } catch (error) {
-          console.error('Error handling auth state change:', error);
-          toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: "There was a problem processing your authentication state. Please refresh the page."
-          });
+          handleError(error, "Error handling auth state change");
         }
       });
 
@@ -62,12 +74,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Checking initial session');
       supabase.auth.getSession().then(({ data: { session: initialSession }, error }) => {
         if (error) {
-          console.error('Error fetching initial session:', error);
-          toast({
-            variant: "destructive",
-            title: "Session Error",
-            description: "Failed to retrieve your session. Please sign in again."
-          });
+          handleError(error, "Error fetching initial session");
+          setAuthInitialized(true);
           return;
         }
         
@@ -83,23 +91,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             getProfile(initialSession.user.id),
             checkAdminStatus(initialSession.user.id)
           ]).catch(error => {
-            console.error('Error during initial profile/admin status check:', error);
-            toast({
-              variant: "destructive",
-              title: "Profile Error",
-              description: "Failed to load your profile data. Please try refreshing the page."
-            });
+            handleError(error, "Error during initial profile/admin status check");
+          }).finally(() => {
+            setAuthInitialized(true);
           });
         } else {
           console.log('No session found');
+          setAuthInitialized(true);
         }
       }).catch(error => {
-        console.error('Unexpected error during session check:', error);
-        toast({
-          variant: "destructive",
-          title: "Session Error",
-          description: "An unexpected error occurred checking your session. Please try again."
-        });
+        handleError(error, "Unexpected error during session check");
+        setAuthInitialized(true);
       });
 
       return () => {
@@ -107,12 +109,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         subscription.unsubscribe();
       };
     } catch (error) {
-      console.error('Critical error in auth setup:', error);
-      toast({
-        variant: "destructive",
-        title: "Critical Auth Error",
-        description: "A critical error occurred in the authentication setup. Please refresh the page."
-      });
+      handleError(error, "Critical error in auth setup");
+      setAuthInitialized(true);
     }
   }, []);
 
@@ -127,6 +125,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signUp,
         signOut,
         updateProfile,
+        authInitialized,
+        authError,
       }}
     >
       {children}

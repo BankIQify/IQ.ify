@@ -3,8 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuthContext } from "@/contexts/AuthContext";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -17,20 +17,41 @@ import SubjectProgress from "./pages/SubjectProgress";
 import Practice from "./pages/Practice"; 
 import Profile from "./pages/Profile";
 import { useState, useEffect } from "react";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import AvatarCreator from "./pages/AvatarCreator";
+import { Loader2 } from "lucide-react";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+// Loading component for auth initialization
+const AuthLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center gap-2">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">Loading...</p>
+    </div>
+  </div>
+);
 
 // Component for routes that require either admin or data_input role
 const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin } = useAuthContext();
+  const { user, isAdmin, authInitialized } = useAuthContext();
   const [hasDataInputRole, setHasDataInputRole] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const checkDataInputRole = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       
       try {
         const { data, error } = await supabase
@@ -42,22 +63,29 @@ const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
 
         if (error) {
           console.error('Error checking data_input role:', error);
-          return;
         }
 
         setHasDataInputRole(!!data);
       } catch (error) {
         console.error('Error in checkDataInputRole:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    checkDataInputRole();
-  }, [user]);
+    if (authInitialized) {
+      checkDataInputRole();
+    }
+  }, [user, authInitialized]);
   
-  console.log('ProtectedDataRoute check:', { user, isAdmin, hasDataInputRole }); // Debug log
+  console.log('ProtectedDataRoute check:', { user, isAdmin, hasDataInputRole, loading, authInitialized });
+  
+  if (!authInitialized || loading) {
+    return <AuthLoader />;
+  }
   
   if (!user || (!isAdmin && !hasDataInputRole)) {
-    return <NotFound />;
+    return <Navigate to="/auth" replace />;
   }
 
   return <>{children}</>;
@@ -65,12 +93,16 @@ const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Component for routes that require strictly admin role
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin } = useAuthContext();
+  const { user, isAdmin, authInitialized } = useAuthContext();
   
-  console.log('ProtectedAdminRoute check:', { user, isAdmin }); // Debug log
+  console.log('ProtectedAdminRoute check:', { user, isAdmin, authInitialized });
+  
+  if (!authInitialized) {
+    return <AuthLoader />;
+  }
   
   if (!user || !isAdmin) {
-    return <NotFound />;
+    return <Navigate to="/auth" replace />;
   }
 
   return <>{children}</>;
