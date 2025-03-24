@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -47,19 +46,31 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+type UserWithRole = {
+  id: string;
+  name: string | null;
+  username: string | null;
+  email?: string;
+  avatar_url: string | null;
+  subscription_tier: string | null;
+  subscription_status: string | null;
+  subscription_expires_at: string | null;
+  role: string;
+  last_login?: string;
+  created_at?: string;
+}
+
 export const AdminUsersList = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [subscriptionFilter, setSubscriptionFilter] = useState("all");
   const [userDetailsOpen, setUserDetailsOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
   
-  // Query to fetch users
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      // In a real implementation, this would fetch from the profiles table with proper pagination
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -72,20 +83,18 @@ export const AdminUsersList = () => {
           subscription_expires_at
         `)
         .order('created_at', { ascending: false })
-        .limit(20); // For demo purposes, limit to 20
+        .limit(20);
       
       if (error) throw error;
       
-      // Mock additional user role data
       return data.map(user => ({
         ...user,
-        role: user.id === '1' ? 'admin' : user.id === '2' || user.id === '3' ? 'data_input' : 'user' // Mock role assignment
-      }));
+        role: user.id === '1' ? 'admin' : user.id === '2' || user.id === '3' ? 'data_input' : 'user'
+      })) as UserWithRole[];
     },
   });
 
-  // Mock user data if no data is fetched yet
-  const mockUsers = [
+  const mockUsers: UserWithRole[] = [
     { 
       id: '1', 
       name: 'Admin User', 
@@ -181,18 +190,14 @@ export const AdminUsersList = () => {
 
   const displayUsers = users || mockUsers;
   
-  // Filter users based on search term, role filter, and subscription filter
   const filteredUsers = displayUsers.filter(user => {
-    // Search filter (name, username, email)
     const matchesSearch = 
       (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.email && user.email.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // Role filter
     const matchesRole = roleFilter === 'all' || user.role === roleFilter;
     
-    // Subscription filter
     const matchesSubscription = 
       subscriptionFilter === 'all' || 
       (subscriptionFilter === 'free' && user.subscription_tier === 'free') ||
@@ -235,12 +240,10 @@ export const AdminUsersList = () => {
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    // In a real implementation, update the user's role in the database
     toast({
       title: "Role Updated",
       description: `User role has been updated to ${newRole}.`,
     });
-    // After updating, refetch the user list
     refetch();
   };
 
@@ -349,7 +352,7 @@ export const AdminUsersList = () => {
                     <div className="flex items-center gap-2">
                       <Avatar className="h-8 w-8">
                         {user.avatar_url ? (
-                          <AvatarImage src={user.avatar_url} alt={user.name} />
+                          <AvatarImage src={user.avatar_url} alt={user.name || ''} />
                         ) : (
                           <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
                         )}
@@ -432,7 +435,6 @@ export const AdminUsersList = () => {
         </Table>
       </div>
 
-      {/* User Details Dialog */}
       {selectedUser && (
         <Dialog open={userDetailsOpen} onOpenChange={setUserDetailsOpen}>
           <DialogContent className="max-w-3xl">
@@ -447,7 +449,7 @@ export const AdminUsersList = () => {
               <div className="md:w-1/3 flex flex-col items-center space-y-4">
                 <Avatar className="h-24 w-24">
                   {selectedUser.avatar_url ? (
-                    <AvatarImage src={selectedUser.avatar_url} alt={selectedUser.name} />
+                    <AvatarImage src={selectedUser.avatar_url} alt={selectedUser.name || ''} />
                   ) : (
                     <AvatarFallback className="text-3xl">{selectedUser.name?.charAt(0)}</AvatarFallback>
                   )}
@@ -482,7 +484,7 @@ export const AdminUsersList = () => {
                         <label className="text-sm text-muted-foreground">Email</label>
                         <div className="flex items-center gap-2">
                           <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span>{selectedUser.email}</span>
+                          <span>{selectedUser.email || 'No email available'}</span>
                         </div>
                       </div>
                       
@@ -490,7 +492,7 @@ export const AdminUsersList = () => {
                         <label className="text-sm text-muted-foreground">Account Created</label>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatDateTime(selectedUser.created_at)}</span>
+                          <span>{formatDateTime(selectedUser.created_at || '')}</span>
                         </div>
                       </div>
                       
@@ -498,7 +500,7 @@ export const AdminUsersList = () => {
                         <label className="text-sm text-muted-foreground">Last Login</label>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>{formatDateTime(selectedUser.last_login)}</span>
+                          <span>{formatDateTime(selectedUser.last_login || '')}</span>
                         </div>
                       </div>
                       
@@ -524,7 +526,7 @@ export const AdminUsersList = () => {
                       <div className="flex items-center justify-between p-2 border-b">
                         <div>
                           <span className="text-sm font-medium">Last Login</span>
-                          <p className="text-xs text-muted-foreground">{formatDateTime(selectedUser.last_login)}</p>
+                          <p className="text-xs text-muted-foreground">{formatDateTime(selectedUser.last_login || '')}</p>
                         </div>
                       </div>
                       <div className="flex items-center justify-between p-2 border-b">
@@ -537,7 +539,7 @@ export const AdminUsersList = () => {
                       <div className="flex items-center justify-between p-2 border-b">
                         <div>
                           <span className="text-sm font-medium">Account Created</span>
-                          <p className="text-xs text-muted-foreground">{formatDateTime(selectedUser.created_at)}</p>
+                          <p className="text-xs text-muted-foreground">{formatDateTime(selectedUser.created_at || '')}</p>
                         </div>
                       </div>
                     </div>

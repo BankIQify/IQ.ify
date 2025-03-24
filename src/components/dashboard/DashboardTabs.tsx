@@ -1,6 +1,6 @@
 
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Award, BarChart3, ChartLineUp, Settings, User } from "lucide-react";
+import { Award, BarChart3, ChartLine, Settings, User } from "lucide-react";
 
 interface DashboardTabsProps {
   isAdmin: boolean;
@@ -16,7 +16,7 @@ export const DashboardTabs = ({ isAdmin, activeTab }: DashboardTabsProps) => {
       </TabsTrigger>
       
       <TabsTrigger value="progress" className="flex items-center gap-2">
-        <ChartLineUp className="h-4 w-4" />
+        <ChartLine className="h-4 w-4" />
         <span>Progress</span>
       </TabsTrigger>
       
