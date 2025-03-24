@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { UserProgressChart } from "@/components/dashboard/UserProgressChart";
+import { Target } from "lucide-react";
 
 export const ProgressTab = () => {
   return (
