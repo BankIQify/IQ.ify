@@ -1,8 +1,8 @@
 
 import { AuthError } from "@supabase/supabase-js";
-import { UseToastReturn } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 
-export const handleAuthError = (error: AuthError, toast: UseToastReturn["toast"]) => {
+export const handleAuthError = (error: AuthError, toastFn = toast) => {
   console.error("Authentication error:", error);
   let message = "An error occurred during authentication.";
 
@@ -20,7 +20,7 @@ export const handleAuthError = (error: AuthError, toast: UseToastReturn["toast"]
       message = error.message;
   }
 
-  toast({
+  toastFn({
     variant: "destructive",
     title: "Authentication Error",
     description: message,
