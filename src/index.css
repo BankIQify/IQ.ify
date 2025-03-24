@@ -56,23 +56,23 @@
 
 /* UI components with iQify colors */
 .btn-iqify-blue {
-  @apply bg-iqify-blue text-white hover:bg-opacity-80 transition-colors;
+  @apply bg-[#1EAEDB] text-white hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-green {
-  @apply bg-iqify-green text-white hover:bg-opacity-80 transition-colors;
+  @apply bg-[#00FF7F] text-white hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-yellow {
-  @apply bg-iqify-yellow text-[#001F3F] hover:bg-opacity-80 transition-colors;
+  @apply bg-[#FFD700] text-[#001F3F] hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-pink {
-  @apply bg-iqify-pink text-white hover:bg-opacity-80 transition-colors;
+  @apply bg-[#FF69B4] text-white hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-orange {
-  @apply bg-iqify-orange text-white hover:bg-opacity-80 transition-colors;
+  @apply bg-[#FF7F00] text-white hover:bg-opacity-80 transition-colors;
 }
 
 .card-iqify {

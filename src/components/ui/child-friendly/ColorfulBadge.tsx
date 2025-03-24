@@ -11,14 +11,14 @@ interface ColorfulBadgeProps {
 }
 
 const colorVariants = {
-  blue: "bg-iqify-blue/20 text-iqify-blue border-iqify-blue/40",
-  green: "bg-iqify-green/20 text-iqify-green/90 border-iqify-green/40",
+  blue: "bg-[rgba(30,174,219,0.2)] text-[#1EAEDB] border-[rgba(30,174,219,0.4)]",
+  green: "bg-[rgba(0,255,127,0.2)] text-[rgba(0,255,127,0.9)] border-[rgba(0,255,127,0.4)]",
   purple: "bg-purple-100 text-purple-600 border-purple-200",
   amber: "bg-amber-100 text-amber-600 border-amber-200",
-  pink: "bg-iqify-pink/20 text-iqify-pink border-iqify-pink/40",
+  pink: "bg-[rgba(255,105,180,0.2)] text-[#FF69B4] border-[rgba(255,105,180,0.4)]",
   teal: "bg-teal-100 text-teal-600 border-teal-200",
-  orange: "bg-iqify-orange/20 text-iqify-orange border-iqify-orange/40",
-  yellow: "bg-iqify-yellow/20 text-iqify-yellow/90 border-iqify-yellow/40",
+  orange: "bg-[rgba(255,127,0,0.2)] text-[#FF7F00] border-[rgba(255,127,0,0.4)]",
+  yellow: "bg-[rgba(255,215,0,0.2)] text-[rgba(255,215,0,0.9)] border-[rgba(255,215,0,0.4)]",
 };
 
 const sizeVariants = {
