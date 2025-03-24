@@ -1,7 +1,6 @@
 
-import { TabHeader } from "@/components/manage-questions/TabHeader";
-import { TabContent } from "@/components/manage-questions/TabContent";
-import { useManageQuestions } from "@/components/manage-questions/useManageQuestions";
+import { useManageQuestions } from "@/hooks/useManageQuestions";
+import { QuestionManagementLayout } from "@/components/manage-questions/QuestionManagementLayout";
 
 const ManageQuestions = () => {
   const {
@@ -20,23 +19,13 @@ const ManageQuestions = () => {
   }
 
   return (
-    <div className="page-container">
-      <h1 className="section-title">Question Management</h1>
-
-      <TabHeader
-        activeTab={activeTab}
-        handleTabChange={handleTabChange}
-        showHomepageTab={showHomepageTab}
-        showWebhooksTab={showWebhooksTab}
-        pendingCount={pendingCount}
-      />
-
-      <TabContent
-        activeTab={activeTab}
-        showHomepageTab={showHomepageTab}
-        showWebhooksTab={showWebhooksTab}
-      />
-    </div>
+    <QuestionManagementLayout
+      activeTab={activeTab}
+      handleTabChange={handleTabChange}
+      showHomepageTab={showHomepageTab}
+      showWebhooksTab={showWebhooksTab}
+      pendingCount={pendingCount}
+    />
   );
 };
 
