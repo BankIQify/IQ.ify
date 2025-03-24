@@ -53,6 +53,8 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Define iQify colors as direct color values rather than HSL variables
+        // This makes them work properly with opacity modifiers
         iqify: {
           blue: "#1EAEDB",
           yellow: "#FFD700",
@@ -70,6 +72,18 @@ export default {
           peach: "#FDE1D3",
           blue: "#D3E4FD",
           gray: "#F1F0FB",
+        },
+        education: {
+          50: "#f0f9ff",
+          100: "#e0f2fe",
+          200: "#bae6fd", 
+          300: "#7dd3fc",
+          400: "#38bdf8",
+          500: "#0ea5e9",
+          600: "#0284c7",
+          700: "#0369a1",
+          800: "#075985",
+          900: "#0c4a6e",
         },
       },
       keyframes: {
@@ -93,6 +107,10 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "rotate-y": {
+          "0%": { transform: "rotateY(0deg)" },
+          "100%": { transform: "rotateY(180deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -100,10 +118,20 @@ export default {
         fadeIn: "fadeIn 0.5s ease-out",
         slideIn: "slideIn 0.3s ease-out",
         float: "float 3s ease-in-out infinite",
+        "rotate-y": "rotate-y 0.5s ease-out",
       },
       backgroundImage: {
         'gradient-pastel': 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
         'gradient-iqify': 'linear-gradient(to right, #1EAEDB, #00FF7F, #FFD700, #FF7F00, #FF69B4)',
+      },
+      transform: {
+        'perspective-1000': 'perspective(1000px)',
+      },
+      rotate: {
+        'y-180': 'rotateY(180deg)',
+      },
+      backfaceVisibility: {
+        'hidden': 'hidden',
       },
     },
   },

@@ -33,7 +33,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-gradient-to-b from-iqify-blue/10 to-iqify-pink/10 min-h-screen text-foreground;
+    @apply bg-gradient-to-b from-[rgba(30,174,219,0.1)] to-[rgba(255,105,180,0.1)] min-h-screen text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -56,23 +56,23 @@
 
 /* UI components with iQify colors */
 .btn-iqify-blue {
-  @apply bg-iqify-blue text-white hover:bg-iqify-blue/80 transition-colors;
+  @apply bg-iqify-blue text-white hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-green {
-  @apply bg-iqify-green text-white hover:bg-iqify-green/80 transition-colors;
+  @apply bg-iqify-green text-white hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-yellow {
-  @apply bg-iqify-yellow text-iqify-navy hover:bg-iqify-yellow/80 transition-colors;
+  @apply bg-iqify-yellow text-iqify-navy hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-pink {
-  @apply bg-iqify-pink text-white hover:bg-iqify-pink/80 transition-colors;
+  @apply bg-iqify-pink text-white hover:bg-opacity-80 transition-colors;
 }
 
 .btn-iqify-orange {
-  @apply bg-iqify-orange text-white hover:bg-iqify-orange/80 transition-colors;
+  @apply bg-iqify-orange text-white hover:bg-opacity-80 transition-colors;
 }
 
 .card-iqify {
@@ -80,21 +80,21 @@
 }
 
 .card-iqify-blue {
-  @apply border-iqify-blue/20 bg-gradient-to-br from-white to-iqify-blue/10;
+  @apply border-[rgba(30,174,219,0.2)] bg-gradient-to-br from-white to-[rgba(30,174,219,0.1)];
 }
 
 .card-iqify-green {
-  @apply border-iqify-green/20 bg-gradient-to-br from-white to-iqify-green/10;
+  @apply border-[rgba(0,255,127,0.2)] bg-gradient-to-br from-white to-[rgba(0,255,127,0.1)];
 }
 
 .card-iqify-yellow {
-  @apply border-iqify-yellow/20 bg-gradient-to-br from-white to-iqify-yellow/10;
+  @apply border-[rgba(255,215,0,0.2)] bg-gradient-to-br from-white to-[rgba(255,215,0,0.1)];
 }
 
 .card-iqify-pink {
-  @apply border-iqify-pink/20 bg-gradient-to-br from-white to-iqify-pink/10;
+  @apply border-[rgba(255,105,180,0.2)] bg-gradient-to-br from-white to-[rgba(255,105,180,0.1)];
 }
 
 .card-iqify-orange {
-  @apply border-iqify-orange/20 bg-gradient-to-br from-white to-iqify-orange/10;
+  @apply border-[rgba(255,127,0,0.2)] bg-gradient-to-br from-white to-[rgba(255,127,0,0.1)];
 }

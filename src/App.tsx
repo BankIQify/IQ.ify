@@ -41,7 +41,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <div className="min-h-screen bg-gradient-to-b from-iqify-blue/5 via-white to-iqify-pink/5">
+          <div className="min-h-screen bg-gradient-to-b from-[rgba(30,174,219,0.05)] via-white to-[rgba(255,105,180,0.05)]">
             <Navigation />
             <Routes>
               <Route path="/" element={<Index />} />
