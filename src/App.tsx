@@ -104,8 +104,6 @@ const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
     return <AuthLoader />;
   }
   
-  // Important: Just render children instead of redirecting here
-  // Let ManageQuestions handle its own redirects
   return <>{children}</>;
 };
 
@@ -123,8 +121,6 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
     return <AuthLoader />;
   }
   
-  // Important: Just render children instead of redirecting here
-  // Let Dashboard handle its own redirects  
   return <>{children}</>;
 };
 
@@ -139,10 +135,7 @@ const App = () => (
             <Navigation />
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route 
-                path="/dashboard" 
-                element={<Dashboard />} 
-              />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/lets-practice" element={<ManageExams />} />
               <Route path="/brain-training" element={<BrainTraining />} />
               <Route path="/profile" element={<Profile />} />
@@ -150,7 +143,11 @@ const App = () => (
               <Route path="/practice/:category" element={<Practice />} />
               <Route 
                 path="/manage-questions" 
-                element={<ManageQuestions />} 
+                element={
+                  <ProtectedDataRoute>
+                    <ManageQuestions />
+                  </ProtectedDataRoute>
+                } 
               />
               <Route path="/auth" element={<Auth />} />
               <Route path="/avatar-creator" element={<AvatarCreator />} />
@@ -164,3 +161,4 @@ const App = () => (
 );
 
 export default App;
+
