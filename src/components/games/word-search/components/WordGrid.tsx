@@ -4,7 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useWordSearchContext } from "../context/WordSearchContext";
 
 export const WordGrid = () => {
-  const { grid, gridDimensions, selectedCells, handleCellClick } = useWordSearchContext();
+  const { 
+    grid, 
+    gridDimensions, 
+    selectedCells, 
+    handleCellClick,
+    handleMouseDown,
+    handleMouseEnter,
+    handleMouseUp,
+    isDragging
+  } = useWordSearchContext();
 
   // Function to determine cell color based on various conditions
   const getCellColor = (rowIndex: number, colIndex: number) => {
@@ -34,6 +43,9 @@ export const WordGrid = () => {
             gridTemplateColumns: `repeat(${gridDimensions.cols}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${gridDimensions.rows}, minmax(0, 1fr))`
           }}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchEnd={handleMouseUp}
         >
           {grid.map((row, rowIndex) => (
             row.map((letter, colIndex) => (
@@ -41,10 +53,28 @@ export const WordGrid = () => {
                 key={`${rowIndex}-${colIndex}`}
                 className={cn(
                   "aspect-square flex items-center justify-center text-xl font-bold border border-slate-100",
-                  "transition-all duration-200 transform",
+                  "transition-all duration-200 transform select-none",
                   getCellColor(rowIndex, colIndex)
                 )}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
+                onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
+                onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
+                onTouchStart={() => handleMouseDown(rowIndex, colIndex)}
+                onTouchMove={(e) => {
+                  if (isDragging) {
+                    // Get touch position and find the element at that position
+                    const touch = e.touches[0];
+                    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                    // Find the grid cell coordinates from the element id
+                    if (element && element.id) {
+                      const cellCoords = element.id.split('-');
+                      if (cellCoords.length === 2) {
+                        handleMouseEnter(parseInt(cellCoords[0]), parseInt(cellCoords[1]));
+                      }
+                    }
+                  }
+                }}
+                id={`${rowIndex}-${colIndex}`}
               >
                 {letter !== ' ' ? letter : ''}
               </div>

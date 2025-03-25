@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast } from "@/components/ui/use-toast";
 import type { WordToFind } from "../types";
 
@@ -11,6 +11,8 @@ export const useGameInteraction = (
 ) => {
   const [selectedCells, setSelectedCells] = useState<[number, number][]>([]);
   const [isGameComplete, setIsGameComplete] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const lastCellRef = useRef<[number, number] | null>(null);
 
   // Check if game is complete
   useEffect(() => {
@@ -28,12 +30,84 @@ export const useGameInteraction = (
       gameState.startGame();
     }
     
-    setSelectedCells((prev) => {
-      if (prev.some(([r, c]) => r === row && c === col)) {
-        return prev.filter(([r, c]) => !(r === row && c === col));
+    // Toggle selection if cell is already selected
+    if (selectedCells.some(([r, c]) => r === row && c === col)) {
+      setSelectedCells(prev => prev.filter(([r, c]) => !(r === row && c === col)));
+      return;
+    }
+    
+    // Start a new selection if there are no cells selected or if dragging hasn't started
+    if (selectedCells.length === 0 || !isDragging) {
+      setSelectedCells([[row, col]]);
+      lastCellRef.current = [row, col];
+      return;
+    }
+    
+    // Add cell to selection
+    setSelectedCells(prev => [...prev, [row, col]]);
+    lastCellRef.current = [row, col];
+  };
+  
+  const handleMouseDown = (row: number, col: number) => {
+    // Skip blank cells
+    if (grid[row][col] === ' ') return;
+    
+    if (!gameState.isActive) {
+      gameState.startGame();
+    }
+    
+    setIsDragging(true);
+    setSelectedCells([[row, col]]);
+    lastCellRef.current = [row, col];
+  };
+  
+  const handleMouseEnter = (row: number, col: number) => {
+    // Skip if not dragging or blank cell
+    if (!isDragging || grid[row][col] === ' ') return;
+    
+    // Get the starting cell
+    const startCell = selectedCells[0];
+    if (!startCell) return;
+    
+    // Calculate the path between startCell and current cell
+    const [startRow, startCol] = startCell;
+    
+    // Only allow straight lines (horizontal, vertical, or diagonal)
+    const rowDiff = row - startRow;
+    const colDiff = col - startCol;
+    
+    if (rowDiff === 0 || colDiff === 0 || Math.abs(rowDiff) === Math.abs(colDiff)) {
+      // Direction is valid, calculate all cells along the path
+      const pathCells: [number, number][] = [[startRow, startCol]];
+      
+      // Determine the step direction
+      const rowStep = rowDiff === 0 ? 0 : rowDiff > 0 ? 1 : -1;
+      const colStep = colDiff === 0 ? 0 : colDiff > 0 ? 1 : -1;
+      
+      // Calculate path
+      let currentRow = startRow;
+      let currentCol = startCol;
+      
+      while (currentRow !== row || currentCol !== col) {
+        currentRow += rowStep;
+        currentCol += colStep;
+        pathCells.push([currentRow, currentCol]);
       }
-      return [...prev, [row, col]];
-    });
+      
+      setSelectedCells(pathCells);
+      lastCellRef.current = [row, col];
+    }
+  };
+  
+  const handleMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      
+      // Check if the selected word is valid
+      if (selectedCells.length >= 2) {
+        checkSelection();
+      }
+    }
   };
 
   const checkSelection = () => {
@@ -79,7 +153,11 @@ export const useGameInteraction = (
   return {
     selectedCells,
     isGameComplete,
+    isDragging,
     handleCellClick,
+    handleMouseDown,
+    handleMouseEnter,
+    handleMouseUp,
     checkSelection
   };
 };

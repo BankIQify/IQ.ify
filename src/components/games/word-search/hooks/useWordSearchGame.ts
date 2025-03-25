@@ -28,8 +28,12 @@ export const useWordSearchGame = (difficulty: Difficulty) => {
   // Game interaction
   const { 
     selectedCells, 
-    isGameComplete, 
-    handleCellClick, 
+    isGameComplete,
+    isDragging,
+    handleCellClick,
+    handleMouseDown,
+    handleMouseEnter,
+    handleMouseUp,
     checkSelection 
   } = useGameInteraction(grid, words, setWords, gameState);
 
@@ -46,6 +50,7 @@ export const useWordSearchGame = (difficulty: Difficulty) => {
     // Game state
     isGameComplete,
     loading,
+    isDragging,
     
     // Theme management
     themes,
@@ -61,6 +66,9 @@ export const useWordSearchGame = (difficulty: Difficulty) => {
     
     // Actions
     handleCellClick,
+    handleMouseDown,
+    handleMouseEnter,
+    handleMouseUp,
     checkSelection,
     handleSelectTheme,
     handleNewPuzzle,

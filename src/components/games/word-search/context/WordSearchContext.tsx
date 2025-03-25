@@ -12,6 +12,7 @@ export interface WordSearchContextValue {
   // Game state
   isGameComplete: boolean;
   loading: boolean;
+  isDragging: boolean;
   
   // Theme management
   themes: { id: string; name: string }[];
@@ -29,6 +30,9 @@ export interface WordSearchContextValue {
   
   // Actions
   handleCellClick: (row: number, col: number) => void;
+  handleMouseDown: (row: number, col: number) => void;
+  handleMouseEnter: (row: number, col: number) => void;
+  handleMouseUp: () => void;
   checkSelection: () => void;
   handleSelectTheme: (themeId: string) => void;
   handleNewPuzzle: () => void;

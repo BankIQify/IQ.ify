@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,6 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
   }, [difficulty]);
 
   const initializeBoard = () => {
-    // Initialize empty 9x9 board
     const emptyBoard: SudokuCell[][] = Array(9).fill(null).map(() =>
       Array(9).fill(null).map(() => ({ 
         value: null, 
@@ -35,8 +33,6 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
       }))
     );
     
-    // TODO: Generate proper Sudoku puzzle based on difficulty
-    // For now, adding some example numbers
     const exampleNumbers = [
       [5, 3, 0, 0, 7, 0, 0, 0, 0],
       [6, 0, 0, 1, 9, 5, 0, 0, 0],
@@ -71,7 +67,6 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
 
   const handleCellClick = (row: number, col: number) => {
     if (!board[row][col].isFixed) {
-      // Highlight all cells in the same row, column, and 3x3 box
       const newBoard = [...board].map((r, ri) => 
         r.map((cell, ci) => ({
           ...cell,
@@ -104,7 +99,6 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const checkCompletion = (currentBoard: SudokuCell[][]) => {
-    // Simple check: are all cells filled?
     const isFilled = currentBoard.every(row => 
       row.every(cell => cell.value !== null)
     );
@@ -116,11 +110,9 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
   };
 
   const checkForErrors = () => {
-    // This is a simplified error check that just marks duplicate numbers in rows, columns, and boxes
     const newBoard = [...board];
     let foundErrors = false;
     
-    // Check rows
     for (let row = 0; row < 9; row++) {
       const seen = new Set<number>();
       for (let col = 0; col < 9; col++) {
@@ -136,7 +128,6 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
       }
     }
     
-    // Check columns
     for (let col = 0; col < 9; col++) {
       const seen = new Set<number>();
       for (let row = 0; row < 9; row++) {
@@ -152,7 +143,6 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
       }
     }
     
-    // Check 3x3 boxes
     for (let boxRow = 0; boxRow < 3; boxRow++) {
       for (let boxCol = 0; boxCol < 3; boxCol++) {
         const seen = new Set<number>();
@@ -183,10 +173,23 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
     if (selectedCell && selectedCell[0] === rowIdx && selectedCell[1] === colIdx) return "bg-pastel-yellow/70";
     if (cell.isHighlighted) return "bg-pastel-blue/20";
     
-    // Alternate 3x3 boxes with different backgrounds
     const boxRow = Math.floor(rowIdx / 3);
     const boxCol = Math.floor(colIdx / 3);
     return (boxRow + boxCol) % 2 === 0 ? "bg-white" : "bg-pastel-gray/20";
+  };
+
+  const getCellBorderClasses = (rowIdx: number, colIdx: number) => {
+    let classes = "border border-gray-200";
+    
+    if (rowIdx % 3 === 0 && rowIdx !== 0) classes += " border-t-2 border-t-primary/70";
+    if (colIdx % 3 === 0 && colIdx !== 0) classes += " border-l-2 border-l-primary/70";
+    
+    if (rowIdx === 0) classes += " border-t-2 border-t-primary";
+    if (rowIdx === 8) classes += " border-b-2 border-b-primary";
+    if (colIdx === 0) classes += " border-l-2 border-l-primary";
+    if (colIdx === 8) classes += " border-r-2 border-r-primary";
+    
+    return classes;
   };
 
   return (
@@ -214,15 +217,16 @@ export const SudokuGame = ({ difficulty }: { difficulty: Difficulty }) => {
         </div>
       )}
 
-      <div className="grid grid-cols-9 gap-0 border-2 border-primary/30 rounded-lg overflow-hidden max-w-[500px] mx-auto shadow-lg bg-white">
+      <div className="grid grid-cols-9 gap-0 max-w-[500px] mx-auto shadow-lg bg-white rounded-lg overflow-hidden">
         {board.map((row, rowIndex) => (
           row.map((cell, colIndex) => (
             <div
               key={`${rowIndex}-${colIndex}`}
               onClick={() => handleCellClick(rowIndex, colIndex)}
               className={cn(
-                "aspect-square flex items-center justify-center text-lg font-medium cursor-pointer border border-gray-200 transition-colors",
+                "aspect-square flex items-center justify-center text-lg font-medium cursor-pointer transition-colors",
                 getBackgroundColor(rowIndex, colIndex, cell),
+                getCellBorderClasses(rowIndex, colIndex),
                 cell.isFixed ? 'text-gray-900 font-bold' : 'text-blue-600',
                 cell.isError ? 'text-red-600' : '',
                 !cell.isFixed && 'hover:bg-pastel-yellow/50'
