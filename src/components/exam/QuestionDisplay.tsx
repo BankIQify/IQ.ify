@@ -19,8 +19,11 @@ const QuestionDisplay = ({
   onSelectAnswer,
   reviewMode = false
 }: QuestionDisplayProps) => {
-  // Ensure we're comparing values of the same type
-  const correctAnswer = question.content.correctAnswer || question.content.answer;
+  // Use correctAnswer if available, otherwise use answer
+  const correctAnswer = question.content.correctAnswer !== undefined 
+    ? question.content.correctAnswer 
+    : question.content.answer;
+  
   const isCorrect = 
     typeof currentAnswerId === 'number' && typeof correctAnswer === 'number'
       ? currentAnswerId === correctAnswer
