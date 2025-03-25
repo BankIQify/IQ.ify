@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +51,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
           const sectionsQuery = await supabase
             .from('question_sections')
             .select('id')
-            .eq('category', examData.category);
+            .eq('category', examData.category as "verbal" | "non_verbal" | "brain_training");
           
           if (sectionsQuery.error) throw sectionsQuery.error;
           
