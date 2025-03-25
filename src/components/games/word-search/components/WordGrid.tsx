@@ -16,20 +16,20 @@ export const WordGrid = () => {
     }
     
     if (isSelected) {
-      return "bg-pastel-purple/70 text-white";
+      return "bg-pastel-purple/80 text-white shadow-sm scale-105";
     }
     
     // Create a checkered pattern for non-blank cells
     return (rowIndex + colIndex) % 2 === 0 
-      ? "bg-white hover:bg-pastel-purple/10 cursor-pointer" 
-      : "bg-slate-50 hover:bg-pastel-purple/10 cursor-pointer";
+      ? "bg-white hover:bg-pastel-purple/10 hover:scale-105 cursor-pointer" 
+      : "bg-slate-50 hover:bg-pastel-purple/10 hover:scale-105 cursor-pointer";
   };
 
   return (
-    <Card className="overflow-hidden border-none shadow-lg">
+    <Card className="overflow-hidden border-2 border-pastel-blue rounded-xl shadow-lg">
       <CardContent className="p-0">
         <div 
-          className={`grid gap-0 bg-white`} 
+          className={`grid gap-0 bg-white rounded-xl`} 
           style={{ 
             gridTemplateColumns: `repeat(${gridDimensions.cols}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${gridDimensions.rows}, minmax(0, 1fr))`
@@ -40,8 +40,8 @@ export const WordGrid = () => {
               <div
                 key={`${rowIndex}-${colIndex}`}
                 className={cn(
-                  "aspect-square flex items-center justify-center text-lg font-medium border border-slate-100",
-                  "transition-all duration-200 transform hover:scale-105",
+                  "aspect-square flex items-center justify-center text-xl font-bold border border-slate-100",
+                  "transition-all duration-200 transform",
                   getCellColor(rowIndex, colIndex)
                 )}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
