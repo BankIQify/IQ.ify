@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card";
 import { CheckCircle, Circle, X } from "lucide-react";
-import { Question } from "@/hooks/useExam";
+import { Question } from "@/types/exam";
 
 interface QuestionDisplayProps {
   question: Question;
@@ -19,6 +19,7 @@ const QuestionDisplay = ({
   reviewMode = false
 }: QuestionDisplayProps) => {
   const isCorrect = currentAnswerId === question.content.answer;
+  const correctAnswer = question.content.answer;
   
   return (
     <Card className="p-6 mb-6">
@@ -30,10 +31,12 @@ const QuestionDisplay = ({
         <div className="space-y-3">
           {question.content.options.map((option, index) => {
             const isSelected = currentAnswerId === index;
-            const isCorrectAnswer = question.content.answer === index;
+            const isCorrectAnswer = correctAnswer === index;
             
+            // Determine the styling based on the state
             let className = "flex items-center p-3 rounded-md cursor-pointer transition-colors ";
             
+            // Enhanced styling for review mode
             if (reviewMode && examCompleted) {
               if (isCorrectAnswer) {
                 className += "bg-green-100 border border-green-500 ";
@@ -53,6 +56,8 @@ const QuestionDisplay = ({
                 key={index}
                 onClick={() => onSelectAnswer(index)}
                 className={className}
+                aria-selected={isSelected}
+                role="option"
               >
                 {reviewMode && examCompleted ? (
                   isCorrectAnswer ? (
@@ -73,6 +78,21 @@ const QuestionDisplay = ({
               </div>
             );
           })}
+        </div>
+      )}
+      
+      {reviewMode && examCompleted && currentAnswerId !== undefined && (
+        <div className="mt-4 pt-4 border-t">
+          <p className={isCorrect ? "text-green-600" : "text-red-600"}>
+            {isCorrect 
+              ? "Correct answer! 👍" 
+              : `Incorrect. The correct answer is: ${
+                  question.content.options 
+                    ? question.content.options[Number(correctAnswer)]
+                    : correctAnswer
+                }`
+            }
+          </p>
         </div>
       )}
     </Card>
