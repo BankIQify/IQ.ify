@@ -1,1 +1,7 @@
+
 project_id = "dqaihawavxlacegykwqu"
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/fallback"
+  status = 200
