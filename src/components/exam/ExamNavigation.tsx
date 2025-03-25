@@ -9,6 +9,8 @@ interface ExamNavigationProps {
   onNext: () => void;
   onSubmit: () => void;
   submitting: boolean;
+  reviewMode?: boolean;
+  onExitReview?: () => void;
 }
 
 const ExamNavigation = ({
@@ -17,7 +19,9 @@ const ExamNavigation = ({
   onPrevious,
   onNext,
   onSubmit,
-  submitting
+  submitting,
+  reviewMode = false,
+  onExitReview
 }: ExamNavigationProps) => {
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
 
@@ -32,7 +36,16 @@ const ExamNavigation = ({
       </Button>
       
       <div className="flex space-x-3">
-        {isLastQuestion && (
+        {reviewMode && onExitReview && (
+          <Button 
+            variant="secondary" 
+            onClick={onExitReview}
+          >
+            Return to Results
+          </Button>
+        )}
+        
+        {!reviewMode && isLastQuestion && (
           <Button 
             onClick={onSubmit} 
             disabled={submitting}

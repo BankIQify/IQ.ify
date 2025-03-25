@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useExam } from "@/hooks/useExam";
@@ -39,12 +40,13 @@ const TakeExam = () => {
     currentQuestionIndex,
     answers,
     examCompleted,
+    reviewMode,
     score,
     handleSelectAnswer,
     handleNextQuestion,
     handlePreviousQuestion,
     handleSubmitExam,
-    setCurrentQuestionIndex
+    startReviewMode
   } = useExam({ 
     examId, 
     userId: user?.id 
@@ -60,25 +62,20 @@ const TakeExam = () => {
     return <NoQuestions />;
   }
 
-  // Exam completed state
-  if (examCompleted) {
+  // Exam completed state (only if not in review mode)
+  if (examCompleted && !reviewMode) {
     return (
       <ExamCompleted
         examName={exam.name}
         score={score}
         totalQuestions={questions.length}
         answeredQuestions={Object.keys(answers).length}
-        onReviewAnswers={() => {
-          // Reset to review mode
-          // Keep answers but allow reviewing
-          // currentQuestionIndex back to 0
-          setCurrentQuestionIndex(0);
-        }}
+        onReviewAnswers={startReviewMode}
       />
     );
   }
 
-  // Active exam state
+  // Active exam state or review mode
   const currentQuestion = questions[currentQuestionIndex];
   
   return (

@@ -28,6 +28,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
   const [examCompleted, setExamCompleted] = useState(false);
   const [score, setScore] = useState(0);
+  const [reviewMode, setReviewMode] = useState(false);
 
   useEffect(() => {
     if (!examId || !userId) return;
@@ -110,7 +111,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
   }, [examId, userId, toast]);
 
   const handleSelectAnswer = (answerId: string | number) => {
-    if (examCompleted) return;
+    if (examCompleted && !reviewMode) return;
     
     setAnswers({
       ...answers,
@@ -187,18 +188,26 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     }
   };
 
+  const startReviewMode = () => {
+    setReviewMode(true);
+    setCurrentQuestionIndex(0);
+  };
+
   return {
     loading,
     submitting,
     exam,
     questions,
     currentQuestionIndex,
+    setCurrentQuestionIndex,
     answers,
     examCompleted,
+    reviewMode,
     score,
     handleSelectAnswer,
     handleNextQuestion,
     handlePreviousQuestion,
-    handleSubmitExam
+    handleSubmitExam,
+    startReviewMode
   };
 };
