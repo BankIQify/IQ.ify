@@ -1,6 +1,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import type { CrosswordCell } from "../types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CrosswordGridProps {
   grid: CrosswordCell[][];
@@ -17,13 +18,17 @@ export const CrosswordGrid = ({
 }: CrosswordGridProps) => {
   // Calculate grid columns dynamically
   const gridCols = grid[0]?.length || 5;
+  const isMobile = useIsMobile();
   
   return (
     <Card>
-      <CardContent className="p-4">
+      <CardContent className={`${isMobile ? 'p-2 overflow-x-auto' : 'p-4'}`}>
         <div 
-          className="grid gap-0.5 bg-gray-200 p-0.5"
-          style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+          className="grid gap-0.5 bg-gray-200 p-0.5 mx-auto"
+          style={{ 
+            gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
+            maxWidth: isMobile ? '100%' : '500px'
+          }}
         >
           {grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => (
@@ -35,8 +40,14 @@ export const CrosswordGrid = ({
                   selectedCell?.[0] === rowIndex && selectedCell?.[1] === colIndex
                     ? 'bg-blue-100'
                     : ''
-                }`}
+                } ${isMobile ? 'min-w-7 min-h-7' : ''}`}
                 onClick={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
+                onTouchStart={(e) => {
+                  if (!cell.isBlack) {
+                    e.preventDefault();
+                    handleCellClick(rowIndex, colIndex);
+                  }
+                }}
               >
                 {cell.number && (
                   <span className="absolute top-0 left-0 text-xs pl-0.5">

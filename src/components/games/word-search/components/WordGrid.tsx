@@ -2,9 +2,11 @@
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { useWordSearchContext } from "../context/WordSearchContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const WordGrid = () => {
   const { grid, gridDimensions, selectedCells, handleCellClick } = useWordSearchContext();
+  const isMobile = useIsMobile();
 
   // Function to determine cell color based on various conditions
   const getCellColor = (rowIndex: number, colIndex: number) => {
@@ -16,7 +18,7 @@ export const WordGrid = () => {
     }
     
     if (isSelected) {
-      return "bg-pastel-purple/70 text-white";
+      return "bg-pastel-purple text-white";
     }
     
     // Create a checkered pattern for non-blank cells
@@ -27,7 +29,7 @@ export const WordGrid = () => {
 
   return (
     <Card className="overflow-hidden border-none shadow-lg">
-      <CardContent className="p-0">
+      <CardContent className={`p-0 ${isMobile ? 'max-w-full overflow-x-auto' : ''}`}>
         <div 
           className={`grid gap-0 bg-white`} 
           style={{ 
@@ -41,10 +43,16 @@ export const WordGrid = () => {
                 key={`${rowIndex}-${colIndex}`}
                 className={cn(
                   "aspect-square flex items-center justify-center text-lg font-medium border border-slate-100",
-                  "transition-all duration-200 transform hover:scale-105",
+                  "transition-colors",
+                  isMobile ? "min-w-8 min-h-8" : "hover:scale-105 transition-all duration-200 transform",
                   getCellColor(rowIndex, colIndex)
                 )}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
+                onTouchStart={(e) => {
+                  // Prevent scrolling when touching grid cells
+                  e.preventDefault();
+                  handleCellClick(rowIndex, colIndex);
+                }}
               >
                 {letter !== ' ' ? letter : ''}
               </div>
