@@ -63,7 +63,7 @@ export const useAuth = () => {
             .from('user_focus_areas')
             .insert({
               user_id: data.user.id,
-              focus_area: area as any // Type assertion as any to bypass strict type checking
+              focus_area: area
             });
 
           if (focusAreaError) {
@@ -87,7 +87,7 @@ export const useAuth = () => {
 
   return {
     user,
-    setUser, // Make sure we're exposing this
+    setUser,
     signInWithEmail,
     signInWithGoogle,
     signUp,

@@ -38,7 +38,7 @@ export const useProfile = (user: User | null) => {
         // Convert avatar_config from Json to Record<string, any>
         const typedProfile: Profile = {
           ...data,
-          avatar_config: data.avatar_config as Record<string, any> || null
+          avatar_config: data.avatar_config as Record<string, any> || {}
         };
         
         setProfile(typedProfile);
@@ -78,7 +78,7 @@ export const useProfile = (user: User | null) => {
             .from('user_focus_areas')
             .insert({
               user_id: user.id,
-              focus_area: area as any // Type assertion as any to bypass strict type checking
+              focus_area: area
             });
         }
       }

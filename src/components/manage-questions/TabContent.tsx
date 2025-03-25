@@ -20,16 +20,16 @@ export const TabContent = ({
 }: TabContentProps) => {
   return (
     <>
-      <TabsContent value="categories">
-        <CategoryManager />
-      </TabsContent>
-
       <TabsContent value="bank">
         <CompleteQuestionBank />
       </TabsContent>
 
       <TabsContent value="manual">
         <ManualQuestionUpload />
+      </TabsContent>
+
+      <TabsContent value="categories">
+        <CategoryManager />
       </TabsContent>
 
       <TabsContent value="puzzles">
