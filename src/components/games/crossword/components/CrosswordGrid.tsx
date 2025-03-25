@@ -46,6 +46,7 @@ export const CrosswordGrid = ({
                   "min-h-[32px] md:min-h-[40px]"
                 )}
                 onClick={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
+                onTouchStart={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
                 style={{ 
                   visibility: cell.isBlack ? 'hidden' : 'visible',
                 }}
@@ -62,6 +63,7 @@ export const CrosswordGrid = ({
                     value={cell.userInput || ''}
                     className={cn(
                       "w-full h-full text-center text-sm md:text-lg font-medium bg-transparent focus:outline-none uppercase",
+                      "touch-manipulation", // Better touch handling
                       cell.userInput && "text-primary font-bold animate-scale-in"
                     )}
                     onKeyDown={(e) => handleKeyPress(e, rowIndex, colIndex)}
@@ -73,6 +75,7 @@ export const CrosswordGrid = ({
                       } as React.KeyboardEvent;
                       handleKeyPress(event, rowIndex, colIndex);
                     }}
+                    onFocus={() => handleCellClick(rowIndex, colIndex)}
                     aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}${cell.number ? `, Number ${cell.number}` : ''}`}
                   />
                 )}
