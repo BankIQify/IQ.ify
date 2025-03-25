@@ -25,6 +25,23 @@ const QuestionDisplay = ({
       ? currentAnswerId === correctAnswer
       : String(currentAnswerId) === String(correctAnswer);
   
+  // Function to safely get the correct option text
+  const getCorrectOptionText = () => {
+    if (!question.content.options) return correctAnswer;
+    
+    // Convert index to number if it's a string
+    const index = typeof correctAnswer === 'number' 
+      ? correctAnswer 
+      : parseInt(String(correctAnswer), 10);
+    
+    // Ensure index is valid
+    if (isNaN(index) || index < 0 || index >= question.content.options.length) {
+      return correctAnswer;
+    }
+    
+    return question.content.options[index];
+  };
+  
   return (
     <Card className="p-6 mb-6">
       <h2 className="text-xl font-semibold mb-4">
@@ -34,8 +51,15 @@ const QuestionDisplay = ({
       {question.content.options && (
         <div className="space-y-3">
           {question.content.options.map((option, index) => {
-            const isSelected = currentAnswerId === index;
-            const isCorrectAnswer = correctAnswer === index;
+            const isSelected = 
+              typeof currentAnswerId === 'number' && typeof index === 'number'
+                ? currentAnswerId === index
+                : String(currentAnswerId) === String(index);
+                
+            const isCorrectAnswer = 
+              typeof correctAnswer === 'number' && typeof index === 'number'
+                ? correctAnswer === index
+                : String(correctAnswer) === String(index);
             
             // Determine the styling based on the state
             let className = "flex items-center p-3 rounded-md cursor-pointer transition-colors ";
@@ -90,11 +114,7 @@ const QuestionDisplay = ({
           <p className={isCorrect ? "text-green-600" : "text-red-600"}>
             {isCorrect 
               ? "Correct answer! 👍" 
-              : `Incorrect. The correct answer is: ${
-                  question.content.options 
-                    ? question.content.options[typeof correctAnswer === 'number' ? correctAnswer : Number(correctAnswer)]
-                    : correctAnswer
-                }`
+              : `Incorrect. The correct answer is: ${getCorrectOptionText()}`
             }
           </p>
         </div>
