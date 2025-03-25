@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import type { CrosswordClue } from "../types";
+import type { CrosswordClue } from "../utils/types";
 import { cn } from "@/lib/utils";
 
 interface CluesListProps {

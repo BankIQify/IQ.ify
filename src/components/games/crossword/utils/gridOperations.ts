@@ -1,5 +1,5 @@
 
-import type { CrosswordCell } from "../types";
+import type { CrosswordCell } from "./types";
 
 // Create a crossword grid
 export function createCrosswordGrid(gridSize: number): CrosswordCell[][] {

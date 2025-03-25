@@ -1,7 +1,7 @@
 
 import { CrosswordGrid } from "./CrosswordGrid";
 import { CluesList } from "./CluesList";
-import type { CrosswordCell, CrosswordClue } from "../types";
+import type { CrosswordCell, CrosswordClue } from "../utils/types";
 
 interface CrosswordContentProps {
   grid: CrosswordCell[][];

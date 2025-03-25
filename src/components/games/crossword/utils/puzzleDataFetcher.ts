@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { CrosswordPuzzle, CrosswordPuzzleData, RawPuzzleData } from "../types";
+import type { CrosswordPuzzle, CrosswordPuzzleData, RawPuzzleData } from "./types";
 import { toast } from "@/components/ui/use-toast";
 import { getDifficultyConfig } from "./difficultyConfig";
 

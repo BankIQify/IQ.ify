@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import type { CrosswordCell } from "../types";
+import type { CrosswordCell } from "../utils/types";
 import { cn } from "@/lib/utils";
 
 interface CrosswordGridProps {
