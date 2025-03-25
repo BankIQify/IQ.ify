@@ -5,14 +5,30 @@ import { WordList } from "./WordList";
 import { GameHeader } from "./GameHeader";
 import { GameCompletedModal } from "./GameCompletedModal";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useEffect } from "react";
 
 export const WordSearchContent = () => {
   const {
     loading,
     isGameComplete,
+    checkSelection,
   } = useWordSearchContext();
   
   const isMobile = useIsMobile();
+
+  // Add effect to check for word matches when selection changes
+  useEffect(() => {
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        checkSelection();
+      }
+    };
+    
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [checkSelection]);
 
   if (loading) {
     return <div className="text-center py-8">Loading puzzles...</div>;

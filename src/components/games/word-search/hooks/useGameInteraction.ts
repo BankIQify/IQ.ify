@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "@/components/ui/use-toast";
 import type { WordToFind } from "../types";
 
@@ -20,7 +20,7 @@ export const useGameInteraction = (
     }
   }, [words, gameState]);
 
-  const handleCellClick = (row: number, col: number) => {
+  const handleCellClick = useCallback((row: number, col: number) => {
     // Skip blank cells
     if (grid[row][col] === ' ') return;
     
@@ -34,9 +34,9 @@ export const useGameInteraction = (
       }
       return [...prev, [row, col]];
     });
-  };
+  }, [grid, gameState]);
 
-  const checkSelection = () => {
+  const checkSelection = useCallback(() => {
     if (selectedCells.length < 2) return;
 
     const selectedWord = selectedCells
@@ -74,7 +74,7 @@ export const useGameInteraction = (
       setIsGameComplete(true);
       gameState.pauseGame();
     }
-  };
+  }, [selectedCells, grid, words, setWords, gameState]);
 
   return {
     selectedCells,
