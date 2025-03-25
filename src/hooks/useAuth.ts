@@ -57,18 +57,19 @@ export const useAuth = () => {
 
       // If focus areas are provided, insert them
       if (profileData.focus_areas && profileData.focus_areas.length > 0) {
-        const focusAreasToInsert = profileData.focus_areas.map(area => ({
-          user_id: data.user!.id,
-          focus_area: area
-        }));
+        // Insert each focus area individually
+        for (const area of profileData.focus_areas) {
+          const { error: focusAreaError } = await supabase
+            .from('user_focus_areas')
+            .insert({
+              user_id: data.user.id,
+              focus_area: area as any // Type assertion as any to bypass strict type checking
+            });
 
-        const { error: focusAreasError } = await supabase
-          .from('user_focus_areas')
-          .insert(focusAreasToInsert);
-
-        if (focusAreasError) {
-          console.error("Error inserting focus areas:", focusAreasError);
-          // Non-blocking error - don't throw to avoid blocking signup
+          if (focusAreaError) {
+            console.error("Error inserting focus area:", focusAreaError);
+            // Non-blocking error - continue with other areas
+          }
         }
       }
 

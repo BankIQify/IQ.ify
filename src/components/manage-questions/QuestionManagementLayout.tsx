@@ -1,4 +1,5 @@
 
+import { Tabs } from "@/components/ui/tabs";
 import { TabHeader } from "@/components/manage-questions/TabHeader";
 import { TabContent } from "@/components/manage-questions/TabContent";
 
@@ -21,19 +22,21 @@ export const QuestionManagementLayout = ({
     <div className="page-container">
       <h1 className="section-title">Question Management</h1>
 
-      <TabHeader
-        activeTab={activeTab}
-        handleTabChange={handleTabChange}
-        showHomepageTab={showHomepageTab}
-        showWebhooksTab={showWebhooksTab}
-        pendingCount={pendingCount}
-      />
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <TabHeader
+          activeTab={activeTab}
+          handleTabChange={handleTabChange}
+          showHomepageTab={showHomepageTab}
+          showWebhooksTab={showWebhooksTab}
+          pendingCount={pendingCount}
+        />
 
-      <TabContent
-        activeTab={activeTab}
-        showHomepageTab={showHomepageTab}
-        showWebhooksTab={showWebhooksTab}
-      />
+        <TabContent
+          activeTab={activeTab}
+          showHomepageTab={showHomepageTab}
+          showWebhooksTab={showWebhooksTab}
+        />
+      </Tabs>
     </div>
   );
 };

@@ -53,12 +53,35 @@ export const useProfile = (user: User | null) => {
     if (!user) throw new Error("User not authenticated");
     
     try {
+      // Handle basic profile data (excluding focus_areas)
+      const { focus_areas, ...basicProfileData } = profileData;
+      
+      // Update the basic profile data
       const { error } = await supabase
         .from('profiles')
-        .update(profileData)
+        .update(basicProfileData)
         .eq('id', user.id);
 
       if (error) throw error;
+      
+      // Handle focus areas separately if they exist
+      if (focus_areas && focus_areas.length > 0) {
+        // First delete existing focus areas
+        await supabase
+          .from('user_focus_areas')
+          .delete()
+          .eq('user_id', user.id);
+          
+        // Then add the new ones
+        for (const area of focus_areas) {
+          await supabase
+            .from('user_focus_areas')
+            .insert({
+              user_id: user.id,
+              focus_area: area as any // Type assertion as any to bypass strict type checking
+            });
+        }
+      }
       
       // Refresh profile data
       await getProfile(user.id);
