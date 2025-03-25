@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import SubjectProgress from "./pages/SubjectProgress";
 import Practice from "./pages/Practice"; 
+import TakeExam from "./pages/TakeExam";
 import Profile from "./pages/Profile";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +31,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Loading component for auth initialization
 const AuthLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
     <div className="flex flex-col items-center gap-2">
@@ -41,7 +40,6 @@ const AuthLoader = () => (
   </div>
 );
 
-// Error component for auth errors
 const AuthError = ({ error }: { error: Error }) => (
   <div className="flex items-center justify-center min-h-screen p-4">
     <Alert variant="destructive" className="max-w-md">
@@ -56,7 +54,6 @@ const AuthError = ({ error }: { error: Error }) => (
   </div>
 );
 
-// Component for routes that require either admin or data_input role
 const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAdmin, authInitialized, authError } = useAuthContext();
   const [hasDataInputRole, setHasDataInputRole] = useState(false);
@@ -107,7 +104,6 @@ const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Component for routes that require strictly admin role
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isAdmin, authInitialized, authError } = useAuthContext();
   
@@ -141,6 +137,8 @@ const App = () => (
               <Route path="/profile" element={<Profile />} />
               <Route path="/progress/:subject" element={<SubjectProgress />} />
               <Route path="/practice/:category" element={<Practice />} />
+              <Route path="/practice" element={<Practice />} />
+              <Route path="/take-exam/:examId" element={<TakeExam />} />
               <Route 
                 path="/manage-questions" 
                 element={
@@ -161,4 +159,3 @@ const App = () => (
 );
 
 export default App;
-

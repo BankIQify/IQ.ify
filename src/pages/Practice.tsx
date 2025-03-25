@@ -65,6 +65,10 @@ const Practice = () => {
     }
   };
 
+  const handleExamClick = (examId: string) => {
+    navigate(`/take-exam/${examId}`);
+  };
+
   return (
     <div className="page-container">
       <div className="flex items-center mb-6">
@@ -93,12 +97,11 @@ const Practice = () => {
       ) : exams.length > 0 ? (
         <div className="grid-responsive">
           {exams.map(exam => (
-            <Card key={exam.id} className="p-6 card-hover cursor-pointer" onClick={() => {
-              toast({
-                title: "Coming Soon",
-                description: "Exam taking functionality is under development"
-              });
-            }}>
+            <Card 
+              key={exam.id} 
+              className="p-6 card-hover cursor-pointer" 
+              onClick={() => handleExamClick(exam.id)}
+            >
               {getExamIcon(exam.category)}
               <h2 className="text-xl font-semibold mb-2">{exam.name}</h2>
               <p className="text-gray-600 mb-2">
