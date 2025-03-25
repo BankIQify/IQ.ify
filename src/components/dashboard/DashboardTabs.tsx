@@ -1,6 +1,6 @@
 
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Users, FileText } from "lucide-react";
+import { Settings, BarChart, TrendingUp, Award } from "lucide-react";
 
 interface DashboardTabsProps {
   isAdmin: boolean;
@@ -32,6 +32,36 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
     );
   }
 
-  // For non-admin users, don't render any tabs (this component won't be used anyway after our Dashboard changes)
-  return null;
+  // For regular users, show user dashboard tabs
+  return (
+    <TabsList className="grid grid-cols-3 gap-2">
+      <TabsTrigger 
+        value="overview" 
+        className="flex items-center gap-2"
+        data-state={activeTab === "overview" ? "active" : "inactive"}
+        onClick={() => handleTabClick("overview")}
+      >
+        <BarChart className="h-4 w-4" />
+        <span>Overview</span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="progress" 
+        className="flex items-center gap-2"
+        data-state={activeTab === "progress" ? "active" : "inactive"}
+        onClick={() => handleTabClick("progress")}
+      >
+        <TrendingUp className="h-4 w-4" />
+        <span>Progress</span>
+      </TabsTrigger>
+      <TabsTrigger 
+        value="achievements" 
+        className="flex items-center gap-2"
+        data-state={activeTab === "achievements" ? "active" : "inactive"}
+        onClick={() => handleTabClick("achievements")}
+      >
+        <Award className="h-4 w-4" />
+        <span>Achievements</span>
+      </TabsTrigger>
+    </TabsList>
+  );
 };
