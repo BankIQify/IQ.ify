@@ -33,7 +33,8 @@ export function canPlaceWord(grid: CrosswordCell[][], word: string, row: number,
       return false;
     }
     
-    // Check adjacent cells (but allow crossings)
+    // For intersections, we only want to share a single letter
+    // So check the cells before and after the current position
     if (grid[r][c].letter === '') {
       // For horizontal words
       if (isAcross) {
@@ -46,8 +47,6 @@ export function canPlaceWord(grid: CrosswordCell[][], word: string, row: number,
         if (i === word.length-1 && c < gridSize-1 && grid[r][c+1].letter !== '') {
           return false;
         }
-        
-        // Don't check above/below adjacency to allow crossings
       } 
       // For vertical words
       else {
@@ -60,8 +59,6 @@ export function canPlaceWord(grid: CrosswordCell[][], word: string, row: number,
         if (i === word.length-1 && r < gridSize-1 && grid[r+1][c].letter !== '') {
           return false;
         }
-        
-        // Don't check left/right adjacency to allow crossings
       }
     }
   }
@@ -89,7 +86,12 @@ export function findIntersection(
   for (const placedWord of shuffledWords) {
     // Try multiple positions in the new word for better variety
     const newWordLetters = newWord.split('');
-    for (let newWordPos = 0; newWordPos < newWordLetters.length; newWordPos++) {
+    
+    // Shuffle the positions in the new word to try different letters first
+    const positions = Array.from({ length: newWordLetters.length }, (_, i) => i);
+    const shuffledPositions = [...positions].sort(() => Math.random() - 0.5);
+    
+    for (const newWordPos of shuffledPositions) {
       
       // Try each letter in the placed word
       for (let i = 0; i < placedWord.word.length; i++) {
@@ -119,35 +121,4 @@ export function findIntersection(
   }
   
   return null;
-}
-
-// Fill remaining empty cells with black cells, but be more selective
-export function fillEmptyCellsWithBlack(grid: CrosswordCell[][]): void {
-  const gridSize = grid.length;
-  
-  for (let row = 0; row < gridSize; row++) {
-    for (let col = 0; col < gridSize; col++) {
-      if (grid[row][col].letter === '') {
-        // Only make a cell black if it has no filled neighbors
-        // This creates a more connected puzzle with fewer black cells
-        let hasFilledNeighbor = false;
-        
-        // Check all 8 neighboring cells
-        for (let r = Math.max(0, row-1); r <= Math.min(gridSize-1, row+1); r++) {
-          for (let c = Math.max(0, col-1); c <= Math.min(gridSize-1, col+1); c++) {
-            if (r !== row || c !== col) { // Skip the cell itself
-              if (grid[r][c].letter !== '') {
-                hasFilledNeighbor = true;
-                break;
-              }
-            }
-          }
-          if (hasFilledNeighbor) break;
-        }
-        
-        // Only make it black if isolated
-        grid[row][col].isBlack = !hasFilledNeighbor;
-      }
-    }
-  }
 }

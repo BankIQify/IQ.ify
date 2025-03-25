@@ -21,9 +21,9 @@ export const CrosswordGrid = ({
   
   return (
     <Card className="rounded-xl overflow-hidden shadow-lg border-2 border-primary/30">
-      <CardContent className="p-1">
+      <CardContent className="p-1 md:p-2">
         <div 
-          className="grid gap-0 bg-gray-200"
+          className="grid gap-0 bg-white"
           style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
         >
           {grid.map((row, rowIndex) => (
@@ -37,12 +37,12 @@ export const CrosswordGrid = ({
                     ? 'bg-pastel-purple/30 scale-105 shadow-sm z-10' 
                     : '',
                   "border border-gray-300",
-                  !cell.isBlack && "hover:bg-pastel-blue/10 cursor-pointer"
+                  !cell.isBlack && "hover:bg-pastel-blue/10 hover:scale-105 cursor-pointer"
                 )}
                 onClick={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
               >
                 {cell.number && (
-                  <span className="absolute top-0 left-0 text-xs px-1 pt-0.5 text-gray-700 font-medium">
+                  <span className="absolute top-0 left-0 text-[10px] px-0.5 text-gray-700 font-medium">
                     {cell.number}
                   </span>
                 )}
@@ -64,6 +64,7 @@ export const CrosswordGrid = ({
                       } as React.KeyboardEvent;
                       handleKeyPress(event, rowIndex, colIndex);
                     }}
+                    aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}${cell.number ? `, Number ${cell.number}` : ''}`}
                   />
                 )}
               </div>
