@@ -78,7 +78,7 @@ export const useProfile = (user: User | null) => {
             .from('user_focus_areas')
             .insert({
               user_id: user.id,
-              focus_area: area
+              focus_area: area as any
             });
         }
       }

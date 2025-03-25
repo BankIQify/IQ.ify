@@ -115,7 +115,7 @@ export const useAuth = () => {
           console.log('Adding focus areas for user:', data.user.id);
           const focusAreasToInsert = profileData.focus_areas.map(area => ({
             user_id: data.user!.id,
-            focus_area: area
+            focus_area: area as any
           }));
 
           const { error: focusAreasError } = await supabase
