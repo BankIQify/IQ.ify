@@ -1,7 +1,6 @@
 
 project_id = "dqaihawavxlacegykwqu"
 
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/fallback"
-  status = 200
+[global.config]
+# Custom configurations for Supabase Edge Functions
+fallback_function = "fallback"
