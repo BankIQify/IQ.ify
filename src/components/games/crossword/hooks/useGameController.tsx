@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useGameState } from "@/hooks/use-game-state";
@@ -94,6 +93,7 @@ export function useGameController(difficulty: Difficulty) {
       console.log(`Using word list for theme: ${themeKey} (original theme: ${themeName})`);
     }
     
+    // Generate a new puzzle with proper crossword layout
     const dummyPuzzleData = generateDummyCrossword(difficulty, themeKey);
     
     setGrid(dummyPuzzleData.grid);

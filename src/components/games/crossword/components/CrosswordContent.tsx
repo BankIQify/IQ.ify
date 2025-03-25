@@ -19,17 +19,21 @@ export const CrosswordContent = ({
   handleKeyPress
 }: CrosswordContentProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <CrosswordGrid 
-        grid={grid}
-        selectedCell={selectedCell}
-        handleCellClick={handleCellClick}
-        handleKeyPress={handleKeyPress}
-      />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2">
+        <CrosswordGrid 
+          grid={grid}
+          selectedCell={selectedCell}
+          handleCellClick={handleCellClick}
+          handleKeyPress={handleKeyPress}
+        />
+      </div>
       
-      <CluesList 
-        clues={clues}
-      />
+      <div className="lg:col-span-1">
+        <CluesList 
+          clues={clues}
+        />
+      </div>
     </div>
   );
 };

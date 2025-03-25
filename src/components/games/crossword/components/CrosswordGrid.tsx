@@ -23,8 +23,12 @@ export const CrosswordGrid = ({
     <Card className="rounded-xl overflow-hidden shadow-lg border-2 border-primary/30">
       <CardContent className="p-1 md:p-2">
         <div 
-          className="grid gap-0 bg-white"
-          style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
+          className="relative mx-auto"
+          style={{ 
+            display: 'grid',
+            gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
+            width: 'fit-content'
+          }}
         >
           {grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => (
@@ -32,17 +36,22 @@ export const CrosswordGrid = ({
                 key={`${rowIndex}-${colIndex}`}
                 className={cn(
                   "aspect-square relative transition-all duration-200",
-                  cell.isBlack ? 'bg-black' : 'bg-white',
+                  cell.isBlack ? 'bg-transparent' : 'bg-white',
                   selectedCell?.[0] === rowIndex && selectedCell?.[1] === colIndex
                     ? 'bg-pastel-purple/30 scale-105 shadow-sm z-10' 
                     : '',
-                  "border border-gray-300",
-                  !cell.isBlack && "hover:bg-pastel-blue/10 hover:scale-105 cursor-pointer"
+                  !cell.isBlack && "border border-gray-300",
+                  !cell.isBlack && "hover:bg-pastel-blue/10 hover:scale-105 cursor-pointer",
+                  "min-w-[32px] md:min-w-[40px]",
+                  "min-h-[32px] md:min-h-[40px]"
                 )}
                 onClick={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
+                style={{ 
+                  visibility: cell.isBlack ? 'hidden' : 'visible',
+                }}
               >
                 {cell.number && (
-                  <span className="absolute top-0 left-0 text-[10px] px-0.5 text-gray-700 font-medium">
+                  <span className="absolute top-0 left-0 text-[9px] md:text-[10px] px-0.5 text-gray-700 font-medium">
                     {cell.number}
                   </span>
                 )}
@@ -52,7 +61,7 @@ export const CrosswordGrid = ({
                     maxLength={1}
                     value={cell.userInput || ''}
                     className={cn(
-                      "w-full h-full text-center text-lg font-medium bg-transparent focus:outline-none uppercase",
+                      "w-full h-full text-center text-sm md:text-lg font-medium bg-transparent focus:outline-none uppercase",
                       cell.userInput && "text-primary font-bold animate-scale-in"
                     )}
                     onKeyDown={(e) => handleKeyPress(e, rowIndex, colIndex)}

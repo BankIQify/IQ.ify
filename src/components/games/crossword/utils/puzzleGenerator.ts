@@ -60,7 +60,7 @@ export const generateDummyCrossword = (difficulty: Difficulty, themeId: string =
     let placed = false;
     
     // Try to find intersections with already placed words - try more aggressively
-    for (let attempt = 0; attempt < 10 && !placed; attempt++) { // Increased attempts for better intersection
+    for (let attempt = 0; attempt < 15 && !placed; attempt++) { // Increased attempts for better intersection
       const intersection = findIntersection(wordPlacements, currentWord);
       
       if (intersection && canPlaceWord(grid, currentWord, intersection.row, intersection.col, intersection.isAcross)) {
@@ -87,8 +87,8 @@ export const generateDummyCrossword = (difficulty: Difficulty, themeId: string =
         const maxCol = isAcross ? gridSize - currentWord.length : gridSize - 1;
         
         // Try to place words closer to the center for better connectivity
-        const rowOffset = Math.floor(gridSize / 3); // Reduced to keep words closer
-        const colOffset = Math.floor(gridSize / 3);
+        const rowOffset = Math.floor(gridSize / 4); // Reduced to keep words closer
+        const colOffset = Math.floor(gridSize / 4);
         const row = Math.max(0, Math.min(maxRow, Math.floor(gridSize / 2) - rowOffset + Math.floor(Math.random() * (rowOffset * 2))));
         const col = Math.max(0, Math.min(maxCol, Math.floor(gridSize / 2) - colOffset + Math.floor(Math.random() * (colOffset * 2))));
         
@@ -112,14 +112,7 @@ export const generateDummyCrossword = (difficulty: Difficulty, themeId: string =
     }
   }
   
-  // Add numbers to grid cells
-  addNumbersToGrid(grid, wordPlacements);
-  
-  // Create clues
-  const clues = createClues(wordPlacements);
-  
-  // Trim the grid to remove unused rows and columns
-  // First, find the used boundaries of the grid
+  // Find the used boundaries of the grid
   let minRow = gridSize;
   let maxRow = 0;
   let minCol = gridSize;
@@ -136,7 +129,7 @@ export const generateDummyCrossword = (difficulty: Difficulty, themeId: string =
     }
   }
   
-  // Add a 1-cell buffer around the used area
+  // Add a small buffer around the used area (just 1 cell)
   minRow = Math.max(0, minRow - 1);
   maxRow = Math.min(gridSize - 1, maxRow + 1);
   minCol = Math.max(0, minCol - 1);
@@ -162,73 +155,30 @@ export const generateDummyCrossword = (difficulty: Difficulty, themeId: string =
     }
   }
   
-  // Update clue positions to match the new grid coordinates
-  const updatedClues = clues.map(clue => {
-    // Find the corresponding word placement
-    const placement = wordPlacements.find(p => 
-      p.word === clue.answer && 
-      p.isAcross === (clue.direction === 'across')
-    );
-    
-    if (placement) {
-      // Find the cell with the clue number in the old grid
-      for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
-          if (grid[row][col].number === clue.number) {
-            // Update the clue with the new coordinates
-            return {
-              ...clue,
-              row: row - minRow,
-              col: col - minCol
-            };
-          }
-        }
-      }
-    }
-    
-    return clue;
-  });
-  
-  // Mark only truly isolated cells as black
-  // A cell is isolated if it's not part of any word
+  // Mark all empty cells that are not part of any word as black
   for (let row = 0; row < trimmedSize.rows; row++) {
     for (let col = 0; col < trimmedSize.cols; col++) {
       if (trimmedGrid[row][col].letter === '') {
-        // By default, consider it non-black (will be part of the puzzle)
-        trimmedGrid[row][col].isBlack = false;
-        
-        // Check if this empty cell is part of a potential word
-        let isPartOfWord = false;
-        
-        // Check if there's at least one letter to the left or right (part of a horizontal word)
-        if ((col > 0 && trimmedGrid[row][col-1].letter !== '') || 
-            (col < trimmedSize.cols-1 && trimmedGrid[row][col+1].letter !== '')) {
-          isPartOfWord = true;
-        }
-        
-        // Check if there's at least one letter above or below (part of a vertical word)
-        if ((row > 0 && trimmedGrid[row-1][col].letter !== '') || 
-            (row < trimmedSize.rows-1 && trimmedGrid[row+1][col].letter !== '')) {
-          isPartOfWord = true;
-        }
-        
-        // If it's not part of any word, it can be black
-        if (!isPartOfWord) {
-          trimmedGrid[row][col].isBlack = true;
-        }
+        trimmedGrid[row][col].isBlack = true;
       }
     }
   }
   
+  // Update clue positions to match the new grid coordinates
+  const updatedWordPlacements = wordPlacements.map(placement => ({
+    ...placement,
+    row: placement.row - minRow,
+    col: placement.col - minCol
+  }));
+  
   // Add numbers to the trimmed grid
-  addNumbersToGrid(trimmedGrid, wordPlacements.map(p => ({
-    ...p,
-    row: p.row - minRow,
-    col: p.col - minCol
-  })));
+  addNumbersToGrid(trimmedGrid, updatedWordPlacements);
+  
+  // Create clues
+  const clues = createClues(updatedWordPlacements);
   
   return {
     grid: trimmedGrid,
-    clues: updatedClues
+    clues: clues
   };
 };
