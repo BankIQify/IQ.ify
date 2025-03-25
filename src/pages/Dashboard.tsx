@@ -7,6 +7,9 @@ import { useToast } from "@/hooks/use-toast";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
 import { AdminTab } from "@/components/dashboard/tabs/AdminTab";
+import { OverviewTab } from "@/components/dashboard/tabs/OverviewTab";
+import { ProgressTab } from "@/components/dashboard/tabs/ProgressTab";
+import { AchievementsTab } from "@/components/dashboard/tabs/AchievementsTab";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -33,20 +36,8 @@ const Dashboard = () => {
         variant: "destructive"
       });
       navigate("/auth");
-      return;
     }
-
-    // Only allow users with admin role to access the admin dashboard
-    if (authInitialized && user && !isAdmin) {
-      console.log("Dashboard: User not admin, redirecting to home");
-      toast({
-        title: "Access Denied",
-        description: "You need administrative privileges to access this page.",
-        variant: "destructive"
-      });
-      navigate("/");
-    }
-  }, [user, isAdmin, navigate, toast, authInitialized]);
+  }, [user, navigate, toast, authInitialized]);
 
   if (!authInitialized) {
     return (
@@ -59,23 +50,40 @@ const Dashboard = () => {
     );
   }
 
-  if (!user || !isAdmin) {
+  if (!user) {
     return null;
   }
 
   // Determine display name - use username or email if name is not available
-  const displayName = profile?.name || profile?.username || user.email?.split('@')[0] || "Admin";
+  const displayName = profile?.name || profile?.username || user.email?.split('@')[0] || "User";
+
+  // Determine which tab to show by default
+  const defaultTab = isAdmin ? "admin" : "overview";
 
   return (
     <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn bg-gradient-to-b from-[rgba(30,174,219,0.2)] to-[rgba(255,105,180,0.2)] rounded-xl">
       <DashboardHeader profile={{...profile, name: displayName}} />
 
-      <Tabs value="admin" className="space-y-8">
-        <DashboardTabs isAdmin={isAdmin} activeTab="admin" />
+      <Tabs value={defaultTab} className="space-y-8">
+        <DashboardTabs isAdmin={isAdmin} activeTab={defaultTab} />
 
-        {/* Admin Tab Content */}
-        <TabsContent value="admin" className="space-y-6">
-          <AdminTab />
+        {/* Show different content based on user role */}
+        {isAdmin && (
+          <TabsContent value="admin" className="space-y-6">
+            <AdminTab />
+          </TabsContent>
+        )}
+        
+        <TabsContent value="overview" className="space-y-6">
+          <OverviewTab profile={{...profile, name: displayName}} />
+        </TabsContent>
+        
+        <TabsContent value="progress" className="space-y-6">
+          <ProgressTab />
+        </TabsContent>
+        
+        <TabsContent value="achievements" className="space-y-6">
+          <AchievementsTab />
         </TabsContent>
       </Tabs>
     </div>
