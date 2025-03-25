@@ -1,6 +1,5 @@
 
 project_id = "dqaihawavxlacegykwqu"
 
-[global.config]
-# Custom configurations for Supabase Edge Functions
-fallback_function = "fallback"
+[functions.fallback]
+verify_jwt = false
