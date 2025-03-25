@@ -4,6 +4,7 @@ import { useManageQuestions } from "@/hooks/useManageQuestions";
 import { QuestionManagementLayout } from "@/components/manage-questions/QuestionManagementLayout";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 const ManageQuestions = () => {
   const {
@@ -14,20 +15,30 @@ const ManageQuestions = () => {
     activeTab,
     handleTabChange,
     showHomepageTab,
-    showWebhooksTab
+    showWebhooksTab,
+    authInitialized
   } = useManageQuestions();
   
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Debug logging
   useEffect(() => {
-    // Debug info
     console.log("ManageQuestions component:", {
-      user,
+      user: user?.id,
       isAdmin,
       hasDataInputRole,
-      activeTab
+      activeTab,
+      authInitialized
     });
+  }, [user, isAdmin, hasDataInputRole, activeTab, authInitialized]);
+
+  useEffect(() => {
+    // Only run redirects after auth is initialized
+    if (!authInitialized) {
+      console.log("Auth not initialized yet, waiting...");
+      return;
+    }
 
     // Redirect if needed
     if (user === null) {
@@ -47,7 +58,19 @@ const ManageQuestions = () => {
       });
       navigate("/");
     }
-  }, [user, isAdmin, hasDataInputRole, navigate, toast]);
+  }, [user, isAdmin, hasDataInputRole, navigate, toast, authInitialized]);
+
+  // Show loading state while auth is initializing
+  if (!authInitialized) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Only render content when we have permission
   if (!user || (!isAdmin && !hasDataInputRole)) {

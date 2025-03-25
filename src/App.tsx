@@ -104,10 +104,8 @@ const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
     return <AuthLoader />;
   }
   
-  if (!user || (!isAdmin && !hasDataInputRole)) {
-    return <Navigate to="/auth" replace />;
-  }
-
+  // Important: Just render children instead of redirecting here
+  // Let ManageQuestions handle its own redirects
   return <>{children}</>;
 };
 
@@ -125,10 +123,8 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
     return <AuthLoader />;
   }
   
-  if (!user || !isAdmin) {
-    return <Navigate to="/auth" replace />;
-  }
-
+  // Important: Just render children instead of redirecting here
+  // Let Dashboard handle its own redirects  
   return <>{children}</>;
 };
 
@@ -145,11 +141,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route 
                 path="/dashboard" 
-                element={
-                  <ProtectedAdminRoute>
-                    <Dashboard />
-                  </ProtectedAdminRoute>
-                } 
+                element={<Dashboard />} 
               />
               <Route path="/lets-practice" element={<ManageExams />} />
               <Route path="/brain-training" element={<BrainTraining />} />
@@ -158,11 +150,7 @@ const App = () => (
               <Route path="/practice/:category" element={<Practice />} />
               <Route 
                 path="/manage-questions" 
-                element={
-                  <ProtectedDataRoute>
-                    <ManageQuestions />
-                  </ProtectedDataRoute>
-                } 
+                element={<ManageQuestions />} 
               />
               <Route path="/auth" element={<Auth />} />
               <Route path="/avatar-creator" element={<AvatarCreator />} />

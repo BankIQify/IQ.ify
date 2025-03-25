@@ -18,6 +18,8 @@ export const QuestionManagementLayout = ({
   showWebhooksTab,
   pendingCount
 }: QuestionManagementLayoutProps) => {
+  console.log("QuestionManagementLayout rendering with activeTab:", activeTab);
+  
   return (
     <div className="page-container p-4 md:p-6">
       <h1 className="section-title text-2xl font-bold mb-6">Question Management</h1>

@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useManageQuestions = () => {
-  const { user, isAdmin } = useAuthContext();
+  const { user, isAdmin, authInitialized } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -14,6 +14,7 @@ export const useManageQuestions = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [activeTab, setActiveTab] = useState("bank");
   const [hasDataInputRole, setHasDataInputRole] = useState(false);
+  const [dataRoleChecked, setDataRoleChecked] = useState(false);
 
   // Extract the tab from URL parameters
   useEffect(() => {
@@ -30,6 +31,7 @@ export const useManageQuestions = () => {
     const checkDataInputRole = async () => {
       if (!user) {
         setHasDataInputRole(false);
+        setDataRoleChecked(true);
         return;
       }
       
@@ -44,18 +46,26 @@ export const useManageQuestions = () => {
 
         if (error) {
           console.error('Error checking data_input role:', error);
+          setDataRoleChecked(true);
           return;
         }
 
         console.log("Data input role check result:", data);
         setHasDataInputRole(!!data);
+        setDataRoleChecked(true);
       } catch (error) {
         console.error('Error in checkDataInputRole:', error);
+        setDataRoleChecked(true);
       }
     };
 
-    checkDataInputRole();
-  }, [user]);
+    if (authInitialized && user) {
+      checkDataInputRole();
+    } else if (authInitialized) {
+      setHasDataInputRole(false);
+      setDataRoleChecked(true);
+    }
+  }, [user, authInitialized]);
 
   // Fetch sections for the CategoriesTable
   useEffect(() => {
@@ -87,10 +97,10 @@ export const useManageQuestions = () => {
       }
     };
 
-    if (user && (isAdmin || hasDataInputRole)) {
+    if (user && (isAdmin || hasDataInputRole) && dataRoleChecked) {
       fetchSections();
     }
-  }, [toast, user, isAdmin, hasDataInputRole]);
+  }, [toast, user, isAdmin, hasDataInputRole, dataRoleChecked]);
 
   // Fetch pending webhook events count
   useEffect(() => {
@@ -108,14 +118,14 @@ export const useManageQuestions = () => {
       }
     };
     
-    if (user && (isAdmin || hasDataInputRole)) {
+    if (user && (isAdmin || hasDataInputRole) && dataRoleChecked) {
       fetchPendingCount();
       
       // Set up a polling interval to refresh the count
       const interval = setInterval(fetchPendingCount, 30000); // every 30 seconds
       return () => clearInterval(interval);
     }
-  }, [user, isAdmin, hasDataInputRole]);
+  }, [user, isAdmin, hasDataInputRole, dataRoleChecked]);
 
   const handleTabChange = (value: string) => {
     console.log("Tab change requested to:", value);
@@ -138,6 +148,7 @@ export const useManageQuestions = () => {
     activeTab,
     handleTabChange,
     showHomepageTab: isAdmin,
-    showWebhooksTab: isAdmin
+    showWebhooksTab: isAdmin,
+    authInitialized: authInitialized && dataRoleChecked
   };
 };

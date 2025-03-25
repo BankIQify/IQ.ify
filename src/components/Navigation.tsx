@@ -17,8 +17,14 @@ const Navigation = () => {
 
   // For debugging
   useEffect(() => {
-    console.log('Current auth state:', { user, isAdmin, profile, authInitialized });
-  }, [user, isAdmin, profile, authInitialized]);
+    console.log('Navigation component: Current auth state:', { 
+      user: user?.id, 
+      isAdmin, 
+      profile: profile?.id, 
+      authInitialized,
+      currentPath: location.pathname
+    });
+  }, [user, isAdmin, profile, authInitialized, location.pathname]);
 
   // Check for data_input role
   useEffect(() => {
