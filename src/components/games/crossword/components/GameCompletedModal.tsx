@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Trophy, Star, Clock } from "lucide-react";
+import { Trophy } from "lucide-react";
 
 interface GameCompletedModalProps {
   isOpen: boolean;
@@ -31,30 +31,28 @@ export const GameCompletedModal = ({
 
   return (
     <AlertDialog open={isOpen}>
-      <AlertDialogContent className="bg-gradient-to-br from-white to-pastel-gray/20 border-4 border-pastel-yellow rounded-2xl max-w-md">
+      <AlertDialogContent className="bg-gradient-to-br from-white to-pastel-gray/20">
         <AlertDialogHeader>
           <div className="flex justify-center mb-4">
-            <div className="p-5 bg-gradient-to-r from-amber-300 to-yellow-500 rounded-full">
-              <Trophy className="h-14 w-14 text-white animate-pulse" />
+            <div className="p-4 bg-yellow-100 rounded-full">
+              <Trophy className="h-10 w-10 text-yellow-500" />
             </div>
           </div>
-          <AlertDialogTitle className="text-3xl font-bold text-center text-iqify-navy">
+          <AlertDialogTitle className="text-2xl font-bold text-center">
             Puzzle Completed!
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-center space-y-5 mt-4">
-            <p className="text-xl">
-              <span className="font-bold">Amazing work!</span> You've solved the crossword puzzle!
+          <AlertDialogDescription className="text-center space-y-4 mt-4">
+            <p className="text-lg">
+              Congratulations! You've successfully completed the crossword puzzle.
             </p>
-            <div className="grid grid-cols-2 gap-5 py-4">
-              <div className="bg-pastel-blue/20 p-4 rounded-xl border-2 border-pastel-blue/30">
-                <Star className="h-5 w-5 text-yellow-500 mx-auto mb-1" />
+            <div className="grid grid-cols-2 gap-4 py-4">
+              <div className="bg-pastel-blue/20 p-3 rounded-lg text-center">
                 <p className="text-sm text-muted-foreground">Score</p>
-                <p className="text-2xl font-bold text-iqify-navy">{score}</p>
+                <p className="text-2xl font-bold">{score}</p>
               </div>
-              <div className="bg-pastel-purple/20 p-4 rounded-xl border-2 border-pastel-purple/30">
-                <Clock className="h-5 w-5 text-amber-500 mx-auto mb-1" />
+              <div className="bg-pastel-purple/20 p-3 rounded-lg text-center">
                 <p className="text-sm text-muted-foreground">Time</p>
-                <p className="text-2xl font-bold text-iqify-navy">{timeFormatted}</p>
+                <p className="text-2xl font-bold">{timeFormatted}</p>
               </div>
             </div>
           </AlertDialogDescription>
@@ -62,7 +60,7 @@ export const GameCompletedModal = ({
         <AlertDialogFooter>
           <AlertDialogAction
             onClick={handleNewPuzzle}
-            className="w-full bg-gradient-to-r from-pastel-purple to-pastel-blue text-white hover:opacity-90 p-6 h-auto text-lg font-bold rounded-xl shadow-md"
+            className="w-full bg-gradient-to-r from-pastel-purple to-pastel-blue text-white hover:opacity-90"
           >
             Try Another Puzzle
           </AlertDialogAction>

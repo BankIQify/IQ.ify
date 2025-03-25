@@ -22,24 +22,22 @@ export const ActiveGame = ({
   if (!currentQuestion) return null;
 
   return (
-    <div className="p-8 rounded-xl bg-white shadow-lg border-2 border-pastel-blue space-y-8 animate-fadeIn">
+    <div className="p-6 rounded-xl bg-white shadow-md space-y-6 animate-fade-in">
       {/* Timer and progress display */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="flex items-center gap-2 bg-pastel-purple/20 px-3 py-1.5 rounded-full">
-          <Timer className="h-5 w-5 text-primary animate-pulse" />
-          <span className="font-bold">{timer}s</span>
-        </div>
-        <Progress value={progressPercentage} className="flex-1 h-3 rounded-full bg-gray-100" />
+      <div className="flex items-center gap-3 mb-6">
+        <Timer className="h-5 w-5 text-primary animate-pulse" />
+        <span className="font-bold">{timer}s remaining</span>
+        <Progress value={progressPercentage} className="flex-1 h-2" />
       </div>
       
       {/* Question display */}
-      <div className="text-center py-10 px-6 rounded-xl bg-gradient-to-r from-pastel-blue/15 to-pastel-purple/15 border-2 border-pastel-blue/30 shadow-sm">
-        <div className="text-4xl font-bold mb-3 text-iqify-navy">
+      <div className="text-center py-8 px-4 rounded-lg bg-gradient-to-r from-pastel-blue/10 to-pastel-purple/10">
+        <div className="text-3xl font-bold mb-2">
           {currentQuestion.operation === "multiply"
             ? `${currentQuestion.num1} × ${currentQuestion.num2} = ?`
             : `${currentQuestion.num1} ÷ ${currentQuestion.num2} = ?`}
         </div>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-sm">
           {currentQuestion.operation === "multiply" 
             ? "Calculate the product" 
             : "Calculate the quotient"}

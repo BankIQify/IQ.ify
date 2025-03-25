@@ -4,16 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useWordSearchContext } from "../context/WordSearchContext";
 
 export const WordGrid = () => {
-  const { 
-    grid, 
-    gridDimensions, 
-    selectedCells, 
-    handleCellClick,
-    handleMouseDown,
-    handleMouseEnter,
-    handleMouseUp,
-    isDragging
-  } = useWordSearchContext();
+  const { grid, gridDimensions, selectedCells, handleCellClick } = useWordSearchContext();
 
   // Function to determine cell color based on various conditions
   const getCellColor = (rowIndex: number, colIndex: number) => {
@@ -25,56 +16,35 @@ export const WordGrid = () => {
     }
     
     if (isSelected) {
-      return "bg-pastel-purple/80 text-white shadow-sm scale-105";
+      return "bg-pastel-purple/70 text-white";
     }
     
     // Create a checkered pattern for non-blank cells
     return (rowIndex + colIndex) % 2 === 0 
-      ? "bg-white hover:bg-pastel-purple/10 hover:scale-105 cursor-pointer" 
-      : "bg-slate-50 hover:bg-pastel-purple/10 hover:scale-105 cursor-pointer";
+      ? "bg-white hover:bg-pastel-purple/10 cursor-pointer" 
+      : "bg-slate-50 hover:bg-pastel-purple/10 cursor-pointer";
   };
 
   return (
-    <Card className="overflow-hidden border-2 border-pastel-blue rounded-xl shadow-lg">
+    <Card className="overflow-hidden border-none shadow-lg">
       <CardContent className="p-0">
         <div 
-          className={`grid gap-0 bg-white rounded-xl`} 
+          className={`grid gap-0 bg-white`} 
           style={{ 
             gridTemplateColumns: `repeat(${gridDimensions.cols}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${gridDimensions.rows}, minmax(0, 1fr))`
           }}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onTouchEnd={handleMouseUp}
         >
           {grid.map((row, rowIndex) => (
             row.map((letter, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
                 className={cn(
-                  "aspect-square flex items-center justify-center text-xl font-bold border border-slate-100",
-                  "transition-all duration-200 transform select-none",
+                  "aspect-square flex items-center justify-center text-lg font-medium border border-slate-100",
+                  "transition-all duration-200 transform hover:scale-105",
                   getCellColor(rowIndex, colIndex)
                 )}
                 onClick={() => handleCellClick(rowIndex, colIndex)}
-                onMouseDown={() => handleMouseDown(rowIndex, colIndex)}
-                onMouseEnter={() => handleMouseEnter(rowIndex, colIndex)}
-                onTouchStart={() => handleMouseDown(rowIndex, colIndex)}
-                onTouchMove={(e) => {
-                  if (isDragging) {
-                    // Get touch position and find the element at that position
-                    const touch = e.touches[0];
-                    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-                    // Find the grid cell coordinates from the element id
-                    if (element && element.id) {
-                      const cellCoords = element.id.split('-');
-                      if (cellCoords.length === 2) {
-                        handleMouseEnter(parseInt(cellCoords[0]), parseInt(cellCoords[1]));
-                      }
-                    }
-                  }
-                }}
-                id={`${rowIndex}-${colIndex}`}
               >
                 {letter !== ' ' ? letter : ''}
               </div>

@@ -1,7 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import type { CrosswordCell } from "../utils/types";
-import { cn } from "@/lib/utils";
+import type { CrosswordCell } from "../types";
 
 interface CrosswordGridProps {
   grid: CrosswordCell[][];
@@ -20,39 +19,27 @@ export const CrosswordGrid = ({
   const gridCols = grid[0]?.length || 5;
   
   return (
-    <Card className="rounded-xl overflow-hidden shadow-lg border-2 border-primary/30">
-      <CardContent className="p-1 md:p-2">
+    <Card>
+      <CardContent className="p-4">
         <div 
-          className="relative mx-auto"
-          style={{ 
-            display: 'grid',
-            gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))`,
-            width: 'fit-content'
-          }}
+          className="grid gap-0.5 bg-gray-200 p-0.5"
+          style={{ gridTemplateColumns: `repeat(${gridCols}, minmax(0, 1fr))` }}
         >
           {grid.map((row, rowIndex) => (
             row.map((cell, colIndex) => (
               <div
                 key={`${rowIndex}-${colIndex}`}
-                className={cn(
-                  "aspect-square relative transition-all duration-200",
-                  cell.isBlack ? 'bg-transparent' : 'bg-white',
+                className={`aspect-square relative ${
+                  cell.isBlack ? 'bg-black' : 'bg-white'
+                } ${
                   selectedCell?.[0] === rowIndex && selectedCell?.[1] === colIndex
-                    ? 'bg-pastel-purple/30 scale-105 shadow-sm z-10' 
-                    : '',
-                  !cell.isBlack && "border border-gray-300",
-                  !cell.isBlack && "hover:bg-pastel-blue/10 hover:scale-105 cursor-pointer",
-                  "min-w-[32px] md:min-w-[40px]",
-                  "min-h-[32px] md:min-h-[40px]"
-                )}
+                    ? 'bg-blue-100'
+                    : ''
+                }`}
                 onClick={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
-                onTouchStart={() => !cell.isBlack && handleCellClick(rowIndex, colIndex)}
-                style={{ 
-                  visibility: cell.isBlack ? 'hidden' : 'visible',
-                }}
               >
                 {cell.number && (
-                  <span className="absolute top-0 left-0 text-[9px] md:text-[10px] px-0.5 text-gray-700 font-medium">
+                  <span className="absolute top-0 left-0 text-xs pl-0.5">
                     {cell.number}
                   </span>
                 )}
@@ -61,11 +48,7 @@ export const CrosswordGrid = ({
                     type="text"
                     maxLength={1}
                     value={cell.userInput || ''}
-                    className={cn(
-                      "w-full h-full text-center text-sm md:text-lg font-medium bg-transparent focus:outline-none uppercase",
-                      "touch-manipulation", // Better touch handling
-                      cell.userInput && "text-primary font-bold animate-scale-in"
-                    )}
+                    className="w-full h-full text-center text-lg font-medium bg-transparent focus:outline-none uppercase"
                     onKeyDown={(e) => handleKeyPress(e, rowIndex, colIndex)}
                     onChange={(e) => {
                       // This allows typing directly into the input
@@ -75,8 +58,6 @@ export const CrosswordGrid = ({
                       } as React.KeyboardEvent;
                       handleKeyPress(event, rowIndex, colIndex);
                     }}
-                    onFocus={() => handleCellClick(rowIndex, colIndex)}
-                    aria-label={`Row ${rowIndex + 1}, Column ${colIndex + 1}${cell.number ? `, Number ${cell.number}` : ''}`}
                   />
                 )}
               </div>

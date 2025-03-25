@@ -38,49 +38,49 @@ export const GameLayout = ({
   const getDifficultyColor = () => {
     switch (difficulty) {
       case "easy":
-        return "bg-pastel-green border-green-300";
+        return "bg-pastel-green";
       case "medium":
-        return "bg-pastel-yellow border-yellow-300";
+        return "bg-pastel-yellow";
       case "hard":
-        return "bg-pastel-orange border-orange-300";
+        return "bg-pastel-orange";
       default:
-        return "bg-pastel-blue border-blue-300";
+        return "bg-pastel-blue";
     }
   };
 
   return (
     <div className="container max-w-4xl mx-auto py-6 px-4">
-      <Card className="w-full border-2 border-pastel-blue rounded-xl shadow-lg overflow-hidden bg-gradient-to-br from-white to-pastel-gray/10">
-        <CardHeader className="space-y-3 bg-gradient-to-r from-pastel-blue/60 to-pastel-purple/60 pb-6">
+      <Card className="w-full border-none shadow-lg overflow-hidden bg-gradient-to-br from-white to-pastel-gray/20">
+        <CardHeader className="space-y-2 bg-gradient-to-r from-pastel-blue/50 to-pastel-purple/50 pb-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-white rounded-full shadow-md">
-                <Brain className="h-7 w-7 text-purple-500" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-full shadow-sm">
+                <Brain className="h-6 w-6 text-purple-500" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-bold text-iqify-navy">{title}</CardTitle>
+                <CardTitle className="text-2xl font-bold">{title}</CardTitle>
                 {description && (
-                  <p className="text-sm text-iqify-navy/80">{description}</p>
+                  <p className="text-sm text-muted-foreground">{description}</p>
                 )}
               </div>
             </div>
             
             <div className="flex items-center gap-3">
-              <div className={`text-sm font-bold px-3 py-1.5 rounded-full border ${getDifficultyColor()}`}>
+              <div className={`text-xs font-medium px-2 py-1 rounded-full ${getDifficultyColor()}`}>
                 {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
               </div>
               
               {timer !== undefined && (
-                <div className="flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-full shadow-sm border border-pastel-blue/30">
+                <div className="flex items-center gap-2 bg-white/80 px-3 py-1 rounded-full">
                   <Clock className="h-4 w-4 text-purple-500" />
-                  <span className="font-bold">{timer}s</span>
+                  <span className="font-medium">{timer}s</span>
                 </div>
               )}
               
               {score > 0 && (
-                <div className="flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-full shadow-sm border border-pastel-blue/30">
+                <div className="flex items-center gap-2 bg-white/80 px-3 py-1 rounded-full">
                   <Trophy className="h-4 w-4 text-yellow-500" />
-                  <span className="font-bold">{score}</span>
+                  <span className="font-medium">{score}</span>
                 </div>
               )}
               
@@ -95,10 +95,10 @@ export const GameLayout = ({
 
         {showSettings && settingsContent ? (
           <Tabs defaultValue="game" className="w-full">
-            <div className="px-6 bg-gradient-to-r from-pastel-blue/30 to-pastel-purple/30">
-              <TabsList className="bg-white/60 p-1 rounded-xl">
-                <TabsTrigger value="game" className="data-[state=active]:bg-white rounded-lg">Game</TabsTrigger>
-                <TabsTrigger value="settings" className="gap-2 data-[state=active]:bg-white rounded-lg">
+            <div className="px-6 bg-gradient-to-r from-pastel-blue/20 to-pastel-purple/20">
+              <TabsList className="bg-white/50">
+                <TabsTrigger value="game" className="data-[state=active]:bg-white">Game</TabsTrigger>
+                <TabsTrigger value="settings" className="gap-2 data-[state=active]:bg-white">
                   <Settings className="h-4 w-4" />
                   Settings
                 </TabsTrigger>

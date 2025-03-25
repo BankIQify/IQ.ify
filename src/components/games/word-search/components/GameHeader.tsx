@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Clock, Star, Trophy } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useWordSearchContext } from "../context/WordSearchContext";
 
 export const GameHeader = () => {
@@ -21,17 +21,17 @@ export const GameHeader = () => {
   const wordsFoundPercentage = (wordsFoundCount / totalWordsCount) * 100 || 0;
 
   return (
-    <div className="bg-gradient-to-r from-pastel-blue/30 to-pastel-green/30 rounded-xl p-5 shadow-md border-2 border-pastel-blue/30">
+    <div className="bg-gradient-to-r from-pastel-blue/20 to-pastel-green/20 rounded-xl p-4 shadow-sm">
       <div className="flex flex-wrap gap-4 items-center justify-between">
         <div className="flex gap-4 items-center">
           <div className="w-48">
             <Select value={selectedTheme} onValueChange={handleSelectTheme}>
-              <SelectTrigger className="border-none bg-white/80 shadow-sm rounded-lg">
+              <SelectTrigger className="border-none bg-white/50 shadow-sm">
                 <SelectValue placeholder="Select Theme" />
               </SelectTrigger>
-              <SelectContent className="rounded-lg border-2 border-pastel-blue/30">
+              <SelectContent>
                 {themes.map(theme => (
-                  <SelectItem key={theme.id} value={theme.id} className="focus:bg-pastel-blue/20">
+                  <SelectItem key={theme.id} value={theme.id}>
                     {theme.name}
                   </SelectItem>
                 ))}
@@ -42,32 +42,26 @@ export const GameHeader = () => {
           <Button 
             onClick={handleNewPuzzle} 
             variant="outline"
-            className="bg-white shadow-sm border-2 border-pastel-green/30 hover:bg-white/90 rounded-lg"
+            className="bg-white shadow-sm border-none hover:bg-white/90"
           >
             New Puzzle
           </Button>
         </div>
         
         {isGameActive && (
-          <div className="flex gap-2 items-center bg-white/80 px-3 py-1.5 rounded-full shadow-sm">
-            <Clock className="h-5 w-5 text-primary" />
-            <span className="font-bold">{timer}s</span>
+          <div className="flex gap-2 items-center">
+            <Clock className="h-4 w-4 text-primary" />
+            <span>{timer}s</span>
           </div>
         )}
       </div>
       
-      <div className="mt-5 space-y-2">
-        <div className="flex justify-between text-base">
-          <div className="flex items-center gap-1.5">
-            <Star className="h-4 w-4 text-yellow-500" />
-            <span className="font-bold">Words found: {wordsFoundCount} of {totalWordsCount}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Trophy className="h-4 w-4 text-amber-500" />
-            <span className="font-bold">Score: {score}</span>
-          </div>
+      <div className="mt-4 space-y-1">
+        <div className="flex justify-between text-sm">
+          <span>Words found: {wordsFoundCount} of {totalWordsCount}</span>
+          <span>Score: {score}</span>
         </div>
-        <Progress value={wordsFoundPercentage} className="h-3 rounded-full" />
+        <Progress value={wordsFoundPercentage} className="h-2" />
       </div>
     </div>
   );

@@ -20,31 +20,30 @@ interface Country {
   name: string;
   capital: string;
   flag: string;
-  flagUrl: string;
 }
 
 // For now using a small set of countries, this could be expanded based on difficulty
 const COUNTRIES: Record<Difficulty, Country[]> = {
   easy: [
-    { name: "France", capital: "Paris", flag: "🇫🇷", flagUrl: "https://flagcdn.com/w320/fr.png" },
-    { name: "Spain", capital: "Madrid", flag: "🇪🇸", flagUrl: "https://flagcdn.com/w320/es.png" },
-    { name: "Italy", capital: "Rome", flag: "🇮🇹", flagUrl: "https://flagcdn.com/w320/it.png" },
-    { name: "Germany", capital: "Berlin", flag: "🇩🇪", flagUrl: "https://flagcdn.com/w320/de.png" },
-    { name: "United Kingdom", capital: "London", flag: "🇬🇧", flagUrl: "https://flagcdn.com/w320/gb.png" },
+    { name: "France", capital: "Paris", flag: "🇫🇷" },
+    { name: "Spain", capital: "Madrid", flag: "🇪🇸" },
+    { name: "Italy", capital: "Rome", flag: "🇮🇹" },
+    { name: "Germany", capital: "Berlin", flag: "🇩🇪" },
+    { name: "United Kingdom", capital: "London", flag: "🇬🇧" },
   ],
   medium: [
-    { name: "Japan", capital: "Tokyo", flag: "🇯🇵", flagUrl: "https://flagcdn.com/w320/jp.png" },
-    { name: "Brazil", capital: "Brasília", flag: "🇧🇷", flagUrl: "https://flagcdn.com/w320/br.png" },
-    { name: "Australia", capital: "Canberra", flag: "🇦🇺", flagUrl: "https://flagcdn.com/w320/au.png" },
-    { name: "Canada", capital: "Ottawa", flag: "🇨🇦", flagUrl: "https://flagcdn.com/w320/ca.png" },
-    { name: "India", capital: "New Delhi", flag: "🇮🇳", flagUrl: "https://flagcdn.com/w320/in.png" },
+    { name: "Japan", capital: "Tokyo", flag: "🇯🇵" },
+    { name: "Brazil", capital: "Brasília", flag: "🇧🇷" },
+    { name: "Australia", capital: "Canberra", flag: "🇦🇺" },
+    { name: "Canada", capital: "Ottawa", flag: "🇨🇦" },
+    { name: "India", capital: "New Delhi", flag: "🇮🇳" },
   ],
   hard: [
-    { name: "Kazakhstan", capital: "Astana", flag: "🇰🇿", flagUrl: "https://flagcdn.com/w320/kz.png" },
-    { name: "Uruguay", capital: "Montevideo", flag: "🇺🇾", flagUrl: "https://flagcdn.com/w320/uy.png" },
-    { name: "Morocco", capital: "Rabat", flag: "🇲🇦", flagUrl: "https://flagcdn.com/w320/ma.png" },
-    { name: "Vietnam", capital: "Hanoi", flag: "🇻🇳", flagUrl: "https://flagcdn.com/w320/vn.png" },
-    { name: "Croatia", capital: "Zagreb", flag: "🇭🇷", flagUrl: "https://flagcdn.com/w320/hr.png" },
+    { name: "Kazakhstan", capital: "Astana", flag: "🇰🇿" },
+    { name: "Uruguay", capital: "Montevideo", flag: "🇺🇾" },
+    { name: "Morocco", capital: "Rabat", flag: "🇲🇦" },
+    { name: "Vietnam", capital: "Hanoi", flag: "🇻🇳" },
+    { name: "Croatia", capital: "Zagreb", flag: "🇭🇷" },
   ],
 };
 
@@ -203,15 +202,9 @@ export const GeographyGame = ({ difficulty }: { difficulty: Difficulty }) => {
 
       <Card className="overflow-hidden border-none shadow-lg">
         <div className="text-center p-6 bg-gradient-to-b from-pastel-blue/10 to-transparent">
-          {currentCountry && (
-            <div className="relative h-40 w-full mb-4 flex items-center justify-center">
-              <img 
-                src={currentCountry.flagUrl} 
-                alt={`Flag of ${currentCountry.name}`}
-                className="max-h-full max-w-full object-contain rounded-md shadow-md transform hover:scale-105 transition-transform"
-              />
-            </div>
-          )}
+          <div className="text-8xl mb-4 transform hover:scale-110 transition-transform">
+            {currentCountry.flag}
+          </div>
           <p className="text-sm text-muted-foreground">
             Identify the country and its capital city
           </p>

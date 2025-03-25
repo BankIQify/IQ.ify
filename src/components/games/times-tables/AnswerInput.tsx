@@ -1,5 +1,5 @@
 
-import { Check, XCircle, Sparkles } from "lucide-react";
+import { Check, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ export const AnswerInput = ({
   return (
     <div className="relative">
       {/* Answer input field and submit button */}
-      <div className="flex gap-4">
+      <div className="flex gap-3">
         <Input
           type="number"
           value={userAnswer}
@@ -29,21 +29,16 @@ export const AnswerInput = ({
           onKeyPress={handleKeyPress}
           placeholder="Enter your answer"
           className={cn(
-            "text-xl font-medium text-center h-14 rounded-xl border-2",
-            showFeedback && (isCorrect 
-              ? "border-green-500 bg-green-50 focus-visible:ring-green-300" 
-              : "border-red-500 bg-red-50 focus-visible:ring-red-300")
+            "text-lg font-medium text-center",
+            showFeedback && (isCorrect ? "border-green-500 bg-green-50" : "border-red-500 bg-red-50")
           )}
           autoFocus
         />
         <Button 
           onClick={handleAnswer}
           className={cn(
-            "px-8 h-14 rounded-xl text-lg font-bold",
-            showFeedback && (isCorrect 
-              ? "bg-green-500 hover:bg-green-600" 
-              : "bg-red-500 hover:bg-red-600"),
-            !showFeedback && "bg-gradient-to-r from-pastel-purple to-pastel-blue hover:opacity-90"
+            "px-6",
+            showFeedback && (isCorrect ? "bg-green-500" : "bg-red-500")
           )}
         >
           Submit
@@ -53,24 +48,22 @@ export const AnswerInput = ({
       {/* Feedback display - shows after answer submission */}
       {showFeedback && (
         <div className={cn(
-          "absolute top-full left-0 right-0 mt-4 py-4 px-5 rounded-xl font-medium border-2 shadow-md animate-fadeIn",
-          isCorrect 
-            ? "text-green-700 bg-green-50 border-green-300" 
-            : "text-red-700 bg-red-50 border-red-300"
+          "absolute top-full left-0 right-0 text-center mt-2 py-1 px-2 rounded font-medium",
+          isCorrect ? "text-green-600 bg-green-50" : "text-red-600 bg-red-50"
         )}>
           {isCorrect ? (
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-green-500 animate-pulse" />
-              <span className="text-lg">Fantastic! That's correct!</span>
+            <div className="flex items-center justify-center gap-1">
+              <Check className="h-4 w-4" />
+              <span>Correct!</span>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <XCircle className="h-5 w-5 text-red-500" />
-                <span className="text-lg">Not quite right! The answer is {currentQuestion?.answer}</span>
+            <div className="flex flex-col items-center justify-center gap-1">
+              <div className="flex items-center gap-1">
+                <XCircle className="h-4 w-4" />
+                <span>Incorrect! The answer is {currentQuestion?.answer}</span>
               </div>
               {currentQuestion?.explanation && (
-                <p className="text-base mt-2 bg-white p-3 rounded-lg">
+                <p className="text-sm mt-1 max-w-md">
                   {currentQuestion.explanation}
                 </p>
               )}

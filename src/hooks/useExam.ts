@@ -85,10 +85,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       questions.forEach(question => {
         // Ensure we're comparing values of the same type
         const userAnswer = answers[question.id];
-        // Use correctAnswer if available, otherwise use answer
-        const correctAnswer = question.content.correctAnswer !== undefined 
-          ? question.content.correctAnswer 
-          : question.content.answer;
+        const correctAnswer = question.content.answer;
         
         // Strict comparison after ensuring types match
         const isCorrect = 

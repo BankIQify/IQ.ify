@@ -22,15 +22,15 @@ const colorVariants = {
 };
 
 const sizeVariants = {
-  sm: "p-3 text-xs",
-  md: "p-4 text-sm",
-  lg: "p-5 text-base",
+  sm: "p-2 text-xs",
+  md: "p-3 text-sm",
+  lg: "p-4 text-base",
 };
 
 const iconSizeVariants = {
-  sm: "h-5 w-5",
-  md: "h-7 w-7",
-  lg: "h-9 w-9",
+  sm: "h-4 w-4",
+  md: "h-6 w-6",
+  lg: "h-8 w-8",
 };
 
 export const ColorfulBadge = ({
@@ -43,17 +43,17 @@ export const ColorfulBadge = ({
   return (
     <div 
       className={cn(
-        "flex flex-col items-center rounded-xl border-2 transition-all shadow-md",
+        "flex flex-col items-center rounded-lg border-2 transition-all",
         colorVariants[color],
         sizeVariants[size],
         !earned && "opacity-50 grayscale",
         earned && "animate-float"
       )}
     >
-      <div className="mb-2 bg-white/50 p-2 rounded-full">
+      <div className="mb-2">
         <Icon className={cn(iconSizeVariants[size], earned && "animate-pulse")} />
       </div>
-      <span className="font-bold text-center">{label}</span>
+      <span className="font-medium text-center">{label}</span>
     </div>
   );
 };

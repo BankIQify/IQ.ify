@@ -26,7 +26,6 @@ export const WordSearchProvider = ({
       // Game state
       isGameComplete: gameState.isGameComplete,
       loading: gameState.loading,
-      isDragging: gameState.isDragging,
       
       // Theme management
       themes: gameState.themes,
@@ -44,9 +43,6 @@ export const WordSearchProvider = ({
       
       // Actions
       handleCellClick: gameState.handleCellClick,
-      handleMouseDown: gameState.handleMouseDown,
-      handleMouseEnter: gameState.handleMouseEnter,
-      handleMouseUp: gameState.handleMouseUp,
       checkSelection: gameState.checkSelection,
       handleSelectTheme: gameState.handleSelectTheme,
       handleNewPuzzle: gameState.handleNewPuzzle,

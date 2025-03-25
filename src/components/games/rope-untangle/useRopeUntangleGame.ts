@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import type { Difficulty } from "@/components/games/GameSettings";
 import type { 
@@ -114,138 +113,107 @@ export const useRopeUntangleGame = (difficulty: Difficulty, gameState: any) => {
     const extraHolesCount = difficulty === "easy" ? 4 : 
                           difficulty === "medium" ? 2 : 0;
     
-    // Create pairs of pins and holes
+    // Create ropes, pins and holes
     for (let i = 0; i < ropeCount; i++) {
       const color = colors[i % colors.length];
       const ropeId = `rope-${i}`;
-      const startPinId = `start-pin-${i}`;
-      const endPinId = `end-pin-${i}`;
-      const startHoleId = `start-hole-${i}`;
-      const endHoleId = `end-hole-${i}`;
+      const pinId = `pin-${i}`;
+      const holeId = `hole-${i}`;
       
-      // Create starting pin at random position
-      const startPinX = margin + Math.random() * (boardWidth / 3 - margin);
-      const startPinY = margin + Math.random() * (boardHeight - 2 * margin);
+      // Create pin at random position
+      const pinX = Math.random() * (boardWidth - 2 * margin) + margin;
+      const pinY = Math.random() * (boardHeight - 2 * margin) + margin;
       
-      // Create ending pin at far side of board
-      const endPinX = boardWidth - margin - Math.random() * (boardWidth / 3 - margin);
-      const endPinY = margin + Math.random() * (boardHeight - 2 * margin);
-      
-      // Create corresponding holes at opposite sides
-      const startHoleX = margin + Math.random() * (boardWidth / 3 - margin);
-      const startHoleY = margin + Math.random() * (boardHeight - 2 * margin);
-      
-      const endHoleX = boardWidth - margin - Math.random() * (boardWidth / 3 - margin);
-      const endHoleY = margin + Math.random() * (boardHeight - 2 * margin);
+      // Create matching hole at some distance
+      const holeDistance = 200 + Math.random() * 200; // Distance between 200-400px
+      const holeAngle = Math.random() * 2 * Math.PI; // Random angle
+      const holeX = Math.max(margin, Math.min(boardWidth - margin, 
+        pinX + holeDistance * Math.cos(holeAngle)));
+      const holeY = Math.max(margin, Math.min(boardHeight - margin,
+        pinY + holeDistance * Math.sin(holeAngle)));
       
       // For hard difficulty, some pins require keys to unlock
       const requiresKey = includeLocks && i >= 2 && Math.random() > 0.5;
       const requiredKeyId = requiresKey ? `key-${i}` : undefined;
       
-      // Add start pin
+      // Add pin
       generatedPins.push({
-        id: startPinId,
-        x: startPinX,
-        y: startPinY,
+        id: pinId,
+        x: pinX,
+        y: pinY,
         color,
         isMovable: !requiresKey,
-        matchingHoleId: startHoleId,
+        matchingHoleId: holeId,
         isMatched: false,
         requiredKeyId
       });
       
-      // Add end pin 
-      generatedPins.push({
-        id: endPinId,
-        x: endPinX,
-        y: endPinY,
-        color,
-        isMovable: !requiresKey,
-        matchingHoleId: endHoleId,
-        isMatched: false,
-        requiredKeyId
-      });
-      
-      // Add matching holes
+      // Add matching hole
       generatedHoles.push({
-        id: startHoleId,
-        x: startHoleX,
-        y: startHoleY,
+        id: holeId,
+        x: holeX,
+        y: holeY,
         color,
         isOccupied: false
       });
       
-      generatedHoles.push({
-        id: endHoleId,
-        x: endHoleX,
-        y: endHoleY,
-        color,
-        isOccupied: false
-      });
+      // Create rope segments between pin and hole
+      // For simplicity, create a rope with 3-5 segments
+      const segmentCount = 2 + Math.floor(Math.random() * 3);
+      const points = [{x: pinX, y: pinY}];
       
-      // Create a rope connecting the two pins with multiple control points
-      const segmentCount = 4 + Math.floor(Math.random() * 3); // More segments for more complex ropes
-      const points = [];
-      
-      // Add starting pin position
-      points.push({x: startPinX, y: startPinY});
-      
-      // Add intermediate control points
-      for (let j = 1; j < segmentCount - 1; j++) {
-        const ratio = j / (segmentCount - 1);
+      for (let j = 1; j < segmentCount; j++) {
+        // Create intermediate points for the rope
+        const ratio = j / segmentCount;
+        const randomOffset = (difficulty === "easy" ? 30 : 
+                              difficulty === "medium" ? 60 : 90);
         
-        // Calculate a base point along the direct line
-        const baseX = startPinX + (endPinX - startPinX) * ratio;
-        const baseY = startPinY + (endPinY - startPinY) * ratio;
+        const offsetX = (Math.random() - 0.5) * 2 * randomOffset;
+        const offsetY = (Math.random() - 0.5) * 2 * randomOffset;
         
-        // Add random offsets based on difficulty (harder = more complex ropes)
-        const offsetScale = difficulty === "easy" ? 30 : 
-                         difficulty === "medium" ? 60 : 100;
+        const x = pinX + (holeX - pinX) * ratio + offsetX;
+        const y = pinY + (holeY - pinY) * ratio + offsetY;
         
-        // Alternate offsets for a more wavy rope
-        const offsetX = ((j % 2 === 0 ? 1 : -1) + (Math.random() - 0.5)) * offsetScale;
-        const offsetY = ((j % 2 === 0 ? -1 : 1) + (Math.random() - 0.5)) * offsetScale;
-        
-        points.push({
-          x: baseX + offsetX,
-          y: baseY + offsetY
-        });
+        points.push({x, y});
       }
       
-      // Add ending pin position
-      points.push({x: endPinX, y: endPinY});
+      // Add final destination point
+      points.push({x: holeX, y: holeY});
       
       generatedRopes.push({
         id: ropeId,
         points,
         color,
-        pinId: startPinId, // Now just using the starting pin as the reference
+        pinId,
         isUntangled: false
       });
       
       // Add keys and locks for hard difficulty
       if (requiresKey) {
-        // Calculate a position for the key along another rope's path
-        const otherRopeIndex = (i + 1) % ropeCount;
-        const keyPointX = boardWidth / 2 + (Math.random() - 0.5) * 100;
-        const keyPointY = boardHeight / 2 + (Math.random() - 0.5) * 100;
+        // Place key near another pin's path
+        const otherPinIndex = (i + 1) % ropeCount;
+        const otherRopePoints = generatedRopes[otherPinIndex]?.points || [];
         
-        generatedKeys.push({
-          id: `key-${i}`,
-          x: keyPointX,
-          y: keyPointY,
-          isCollected: false
-        });
-        
-        // Add lock near the pin
-        generatedLocks.push({
-          id: `lock-${i}`,
-          x: startPinX + 20,
-          y: startPinY + 20,
-          isUnlocked: false,
-          requiredKeyId: `key-${i}`,
-          affectedPinIds: [startPinId, endPinId]
-        });
+        if (otherRopePoints.length > 0) {
+          const keyPoint = otherRopePoints[Math.floor(otherRopePoints.length / 2)];
+          
+          generatedKeys.push({
+            id: `key-${i}`,
+            x: keyPoint.x + (Math.random() - 0.5) * 50,
+            y: keyPoint.y + (Math.random() - 0.5) * 50,
+            isCollected: false
+          });
+          
+          // Add lock near the pin
+          generatedLocks.push({
+            id: `lock-${i}`,
+            x: pinX + 20,
+            y: pinY + 20,
+            isUnlocked: false,
+            requiredKeyId: `key-${i}`,
+            affectedPinIds: [pinId]
+          });
+        }
       }
     }
     
@@ -287,27 +255,12 @@ export const useRopeUntangleGame = (difficulty: Difficulty, gameState: any) => {
     // Update rope points
     setRopes(prevRopes => 
       prevRopes.map(rope => {
-        // Find all pins associated with this rope
-        const isPinInRope = rope.points.some((_, idx) => 
-          (idx === 0 && rope.pinId === pinId) || 
-          (idx === rope.points.length - 1 && pins.find(p => p.id === pinId && p.color === rope.color))
-        );
-        
-        if (isPinInRope) {
+        if (rope.pinId === pinId) {
+          // Update first point of the rope
           const newPoints = [...rope.points];
-          
-          // Update the end point that corresponds to the pin
-          if (rope.pinId === pinId) {
-            // This is the start pin
-            newPoints[0] = { x, y };
-          } else {
-            // This might be the end pin
-            newPoints[newPoints.length - 1] = { x, y };
-          }
-          
+          newPoints[0] = { x, y };
           return { ...rope, points: newPoints, isUntangled: false };
         }
-        
         return rope;
       })
     );

@@ -1,5 +1,5 @@
 
-import type { CrosswordCell, CrosswordClue } from "./types";
+import type { CrosswordCell, CrosswordClue } from "../types";
 import { WordClue } from "./wordLists";
 
 export interface WordPlacement {
