@@ -104,18 +104,21 @@ export type Database = {
           exam_id: string | null
           id: number
           score: number | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           exam_id?: string | null
           id?: number
           score?: number | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           exam_id?: string | null
           id?: number
           score?: number | null
+          user_id?: string | null
         }
         Relationships: [
           {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -167,6 +168,8 @@ const TakeExam = () => {
       const finalScore = Math.round((correctAnswers / questions.length) * 100);
       setScore(finalScore);
       
+      console.log('Submitting exam result with user_id:', user?.id);
+      
       const { error } = await supabase
         .from('exam_results')
         .insert({
@@ -175,7 +178,10 @@ const TakeExam = () => {
           user_id: user?.id
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
       setExamCompleted(true);
       
