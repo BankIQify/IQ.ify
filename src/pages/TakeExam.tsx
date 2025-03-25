@@ -46,7 +46,8 @@ const TakeExam = () => {
     handleNextQuestion,
     handlePreviousQuestion,
     handleSubmitExam,
-    startReviewMode
+    startReviewMode,
+    exitReviewMode
   } = useExam({ 
     examId, 
     userId: user?.id 
@@ -92,6 +93,7 @@ const TakeExam = () => {
         currentAnswerId={answers[currentQuestion.id]}
         examCompleted={examCompleted}
         onSelectAnswer={handleSelectAnswer}
+        reviewMode={reviewMode}
       />
       
       <ExamNavigation
@@ -101,6 +103,8 @@ const TakeExam = () => {
         onNext={handleNextQuestion}
         onSubmit={handleSubmitExam}
         submitting={submitting}
+        reviewMode={reviewMode}
+        onExitReview={exitReviewMode}
       />
     </div>
   );

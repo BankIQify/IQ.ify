@@ -1,16 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-
-export interface Question {
-  id: string;
-  content: {
-    question: string;
-    options?: string[];
-    answer: string | number;
-  };
-  questionType: string;
-}
+import { Question, ExamData } from "@/types/exam";
+import { fetchExamById, fetchExamQuestions, submitExamResult } from "@/services/examService";
 
 interface UseExamProps {
   examId: string | undefined;
@@ -21,7 +13,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [exam, setExam] = useState<any>(null);
+  const [exam, setExam] = useState<ExamData | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number>>({});
@@ -32,68 +24,13 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
   useEffect(() => {
     if (!examId || !userId) return;
 
-    const fetchExam = async () => {
+    const loadExamData = async () => {
       try {
-        const { data: examData, error: examError } = await supabase
-          .from('exams')
-          .select('*')
-          .eq('id', examId)
-          .single();
-        
-        if (examError) throw examError;
+        const examData = await fetchExamById(examId);
         setExam(examData);
         
-        let query = supabase
-          .from('questions')
-          .select('id, content, question_type');
-        
-        if (examData.is_standard) {
-          const sectionsQuery = await supabase
-            .from('question_sections')
-            .select('id')
-            .eq('category', examData.category as "verbal" | "non_verbal" | "brain_training");
-          
-          if (sectionsQuery.error) throw sectionsQuery.error;
-          
-          const sectionIds = sectionsQuery.data.map(section => section.id);
-          
-          const subTopicsQuery = await supabase
-            .from('sub_topics')
-            .select('id')
-            .in('section_id', sectionIds);
-          
-          if (subTopicsQuery.error) throw subTopicsQuery.error;
-          
-          const subTopicIds = subTopicsQuery.data.map(subTopic => subTopic.id);
-          
-          query = query.in('sub_topic_id', subTopicIds);
-        } else {
-          const { data: examSubTopics, error: subTopicsError } = await supabase
-            .from('exam_sub_topics')
-            .select('sub_topic_id')
-            .eq('exam_id', examId);
-          
-          if (subTopicsError) throw subTopicsError;
-          
-          if (examSubTopics.length > 0) {
-            const subTopicIds = examSubTopics.map(est => est.sub_topic_id);
-            query = query.in('sub_topic_id', subTopicIds);
-          }
-        }
-        
-        query = query.limit(examData.question_count);
-        
-        const { data: questionsData, error: questionsError } = await query;
-        
-        if (questionsError) throw questionsError;
-        
-        const formattedQuestions = questionsData.map(q => ({
-          id: q.id,
-          content: q.content,
-          questionType: q.question_type
-        })) as Question[];
-        
-        setQuestions(formattedQuestions);
+        const questionsData = await fetchExamQuestions(examData, examData.question_count);
+        setQuestions(questionsData);
       } catch (error: any) {
         console.error('Error fetching exam:', error);
         toast({
@@ -106,7 +43,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       }
     };
 
-    fetchExam();
+    loadExamData();
   }, [examId, userId, toast]);
 
   const handleSelectAnswer = (answerId: string | number) => {
@@ -154,19 +91,12 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       const finalScore = Math.round((correctAnswers / questions.length) * 100);
       setScore(finalScore);
       
-      console.log('Submitting exam result with user_id:', userId);
-      
-      const { error } = await supabase
-        .from('exam_results')
-        .insert({
-          exam_id: examId,
+      if (userId && examId) {
+        await submitExamResult({
+          examId,
           score: finalScore,
-          user_id: userId
+          userId
         });
-      
-      if (error) {
-        console.error('Error details:', error);
-        throw error;
       }
       
       setExamCompleted(true);
@@ -191,6 +121,10 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     setReviewMode(true);
     setCurrentQuestionIndex(0);
   };
+  
+  const exitReviewMode = () => {
+    setReviewMode(false);
+  };
 
   return {
     loading,
@@ -207,6 +141,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     handleNextQuestion,
     handlePreviousQuestion,
     handleSubmitExam,
-    startReviewMode
+    startReviewMode,
+    exitReviewMode
   };
 };
