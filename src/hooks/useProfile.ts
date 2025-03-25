@@ -11,6 +11,7 @@ export const useProfile = (user: User | null) => {
 
   const getProfile = async (userId: string) => {
     try {
+      console.log("Fetching profile for user:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -23,6 +24,7 @@ export const useProfile = (user: User | null) => {
       }
 
       if (data) {
+        console.log("Profile retrieved:", data.id);
         // Fetch focus areas
         const { data: focusAreasData, error: focusAreasError } = await supabase
           .from("user_focus_areas")
@@ -42,6 +44,8 @@ export const useProfile = (user: User | null) => {
         };
         
         setProfile(typedProfile);
+      } else {
+        console.log("No profile found for user:", userId);
       }
     } catch (error) {
       console.error("Error in getProfile:", error);
@@ -53,6 +57,7 @@ export const useProfile = (user: User | null) => {
     if (!user) throw new Error("User not authenticated");
     
     try {
+      console.log("Updating profile for user:", user.id);
       // Handle basic profile data (excluding focus_areas)
       const { focus_areas, ...basicProfileData } = profileData;
       
@@ -90,6 +95,8 @@ export const useProfile = (user: User | null) => {
         title: "Profile updated",
         description: "Your profile has been successfully updated.",
       });
+      
+      console.log("Profile successfully updated");
     } catch (error: any) {
       console.error("Error updating profile:", error);
       toast({

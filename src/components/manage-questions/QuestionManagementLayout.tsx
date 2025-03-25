@@ -19,10 +19,10 @@ export const QuestionManagementLayout = ({
   pendingCount
 }: QuestionManagementLayoutProps) => {
   return (
-    <div className="page-container">
-      <h1 className="section-title">Question Management</h1>
+    <div className="page-container p-4 md:p-6">
+      <h1 className="section-title text-2xl font-bold mb-6">Question Management</h1>
 
-      <Tabs value={activeTab} onValueChange={handleTabChange}>
+      <Tabs value={activeTab} onValueChange={handleTabChange} defaultValue="bank">
         <TabHeader
           activeTab={activeTab}
           handleTabChange={handleTabChange}

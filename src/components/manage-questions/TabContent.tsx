@@ -18,32 +18,34 @@ export const TabContent = ({
   showHomepageTab, 
   showWebhooksTab 
 }: TabContentProps) => {
+  console.log("TabContent rendering with activeTab:", activeTab);
+  
   return (
     <>
-      <TabsContent value="bank">
+      <TabsContent value="bank" className="mt-4">
         <CompleteQuestionBank />
       </TabsContent>
 
-      <TabsContent value="manual">
+      <TabsContent value="manual" className="mt-4">
         <ManualQuestionUpload />
       </TabsContent>
 
-      <TabsContent value="categories">
+      <TabsContent value="categories" className="mt-4">
         <CategoryManager />
       </TabsContent>
 
-      <TabsContent value="puzzles">
+      <TabsContent value="puzzles" className="mt-4">
         <GamePuzzlesManager />
       </TabsContent>
 
       {showHomepageTab && (
-        <TabsContent value="homepage">
+        <TabsContent value="homepage" className="mt-4">
           <HomepageEditor />
         </TabsContent>
       )}
 
       {showWebhooksTab && (
-        <TabsContent value="webhooks">
+        <TabsContent value="webhooks" className="mt-4">
           <WebhookQuestionReview />
         </TabsContent>
       )}

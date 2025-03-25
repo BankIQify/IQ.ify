@@ -17,6 +17,8 @@ export const TabHeader = ({
   showWebhooksTab,
   pendingCount,
 }: TabHeaderProps) => {
+  console.log("TabHeader rendering with activeTab:", activeTab);
+  
   return (
     <TabsList className={`grid w-full ${showHomepageTab && showWebhooksTab ? 'grid-cols-6' : showHomepageTab || showWebhooksTab ? 'grid-cols-5' : 'grid-cols-4'}`}>
       <TabsTrigger value="bank" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">

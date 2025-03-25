@@ -21,15 +21,20 @@ export const useManageQuestions = () => {
     const tab = params.get("tab");
     if (tab && ["bank", "manual", "categories", "puzzles", "homepage", "webhooks"].includes(tab)) {
       setActiveTab(tab);
+      console.log("Setting active tab from URL:", tab);
     }
   }, [location]);
 
   // Check for data_input role specifically
   useEffect(() => {
     const checkDataInputRole = async () => {
-      if (!user) return;
+      if (!user) {
+        setHasDataInputRole(false);
+        return;
+      }
       
       try {
+        console.log("Checking data_input role for user:", user.id);
         const { data, error } = await supabase
           .from('user_roles')
           .select('*')
@@ -42,6 +47,7 @@ export const useManageQuestions = () => {
           return;
         }
 
+        console.log("Data input role check result:", data);
         setHasDataInputRole(!!data);
       } catch (error) {
         console.error('Error in checkDataInputRole:', error);
@@ -50,28 +56,6 @@ export const useManageQuestions = () => {
 
     checkDataInputRole();
   }, [user]);
-
-  // Redirect if not admin or data_input role
-  useEffect(() => {
-    if (!user) {
-      toast({
-        title: "Access Denied",
-        description: "You must be logged in to access this page.",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
-    }
-
-    if (!isAdmin && !hasDataInputRole) {
-      toast({
-        title: "Access Denied",
-        description: "You need admin or data team privileges to access this page.",
-        variant: "destructive",
-      });
-      navigate("/");
-    }
-  }, [user, isAdmin, hasDataInputRole, navigate, toast]);
 
   // Fetch sections for the CategoriesTable
   useEffect(() => {
@@ -103,8 +87,10 @@ export const useManageQuestions = () => {
       }
     };
 
-    fetchSections();
-  }, [toast]);
+    if (user && (isAdmin || hasDataInputRole)) {
+      fetchSections();
+    }
+  }, [toast, user, isAdmin, hasDataInputRole]);
 
   // Fetch pending webhook events count
   useEffect(() => {
@@ -132,6 +118,7 @@ export const useManageQuestions = () => {
   }, [user, isAdmin, hasDataInputRole]);
 
   const handleTabChange = (value: string) => {
+    console.log("Tab change requested to:", value);
     setActiveTab(value);
     // Update URL with current tab
     const params = new URLSearchParams(location.search);
