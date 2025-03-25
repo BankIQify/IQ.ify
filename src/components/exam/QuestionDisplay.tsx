@@ -20,7 +20,7 @@ const QuestionDisplay = ({
   reviewMode = false
 }: QuestionDisplayProps) => {
   // Ensure we're comparing values of the same type
-  const correctAnswer = question.content.answer;
+  const correctAnswer = question.content.correctAnswer || question.content.answer;
   const isCorrect = 
     typeof currentAnswerId === 'number' && typeof correctAnswer === 'number'
       ? currentAnswerId === correctAnswer
@@ -29,6 +29,12 @@ const QuestionDisplay = ({
   // Function to safely get the correct option text
   const getCorrectOptionText = () => {
     if (!question.content.options) return correctAnswer;
+    
+    // If the correctAnswer is already the full text, return it
+    if (typeof correctAnswer === 'string' && 
+        question.content.options.includes(correctAnswer)) {
+      return correctAnswer;
+    }
     
     // Convert index to number if it's a string
     const index = typeof correctAnswer === 'number' 
