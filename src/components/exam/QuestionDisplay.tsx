@@ -18,8 +18,12 @@ const QuestionDisplay = ({
   onSelectAnswer,
   reviewMode = false
 }: QuestionDisplayProps) => {
-  const isCorrect = currentAnswerId === question.content.answer;
+  // Ensure we're comparing values of the same type
   const correctAnswer = question.content.answer;
+  const isCorrect = 
+    typeof currentAnswerId === 'number' && typeof correctAnswer === 'number'
+      ? currentAnswerId === correctAnswer
+      : String(currentAnswerId) === String(correctAnswer);
   
   return (
     <Card className="p-6 mb-6">
@@ -88,7 +92,7 @@ const QuestionDisplay = ({
               ? "Correct answer! 👍" 
               : `Incorrect. The correct answer is: ${
                   question.content.options 
-                    ? question.content.options[Number(correctAnswer)]
+                    ? question.content.options[typeof correctAnswer === 'number' ? correctAnswer : Number(correctAnswer)]
                     : correctAnswer
                 }`
             }

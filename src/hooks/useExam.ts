@@ -83,11 +83,24 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       let correctAnswers = 0;
       
       questions.forEach(question => {
-        if (answers[question.id] === question.content.answer) {
+        // Ensure we're comparing values of the same type
+        const userAnswer = answers[question.id];
+        const correctAnswer = question.content.answer;
+        
+        // Strict comparison after ensuring types match
+        const isCorrect = 
+          typeof userAnswer === 'number' && typeof correctAnswer === 'number' 
+            ? userAnswer === correctAnswer
+            : String(userAnswer) === String(correctAnswer);
+        
+        if (isCorrect) {
           correctAnswers++;
         }
       });
       
+      console.log(`Correct answers: ${correctAnswers} out of ${questions.length}`);
+      
+      const answeredCount = Object.keys(answers).length;
       const finalScore = Math.round((correctAnswers / questions.length) * 100);
       setScore(finalScore);
       
@@ -103,7 +116,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       
       toast({
         title: "Exam Completed",
-        description: `Your score: ${finalScore}%`
+        description: `Your score: ${finalScore}% (${correctAnswers}/${questions.length} correct)`
       });
     } catch (error: any) {
       console.error('Error submitting exam:', error);
