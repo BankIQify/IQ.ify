@@ -31,7 +31,8 @@ export function CustomExamForm() {
     topicSelectorOpen,
     setTopicSelectorOpen,
     handleTopicSelection,
-    handleCreateCustomExam
+    handleCreateCustomExam,
+    isLoading
   } = useCustomExamForm();
 
   const { data: sections = [], isLoading: isLoadingSections } = useQuery({
@@ -108,8 +109,12 @@ export function CustomExamForm() {
         setTimeLimit={setTimeLimit}
       />
 
-      <Button onClick={handleCreateCustomExam} className="w-full">
-        Create Custom Exam
+      <Button 
+        onClick={handleCreateCustomExam} 
+        className="w-full"
+        disabled={isLoading}
+      >
+        {isLoading ? "Creating..." : "Create Custom Exam"}
       </Button>
     </div>
   );

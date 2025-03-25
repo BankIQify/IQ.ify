@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
@@ -17,6 +18,7 @@ interface SubTopic {
 
 export function useCustomExamForm() {
   const { toast } = useToast();
+  const { user } = useAuthContext();
   const [customName, setCustomName] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<QuestionCategory[]>([]);
   const [selectedSubTopics, setSelectedSubTopics] = useState<string[]>([]);
@@ -25,6 +27,7 @@ export function useCustomExamForm() {
   const [topicSelectorOpen, setTopicSelectorOpen] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
   const [subTopics, setSubTopics] = useState<SubTopic[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleTopicSelection = (topic: QuestionCategory) => {
     setSelectedTopics(prev => {
@@ -71,6 +74,15 @@ export function useCustomExamForm() {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create exams",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (questionCount < 10 || questionCount > 40) {
       toast({
         title: "Error",
@@ -89,7 +101,16 @@ export function useCustomExamForm() {
       return;
     }
 
+    setIsLoading(true);
+
     try {
+      console.log('Creating custom exam:', { 
+        name: customName, 
+        category: selectedTopics[0],
+        userId: user.id,
+        subTopics: selectedSubTopics
+      });
+
       // Create the exam
       const { data: exam, error: examError } = await supabase
         .from('exams')
@@ -98,7 +119,8 @@ export function useCustomExamForm() {
           category: selectedTopics[0], // Primary category
           question_count: questionCount,
           time_limit_minutes: timeLimit,
-          is_standard: false
+          is_standard: false,
+          created_by: user.id
         })
         .select()
         .single();
@@ -130,13 +152,15 @@ export function useCustomExamForm() {
       setSelectedSubTopics([]);
       setQuestionCount(20);
       setTimeLimit(undefined);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating custom exam:', error);
       toast({
         title: "Error",
-        description: "Failed to create custom exam",
+        description: error.message || "Failed to create custom exam",
         variant: "destructive"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -153,6 +177,7 @@ export function useCustomExamForm() {
     topicSelectorOpen,
     setTopicSelectorOpen,
     handleTopicSelection,
-    handleCreateCustomExam
+    handleCreateCustomExam,
+    isLoading
   };
 }

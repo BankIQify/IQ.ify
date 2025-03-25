@@ -6,11 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
 export function StandardExamForm() {
   const { toast } = useToast();
+  const { user } = useAuthContext();
   const navigate = useNavigate();
   const [standardCategory, setStandardCategory] = useState<QuestionCategory | ''>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,12 +27,21 @@ export function StandardExamForm() {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to create exams",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const examName = `Standard ${standardCategory.replace('_', ' ')} Test`;
       
-      console.log('Creating standard exam:', { examName, category: standardCategory });
+      console.log('Creating standard exam:', { examName, category: standardCategory, userId: user.id });
       
       const { data, error } = await supabase
         .from('exams')
@@ -38,7 +49,8 @@ export function StandardExamForm() {
           name: examName,
           category: standardCategory,
           question_count: 20,
-          is_standard: true
+          is_standard: true,
+          created_by: user.id
         })
         .select()
         .maybeSingle();
