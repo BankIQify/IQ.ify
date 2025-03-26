@@ -19,7 +19,8 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     currentQuestionIndex, 
     setCurrentQuestionIndex, 
     handleNextQuestion, 
-    handlePreviousQuestion 
+    handlePreviousQuestion,
+    jumpToQuestion
   } = useExamNavigation(questions.length);
   
   // Review mode state and handlers
@@ -78,6 +79,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     handlePreviousQuestion,
     handleSubmitExam: submitExam,
     startReviewMode,
-    exitReviewMode
+    exitReviewMode,
+    jumpToQuestion
   };
 };

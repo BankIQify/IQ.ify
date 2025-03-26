@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -38,6 +39,7 @@ const TakeExam = () => {
     exam,
     questions,
     currentQuestionIndex,
+    setCurrentQuestionIndex,
     answers,
     examCompleted,
     reviewMode,
@@ -47,7 +49,8 @@ const TakeExam = () => {
     handlePreviousQuestion,
     handleSubmitExam,
     startReviewMode,
-    exitReviewMode
+    exitReviewMode,
+    jumpToQuestion
   } = useExam({ 
     examId, 
     userId: user?.id 
@@ -164,6 +167,7 @@ const TakeExam = () => {
         submitting={submitting}
         reviewMode={reviewMode}
         onExitReview={exitReviewMode}
+        onJumpToQuestion={jumpToQuestion}
       />
     </div>
   );
