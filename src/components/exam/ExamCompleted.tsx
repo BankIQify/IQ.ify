@@ -41,7 +41,7 @@ const ExamCompleted = ({
         </div>
         
         <div className="mt-4 mb-6 px-4 py-3 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-800">
-          <p>This exam will not be saved after you leave this page. You can review your answers now, but once you return to practice, this exam data will be discarded.</p>
+          <p>This exam will not be saved. You can review your answers now, but once you leave this page, all exam data will be permanently discarded.</p>
         </div>
         
         <div className="flex justify-center space-x-4">

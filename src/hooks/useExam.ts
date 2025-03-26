@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Question, ExamData } from "@/types/exam";
@@ -75,6 +76,21 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     loadExamData();
   }, [examId, userId, toast]);
 
+  // Add a cleanup effect when navigating away from the exam page
+  useEffect(() => {
+    return () => {
+      // This cleanup function runs when the component unmounts
+      console.log('Leaving exam page - clearing all exam data');
+      // Clear all state to ensure exam data is not persisted
+      setExam(null);
+      setQuestions([]);
+      setAnswers({});
+      setExamCompleted(false);
+      setScore(0);
+      setReviewMode(false);
+    };
+  }, []);
+
   const handleSelectAnswer = (answerId: string | number) => {
     if (examCompleted && !reviewMode) return;
     
@@ -136,20 +152,16 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       
       console.log(`Correct answers: ${correctAnswers} out of ${questions.length}`);
       
-      const answeredCount = Object.keys(answers).length;
       const finalScore = Math.round((correctAnswers / questions.length) * 100);
       setScore(finalScore);
       
-      if (userId && examId) {
-        // Log performance data for analysis without saving the actual exam
-        // This updates a user's progress data without storing their completed exam
-        await logUserExamPerformance({
-          userId,
-          category: exam?.category || 'unknown',
-          score: finalScore,
-          completedAt: new Date().toISOString()
-        });
-      }
+      // We're no longer storing exam results in the database
+      // This only logs to the console for development purposes
+      console.log('Exam completed:', {
+        category: exam?.category || 'unknown',
+        score: finalScore,
+        completedAt: new Date().toISOString()
+      });
       
       setExamCompleted(true);
       
@@ -169,25 +181,6 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     }
   };
 
-  // Helper function to log performance data for progress analysis without saving the exam
-  const logUserExamPerformance = async (data: {
-    userId: string;
-    category: string;
-    score: number;
-    completedAt: string;
-  }) => {
-    try {
-      // Log to console for now - in a real implementation, this would send data to a progress tracking service
-      console.log('Logging user performance for progress analysis:', data);
-      
-      // Here you would typically call a function to update the user's progress metrics
-      // This is where you'd track improvement over time, areas of strength/weakness, etc.
-      // without saving the completed exam itself
-    } catch (error) {
-      console.error('Error logging user performance:', error);
-    }
-  };
-
   const startReviewMode = () => {
     setReviewMode(true);
     setCurrentQuestionIndex(0);
@@ -196,10 +189,8 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
   const exitReviewMode = () => {
     setReviewMode(false);
     
-    // Upon exiting review mode, clear all exam data since we don't want to keep it
+    // Upon exiting review mode, clear all exam data
     if (examCompleted) {
-      // We'll keep this function call to allow navigating back to practice
-      // but the exam data itself should be cleared from state in a real implementation
       toast({
         title: "Exam Discarded",
         description: "This exam has been completed and will not be saved."

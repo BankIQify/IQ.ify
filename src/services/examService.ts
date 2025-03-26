@@ -141,4 +141,6 @@ export const fetchExamQuestions = async (
   return questions;
 };
 
-// Note: The exam result submission function has been removed since we don't want to save completed exams
+// No exam result submission function since we don't want to save completed exams
+// Note: We may still want to track aggregated user progress metrics (without storing actual exams)
+// This could be implemented in a separate service that only stores summary statistics
