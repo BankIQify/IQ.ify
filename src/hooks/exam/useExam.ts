@@ -33,8 +33,16 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     handleSubmitExam,
     startReviewMode,
     exitReviewMode,
-    setCurrentQuestionIndex: setReviewQuestionIndex
+    setCurrentQuestionIndex: setReviewQuestionIndex,
+    currentQuestionIndex: reviewQuestionIndex
   } = useExamSubmission({ questions, answers });
+
+  // Sync the question indices when in review mode
+  useEffect(() => {
+    if (reviewMode) {
+      setCurrentQuestionIndex(reviewQuestionIndex);
+    }
+  }, [reviewMode, reviewQuestionIndex, setCurrentQuestionIndex]);
 
   // Add a cleanup effect when navigating away from the exam page
   useEffect(() => {

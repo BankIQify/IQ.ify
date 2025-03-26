@@ -14,6 +14,7 @@ export const useExamSubmission = ({ questions, answers }: UseExamSubmissionProps
   const [examCompleted, setExamCompleted] = useState(false);
   const [score, setScore] = useState(0);
   const [reviewMode, setReviewMode] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const handleSubmitExam = async () => {
     if (Object.keys(answers).length === 0) {
@@ -108,6 +109,7 @@ export const useExamSubmission = ({ questions, answers }: UseExamSubmissionProps
     handleSubmitExam,
     startReviewMode,
     exitReviewMode,
-    setCurrentQuestionIndex
+    setCurrentQuestionIndex,
+    currentQuestionIndex
   };
 };
