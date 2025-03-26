@@ -1,8 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { Brain, CheckCircle } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Brain } from "lucide-react";
 
 export const RecentActivity = () => {
   const { user } = useAuthContext();
@@ -54,8 +53,8 @@ export const RecentActivity = () => {
   })).sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 5);
 
   const getActivityIcon = (type: string) => {
-    if (type === 'game') return <Brain className="h-4 w-4 text-purple-500" />;
-    return <CheckCircle className="h-4 w-4 text-green-500" />;
+    // Only games are shown now
+    return <Brain className="h-4 w-4 text-purple-500" />;
   };
   
   const formatDate = (date: Date) => {
