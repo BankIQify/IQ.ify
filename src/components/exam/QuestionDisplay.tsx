@@ -122,20 +122,15 @@ const QuestionDisplay = ({
             }
           </p>
           
-          {/* Always show explanation in review mode if available */}
-          {question.content.explanation && (
-            <div className="mt-2 p-3 bg-gray-50 rounded-md">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Explanation:</h3>
-              <p className="text-gray-600">{question.content.explanation}</p>
-            </div>
-          )}
-          {/* If no explanation is available, try to fetch one */}
-          {!question.content.explanation && !isCorrect && (
-            <div className="mt-2 p-3 bg-gray-50 rounded-md">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Explanation:</h3>
-              <p className="text-gray-600">Understanding this question type helps build your reasoning skills. Practice similar questions to improve.</p>
-            </div>
-          )}
+          {/* Always show explanation in review mode */}
+          <div className="mt-2 p-3 bg-gray-50 rounded-md">
+            <h3 className="text-sm font-medium text-gray-700 mb-1">Explanation:</h3>
+            <p className="text-gray-600">
+              {question.content.explanation 
+                ? question.content.explanation 
+                : "Understanding this question type helps build your reasoning skills. Practice similar questions to improve."}
+            </p>
+          </div>
         </div>
       )}
     </Card>
