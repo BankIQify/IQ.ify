@@ -5,8 +5,8 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { CustomExamForm } from "@/components/exams/CustomExamForm";
 import { StandardExamForm } from "@/components/exams/StandardExamForm";
+import { CustomExamForm } from "@/components/exams/CustomExamForm";
 import { Loader2 } from "lucide-react";
 
 const ManageExams = () => {
@@ -53,17 +53,17 @@ const ManageExams = () => {
       <h1 className="section-title">Create Practice Tests</h1>
       
       <Tabs defaultValue="standard" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="standard">Standard Tests</TabsTrigger>
-          <TabsTrigger value="custom">Custom Tests</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="standard">Standard Practice</TabsTrigger>
+          <TabsTrigger value="custom">Custom Practice</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="standard">
           <Card className="p-6">
             <StandardExamForm />
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="custom">
           <Card className="p-6">
             <CustomExamForm />
