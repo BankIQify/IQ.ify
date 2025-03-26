@@ -24,11 +24,18 @@ export const fetchExamQuestions = async (
   exam: ExamData,
   limit: number
 ): Promise<Question[]> => {
-  console.log('Fetching questions for exam:', exam.id, 'with limit:', limit);
+  console.log('Fetching questions for exam:', exam.id, 'with limit:', limit, 'category:', exam.category);
   
+  // Enhanced query to also fetch sub_topic information
   let query = supabase
     .from('questions')
-    .select('id, content, question_type');
+    .select(`
+      id, 
+      content, 
+      question_type,
+      sub_topic_id,
+      sub_topics(name)
+    `);
   
   if (exam.is_standard) {
     console.log('Fetching questions for standard exam in category:', exam.category);
@@ -139,12 +146,15 @@ export const fetchExamQuestions = async (
     // For verbal questions, add extra logging
     if (exam.category === 'verbal') {
       console.log('Verbal question content:', validContent);
+      console.log('Verbal question sub_topic data:', q.sub_topics);
     }
     
     return {
       id: q.id,
       content: validContent,
-      questionType: q.question_type
+      questionType: q.question_type,
+      sub_topic_id: q.sub_topic_id,
+      sub_topic_name: q.sub_topics?.name
     };
   }) as Question[];
   

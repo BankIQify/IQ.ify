@@ -9,6 +9,8 @@ export interface Question {
     explanation?: string;
   };
   questionType: string;
+  sub_topic_id?: string;
+  sub_topic_name?: string;
 }
 
 export interface ExamData {

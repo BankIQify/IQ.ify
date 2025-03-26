@@ -45,6 +45,8 @@ const QuestionDisplay = ({
 
   // Log the question for debugging
   console.log('Processing question in QuestionDisplay:', question.id, question.content);
+  console.log('Question sub_topic_id:', question.sub_topic_id);
+  console.log('Question sub_topic_name:', question.sub_topic_name);
 
   // Get question text, handling different possible formats
   const questionText = question.content.question || 
@@ -52,6 +54,10 @@ const QuestionDisplay = ({
 
   // Get options, handling different possible formats
   const options = question.content.options || [];
+  
+  if (options.length === 0) {
+    console.warn('No options found for question:', question.id);
+  }
   
   // Determine correct answer - with improved fallback logic
   const correctAnswer = 
@@ -80,6 +86,15 @@ const QuestionDisplay = ({
   
   return (
     <Card className="p-6 mb-6 animate-fade-in">
+      {/* Add sub-topic name if available */}
+      {question.sub_topic_name && (
+        <div className="mb-2">
+          <span className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-md">
+            {question.sub_topic_name}
+          </span>
+        </div>
+      )}
+      
       <h2 className="text-xl font-semibold mb-4">
         {questionText}
       </h2>
