@@ -1,13 +1,12 @@
 
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { StandardExamForm } from "@/components/exams/StandardExamForm";
 import { CustomExamForm } from "@/components/exams/CustomExamForm";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ManageExams = () => {
   const { user, authInitialized } = useAuthContext();
@@ -50,26 +49,25 @@ const ManageExams = () => {
 
   return (
     <div className="page-container">
-      <h1 className="section-title">Create Practice Tests</h1>
+      <div className="flex items-center mb-6">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate(-1)} 
+          className="mr-2"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back
+        </Button>
+        <h1 className="section-title">Create Custom Practice Tests</h1>
+      </div>
       
-      <Tabs defaultValue="standard" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="standard">Standard Practice</TabsTrigger>
-          <TabsTrigger value="custom">Custom Practice</TabsTrigger>
-        </TabsList>
+      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-md text-blue-800">
+        <p><strong>Note:</strong> For standard practice tests, simply select a category on the <Link to="/practice" className="underline">Practice</Link> page.</p>
+      </div>
 
-        <TabsContent value="standard">
-          <Card className="p-6">
-            <StandardExamForm />
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="custom">
-          <Card className="p-6">
-            <CustomExamForm />
-          </Card>
-        </TabsContent>
-      </Tabs>
+      <Card className="p-6">
+        <CustomExamForm />
+      </Card>
     </div>
   );
 };

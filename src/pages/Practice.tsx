@@ -2,57 +2,81 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { BookOpen, Brain, ArrowLeft, FileText } from "lucide-react";
+import { BookOpen, Brain, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 const Practice = () => {
   const { category } = useParams<{ category?: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [exams, setExams] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuthContext();
+  const [loading, setLoading] = useState(false);
 
+  // Immediately create standard exam when category is selected
   useEffect(() => {
-    const fetchExams = async () => {
-      setLoading(true);
-      try {
-        let query = supabase.from('exams').select('*');
-        
-        if (category) {
-          query = query.eq('category', category);
-        }
-        
-        const { data, error } = await query.order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        setExams(data || []);
-      } catch (error) {
-        console.error('Error fetching exams:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load exams",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (category) {
+      createStandardExam(category);
+    }
+  }, [category]);
 
-    fetchExams();
-  }, [category, toast]);
+  const createStandardExam = async (examCategory: string) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to create practice tests",
+        variant: "destructive"
+      });
+      navigate("/auth");
+      return;
+    }
 
-  const getCategoryTitle = () => {
-    if (!category) return "All Practice Tests";
+    setLoading(true);
     
-    switch(category) {
+    try {
+      console.log(`Creating standard exam for category: ${examCategory}`);
+      
+      const examName = `Standard ${getCategoryTitle(examCategory).toLowerCase()} Test`;
+      
+      const { data: exam, error } = await supabase
+        .from('exams')
+        .insert({
+          name: examName,
+          category: examCategory,
+          is_standard: true,
+          question_count: 10,
+          time_limit_minutes: 15,
+          created_by: user.id
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      console.log('Exam created:', exam);
+      navigate(`/take-exam/${exam.id}`);
+    } catch (error) {
+      console.error('Error creating exam:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create exam. Please try again.",
+        variant: "destructive"
+      });
+      navigate("/lets-practice");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCategoryTitle = (categoryValue: string) => {
+    switch(categoryValue) {
       case "verbal": return "Verbal Reasoning";
       case "non_verbal": return "Non-Verbal Reasoning";
       case "brain_training": return "Brain Training";
-      default: return category.charAt(0).toUpperCase() + category.slice(1).replace("_", " ");
+      default: return categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1).replace("_", " ");
     }
   };
 
@@ -61,14 +85,36 @@ const Practice = () => {
       case "verbal": return <BookOpen className="w-8 h-8 text-education-600 mb-4" />;
       case "non_verbal": return <Brain className="w-8 h-8 text-education-600 mb-4" />;
       case "brain_training": return <Brain className="w-8 h-8 text-education-600 mb-4" />;
-      default: return <FileText className="w-8 h-8 text-education-600 mb-4" />;
+      default: return <Brain className="w-8 h-8 text-education-600 mb-4" />;
     }
   };
 
-  const handleExamClick = (examId: string) => {
-    navigate(`/take-exam/${examId}`);
-  };
+  // If we're on a category page, show loading state until exam is created
+  if (category && loading) {
+    return (
+      <div className="page-container">
+        <div className="flex items-center mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(-1)} 
+            className="mr-2"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          <h1 className="section-title">Creating {getCategoryTitle(category)} Test</h1>
+        </div>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="spinner mb-4"></div>
+            <p>Generating practice test...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  // Main category selection page
   return (
     <div className="page-container">
       <div className="flex items-center mb-6">
@@ -80,82 +126,47 @@ const Practice = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
-        <h1 className="section-title">{getCategoryTitle()} Practice</h1>
+        <h1 className="section-title">Practice Tests</h1>
       </div>
 
-      {loading ? (
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Select a Category</h2>
         <div className="grid-responsive">
-          {[1, 2, 3].map(i => (
-            <Card key={i} className="p-6">
-              <Skeleton className="h-8 w-8 mb-4" />
-              <Skeleton className="h-6 w-3/4 mb-2" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-2/3 mt-2" />
-            </Card>
-          ))}
-        </div>
-      ) : exams.length > 0 ? (
-        <div className="grid-responsive">
-          {exams.map(exam => (
-            <Card 
-              key={exam.id} 
-              className="p-6 card-hover cursor-pointer" 
-              onClick={() => handleExamClick(exam.id)}
-            >
-              {getExamIcon(exam.category)}
-              <h2 className="text-xl font-semibold mb-2">{exam.name}</h2>
-              <p className="text-gray-600 mb-2">
-                {exam.question_count} questions
-              </p>
-              <p className="text-sm text-gray-500">
-                {exam.is_standard ? "Standard Test" : "Custom Test"}
+          <Link to="/practice/verbal">
+            <Card className="p-6 card-hover cursor-pointer">
+              <BookOpen className="w-8 h-8 text-education-600 mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Verbal Reasoning</h2>
+              <p className="text-gray-600">
+                Practice vocabulary, comprehension, and word relationships
               </p>
             </Card>
-          ))}
+          </Link>
+          <Link to="/practice/non_verbal">
+            <Card className="p-6 card-hover cursor-pointer">
+              <Brain className="w-8 h-8 text-education-600 mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Non-Verbal Reasoning</h2>
+              <p className="text-gray-600">
+                Enhance spatial awareness and pattern recognition
+              </p>
+            </Card>
+          </Link>
+          <Link to="/practice/brain_training">
+            <Card className="p-6 card-hover cursor-pointer">
+              <Brain className="w-8 h-8 text-education-600 mb-4" />
+              <h2 className="text-xl font-semibold mb-2">Brain Training</h2>
+              <p className="text-gray-600">
+                Boost cognitive skills with targeted mental exercises
+              </p>
+            </Card>
+          </Link>
         </div>
-      ) : (
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">No exams found for this category.</p>
-          <Button asChild>
-            <Link to="/lets-practice">Create an Exam</Link>
-          </Button>
-        </div>
-      )}
+      </div>
 
-      {!category && (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
-          <div className="grid-responsive">
-            <Link to="/practice/verbal">
-              <Card className="p-6 card-hover cursor-pointer">
-                <BookOpen className="w-8 h-8 text-education-600 mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Verbal Reasoning</h2>
-                <p className="text-gray-600">
-                  Practice vocabulary, comprehension, and word relationships
-                </p>
-              </Card>
-            </Link>
-            <Link to="/practice/non_verbal">
-              <Card className="p-6 card-hover cursor-pointer">
-                <Brain className="w-8 h-8 text-education-600 mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Non-Verbal Reasoning</h2>
-                <p className="text-gray-600">
-                  Enhance spatial awareness and pattern recognition
-                </p>
-              </Card>
-            </Link>
-            <Link to="/practice/brain_training">
-              <Card className="p-6 card-hover cursor-pointer">
-                <Brain className="w-8 h-8 text-education-600 mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Brain Training</h2>
-                <p className="text-gray-600">
-                  Boost cognitive skills with targeted mental exercises
-                </p>
-              </Card>
-            </Link>
-          </div>
-        </div>
-      )}
+      <div className="mt-8">
+        <Button asChild className="mt-4">
+          <Link to="/lets-practice">Custom Practice Tests</Link>
+        </Button>
+      </div>
     </div>
   );
 };
