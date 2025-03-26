@@ -100,7 +100,7 @@ export const useExamData = ({ examId, userId }: UseExamDataProps) => {
                     content.correctAnswer !== undefined ? content.correctAnswer : 0,
               explanation: content.explanation || ''
             },
-            questionType: q.question_type || q.questionType,
+            questionType: q.questionType || q.question_type, // Fixed: Use questionType for consistency
             sub_topic_id: q.sub_topic_id,
             sub_topic_name: q.sub_topic_name
           };
