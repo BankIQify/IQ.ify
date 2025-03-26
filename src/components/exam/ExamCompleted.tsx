@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, BarChart } from "lucide-react";
 
 interface ExamCompletedProps {
   examName: string;
@@ -40,10 +40,18 @@ const ExamCompleted = ({
           </p>
         </div>
         
+        <div className="mt-4 mb-6 px-4 py-3 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-800">
+          <p>This exam will not be saved after you leave this page. You can review your answers now, but once you return to practice, this exam data will be discarded.</p>
+        </div>
+        
         <div className="flex justify-center space-x-4">
           <Button onClick={() => navigate("/practice")}>Return to Practice</Button>
           <Button variant="outline" onClick={onReviewAnswers}>
             Review Answers
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/dashboard")} className="flex items-center">
+            <BarChart className="w-4 h-4 mr-2" />
+            View Progress
           </Button>
         </div>
       </Card>

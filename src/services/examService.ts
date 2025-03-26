@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { ExamData, Question, ExamResult } from "@/types/exam";
+import { ExamData, Question } from "@/types/exam";
 
 export const fetchExamById = async (examId: string): Promise<ExamData> => {
   console.log('Fetching exam with ID:', examId);
@@ -141,21 +141,4 @@ export const fetchExamQuestions = async (
   return questions;
 };
 
-export const submitExamResult = async (result: ExamResult): Promise<void> => {
-  console.log('Submitting exam result:', result);
-  
-  const { error } = await supabase
-    .from('exam_results')
-    .insert({
-      exam_id: result.examId,
-      score: result.score,
-      user_id: result.userId
-    });
-  
-  if (error) {
-    console.error('Error submitting exam result:', error);
-    throw error;
-  }
-  
-  console.log('Exam result submitted successfully');
-};
+// Note: The exam result submission function has been removed since we don't want to save completed exams

@@ -1,5 +1,5 @@
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useEffect } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useExam } from "@/hooks/useExam";
 
@@ -11,7 +11,6 @@ import QuestionDisplay from "@/components/exam/QuestionDisplay";
 import ExamNavigation from "@/components/exam/ExamNavigation";
 import ExamHeader from "@/components/exam/ExamHeader";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 
 const TakeExam = () => {
@@ -53,6 +52,16 @@ const TakeExam = () => {
     examId, 
     userId: user?.id 
   });
+
+  // Add a cleanup effect when navigating away from the exam page
+  useEffect(() => {
+    return () => {
+      // This cleanup function runs when the component unmounts
+      console.log('Leaving exam page - exam data will be discarded');
+      // No need to do anything else here as React will naturally clean up the state
+      // when the component unmounts
+    };
+  }, []);
 
   // Log exam loading state
   console.log('TakeExam component:', { 

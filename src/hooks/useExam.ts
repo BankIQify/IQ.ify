@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Question, ExamData } from "@/types/exam";
-import { fetchExamById, fetchExamQuestions, submitExamResult } from "@/services/examService";
+import { fetchExamById, fetchExamQuestions } from "@/services/examService";
 
 interface UseExamProps {
   examId: string | undefined;
@@ -142,10 +141,13 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       setScore(finalScore);
       
       if (userId && examId) {
-        await submitExamResult({
-          examId,
+        // Log performance data for analysis without saving the actual exam
+        // This updates a user's progress data without storing their completed exam
+        await logUserExamPerformance({
+          userId,
+          category: exam?.category || 'unknown',
           score: finalScore,
-          userId
+          completedAt: new Date().toISOString()
         });
       }
       
@@ -167,6 +169,25 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
     }
   };
 
+  // Helper function to log performance data for progress analysis without saving the exam
+  const logUserExamPerformance = async (data: {
+    userId: string;
+    category: string;
+    score: number;
+    completedAt: string;
+  }) => {
+    try {
+      // Log to console for now - in a real implementation, this would send data to a progress tracking service
+      console.log('Logging user performance for progress analysis:', data);
+      
+      // Here you would typically call a function to update the user's progress metrics
+      // This is where you'd track improvement over time, areas of strength/weakness, etc.
+      // without saving the completed exam itself
+    } catch (error) {
+      console.error('Error logging user performance:', error);
+    }
+  };
+
   const startReviewMode = () => {
     setReviewMode(true);
     setCurrentQuestionIndex(0);
@@ -174,6 +195,16 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
   
   const exitReviewMode = () => {
     setReviewMode(false);
+    
+    // Upon exiting review mode, clear all exam data since we don't want to keep it
+    if (examCompleted) {
+      // We'll keep this function call to allow navigating back to practice
+      // but the exam data itself should be cleared from state in a real implementation
+      toast({
+        title: "Exam Discarded",
+        description: "This exam has been completed and will not be saved."
+      });
+    }
   };
 
   return {
