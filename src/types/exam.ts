@@ -5,6 +5,7 @@ export interface Question {
     question: string;
     options?: string[];
     answer: string | number;
+    explanation?: string;
   };
   questionType: string;
 }

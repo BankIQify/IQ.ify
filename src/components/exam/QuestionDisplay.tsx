@@ -124,6 +124,13 @@ const QuestionDisplay = ({
                 }`
             }
           </p>
+          
+          {!isCorrect && question.content.explanation && (
+            <div className="mt-2 p-3 bg-gray-50 rounded-md">
+              <h3 className="text-sm font-medium text-gray-700 mb-1">Explanation:</h3>
+              <p className="text-gray-600">{question.content.explanation}</p>
+            </div>
+          )}
         </div>
       )}
     </Card>
