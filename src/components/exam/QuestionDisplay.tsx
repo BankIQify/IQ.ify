@@ -29,6 +29,9 @@ const QuestionDisplay = ({
     );
   }
 
+  // Log the question for debugging
+  console.log('Processing question in QuestionDisplay:', question);
+
   // Determine correct answer - first try answer directly, fall back to correctAnswer
   const correctAnswer = question.content.answer !== undefined 
     ? question.content.answer 
@@ -59,7 +62,7 @@ const QuestionDisplay = ({
         {question.content.question}
       </h2>
       
-      {question.content.options && (
+      {question.content.options && Array.isArray(question.content.options) && question.content.options.length > 0 ? (
         <div className="space-y-3">
           {question.content.options.map((option, index) => {
             const isSelected = currentAnswerId === index;
@@ -118,6 +121,10 @@ const QuestionDisplay = ({
             );
           })}
         </div>
+      ) : (
+        <div className="p-4 bg-yellow-50 rounded-md border border-yellow-200">
+          <p className="text-yellow-700">This question has no options. This is likely a data issue.</p>
+        </div>
       )}
       
       {reviewMode && examCompleted && currentAnswerId !== undefined && (
@@ -126,7 +133,7 @@ const QuestionDisplay = ({
             {isCorrect 
               ? "Correct answer! 👍" 
               : `Incorrect. The correct answer is: ${
-                  question.content.options 
+                  question.content.options && Array.isArray(question.content.options) && question.content.options.length > 0
                     ? question.content.options[typeof correctAnswer === 'number' ? correctAnswer : Number(correctAnswer)] || String(correctAnswer)
                     : String(correctAnswer)
                 }`

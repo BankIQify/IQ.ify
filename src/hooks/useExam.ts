@@ -46,20 +46,29 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
         }
 
         // Map the questions to ensure consistent structure
-        const mappedQuestions = questionsData.map(q => ({
-          id: q.id,
-          content: {
-            ...q.content,
-            // Ensure question content has the correct structure
-            question: q.content.question || 'Question not available',
-            options: q.content.options || [],
-            // Handle different answer property formats
-            answer: q.content.answer !== undefined ? q.content.answer : 
-                  q.content.correctAnswer !== undefined ? q.content.correctAnswer : 0,
-            explanation: q.content.explanation || ''
-          },
-          questionType: q.questionType
-        }));
+        const mappedQuestions = questionsData.map(q => {
+          // Ensure content is an object
+          const content = typeof q.content === 'string' 
+            ? JSON.parse(q.content) 
+            : q.content;
+            
+          console.log('Processing question:', q.id, 'content:', content);
+          
+          return {
+            id: q.id,
+            content: {
+              ...content,
+              // Ensure question content has the correct structure
+              question: content.question || 'Question not available',
+              options: Array.isArray(content.options) ? content.options : [],
+              // Handle different answer property formats
+              answer: content.answer !== undefined ? content.answer : 
+                    content.correctAnswer !== undefined ? content.correctAnswer : 0,
+              explanation: content.explanation || ''
+            },
+            questionType: q.questionType
+          };
+        });
         
         console.log('Mapped questions:', mappedQuestions);
         setQuestions(mappedQuestions);
@@ -95,6 +104,8 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
 
   const handleSelectAnswer = (answerId: string | number) => {
     if (examCompleted && !reviewMode) return;
+    
+    console.log('Selected answer:', answerId, 'for question:', questions[currentQuestionIndex].id);
     
     setAnswers({
       ...answers,

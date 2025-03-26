@@ -90,6 +90,11 @@ export const fetchExamQuestions = async (
     }
   }
   
+  // Add a specific debug log for verbal category
+  if (exam.category === 'verbal') {
+    console.log('Fetching VERBAL questions - this should include additional debug info');
+  }
+  
   query = query.limit(limit);
   
   const { data, error } = await query;
@@ -129,6 +134,11 @@ export const fetchExamQuestions = async (
     
     if (!validContent || !validContent.question) {
       console.error('Invalid question content detected:', q);
+    }
+    
+    // For verbal questions, add extra logging
+    if (exam.category === 'verbal') {
+      console.log('Verbal question content:', validContent);
     }
     
     return {
