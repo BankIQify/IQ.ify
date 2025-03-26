@@ -1,5 +1,5 @@
-
-import { useParams, useNavigate, useEffect } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { useExam } from "@/hooks/useExam";
 
