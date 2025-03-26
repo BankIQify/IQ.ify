@@ -29,8 +29,12 @@ const QuestionDisplay = ({
     );
   }
 
-  // Extract the correct answer - use the answer property directly
-  const correctAnswer = question.content.answer;
+  // Determine correct answer - first try answer directly, fall back to correctAnswer
+  const correctAnswer = question.content.answer !== undefined 
+    ? question.content.answer 
+    : question.content.correctAnswer !== undefined 
+      ? question.content.correctAnswer 
+      : undefined;
 
   if (correctAnswer === undefined) {
     console.error('No correct answer found in question:', question);
@@ -59,7 +63,10 @@ const QuestionDisplay = ({
         <div className="space-y-3">
           {question.content.options.map((option, index) => {
             const isSelected = currentAnswerId === index;
-            const isCorrectAnswer = correctAnswer === index || correctAnswer === option;
+            const isCorrectAnswer = 
+              correctAnswer === index || 
+              correctAnswer === option ||
+              (typeof correctAnswer === 'string' && option === correctAnswer);
             
             // Determine the styling based on the state
             let className = "flex items-center p-3 rounded-md cursor-pointer transition-colors ";
@@ -82,7 +89,11 @@ const QuestionDisplay = ({
             return (
               <div 
                 key={index}
-                onClick={() => onSelectAnswer(index)}
+                onClick={() => {
+                  if (!examCompleted || reviewMode) {
+                    onSelectAnswer(index);
+                  }
+                }}
                 className={className}
                 aria-selected={isSelected}
                 role="option"
@@ -116,8 +127,8 @@ const QuestionDisplay = ({
               ? "Correct answer! 👍" 
               : `Incorrect. The correct answer is: ${
                   question.content.options 
-                    ? question.content.options[typeof correctAnswer === 'number' ? correctAnswer : Number(correctAnswer)] || correctAnswer
-                    : correctAnswer
+                    ? question.content.options[typeof correctAnswer === 'number' ? correctAnswer : Number(correctAnswer)] || String(correctAnswer)
+                    : String(correctAnswer)
                 }`
             }
           </p>

@@ -53,8 +53,10 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
             // Ensure question content has the correct structure
             question: q.content.question || 'Question not available',
             options: q.content.options || [],
-            // Use answer property directly
-            answer: q.content.answer !== undefined ? q.content.answer : 0
+            // Handle different answer property formats
+            answer: q.content.answer !== undefined ? q.content.answer : 
+                  q.content.correctAnswer !== undefined ? q.content.correctAnswer : 0,
+            explanation: q.content.explanation || ''
           },
           questionType: q.questionType
         }));
@@ -129,7 +131,9 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       
       questions.forEach(question => {
         // Get the correct answer from the question content
-        const correctAnswer = question.content.answer;
+        const correctAnswer = question.content.answer !== undefined 
+          ? question.content.answer 
+          : question.content.correctAnswer;
         
         if (correctAnswer === undefined) {
           console.error('No correct answer found for question:', question);
@@ -138,6 +142,11 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
         
         // Ensure we're comparing values of the same type
         const userAnswer = answers[question.id];
+        
+        if (userAnswer === undefined) {
+          // Unanswered question
+          return;
+        }
         
         // Strict comparison after ensuring types match
         const isCorrect = 

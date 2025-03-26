@@ -4,7 +4,8 @@ export interface Question {
   content: {
     question: string;
     options?: string[];
-    answer: string | number;
+    answer?: string | number;
+    correctAnswer?: string | number; // Some questions use this format
     explanation?: string;
   };
   questionType: string;
