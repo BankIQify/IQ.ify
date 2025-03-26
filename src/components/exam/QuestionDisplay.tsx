@@ -18,6 +18,19 @@ const QuestionDisplay = ({
   onSelectAnswer,
   reviewMode = false
 }: QuestionDisplayProps) => {
+  if (!question || !question.content) {
+    console.error('Invalid question data:', question);
+    return (
+      <Card className="p-6 mb-6">
+        <div className="text-center py-4">
+          <p className="text-red-500">Error: Question data is invalid or incomplete</p>
+        </div>
+      </Card>
+    );
+  }
+
+  console.log('Rendering question:', question.id, question.content.question);
+  
   // Ensure we're comparing values of the same type
   const correctAnswer = question.content.answer;
   const isCorrect = 

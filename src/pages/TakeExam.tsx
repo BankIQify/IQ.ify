@@ -79,6 +79,8 @@ const TakeExam = () => {
   // Active exam state or review mode
   const currentQuestion = questions[currentQuestionIndex];
   
+  console.log('Current question:', currentQuestion);
+  
   return (
     <div className="page-container">
       <ExamHeader
@@ -88,13 +90,19 @@ const TakeExam = () => {
         timeLimit={exam.time_limit_minutes}
       />
       
-      <QuestionDisplay
-        question={currentQuestion}
-        currentAnswerId={answers[currentQuestion.id]}
-        examCompleted={examCompleted}
-        onSelectAnswer={handleSelectAnswer}
-        reviewMode={reviewMode}
-      />
+      {currentQuestion ? (
+        <QuestionDisplay
+          question={currentQuestion}
+          currentAnswerId={answers[currentQuestion.id]}
+          examCompleted={examCompleted}
+          onSelectAnswer={handleSelectAnswer}
+          reviewMode={reviewMode}
+        />
+      ) : (
+        <div className="text-center py-4 my-6 bg-yellow-50 rounded-lg border border-yellow-200">
+          <p className="text-yellow-700">Question data could not be loaded.</p>
+        </div>
+      )}
       
       <ExamNavigation
         currentQuestionIndex={currentQuestionIndex}

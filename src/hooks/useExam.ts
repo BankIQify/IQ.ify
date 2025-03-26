@@ -26,10 +26,25 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
 
     const loadExamData = async () => {
       try {
+        setLoading(true);
+        console.log('Loading exam data for examId:', examId);
+        
         const examData = await fetchExamById(examId);
+        console.log('Exam data loaded:', examData);
         setExam(examData);
         
         const questionsData = await fetchExamQuestions(examData, examData.question_count);
+        console.log('Questions data loaded:', questionsData);
+        
+        if (questionsData.length === 0) {
+          console.error('No questions returned from the database');
+          toast({
+            title: "Error",
+            description: "No questions available for this exam",
+            variant: "destructive"
+          });
+        }
+        
         setQuestions(questionsData);
       } catch (error: any) {
         console.error('Error fetching exam:', error);
