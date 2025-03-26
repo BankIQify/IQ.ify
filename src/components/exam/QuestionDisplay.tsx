@@ -32,10 +32,8 @@ const QuestionDisplay = ({
   // Log the question data to identify the structure
   console.log('Question data structure:', JSON.stringify(question, null, 2));
 
-  // Extract the correct answer - check if it's correctAnswer or answer property
-  const correctAnswer = question.content.correctAnswer !== undefined 
-    ? question.content.correctAnswer 
-    : question.content.answer;
+  // Extract the correct answer - use the answer property directly
+  const correctAnswer = question.content.answer;
 
   if (correctAnswer === undefined) {
     console.error('No correct answer found in question:', question);

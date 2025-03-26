@@ -108,18 +108,32 @@ export const fetchExamQuestions = async (
   
   // Log a sample question to understand its structure
   console.log('Sample question:', data[0]);
-  console.log('Sample question content:', data[0]?.content);
-
+  
+  // Check if content is a string and safely handle it
+  const validateContent = (content: any) => {
+    if (typeof content === 'string') {
+      try {
+        return JSON.parse(content);
+      } catch (e) {
+        console.error('Failed to parse question content string:', e);
+        return { question: 'Error parsing question' };
+      }
+    }
+    return content;
+  };
+  
   // Map the questions to ensure consistent structure
   const questions = data.map(q => {
-    // Verify content structure is valid
-    if (!q.content || !q.content.question) {
+    // Verify and parse content if needed
+    const validContent = validateContent(q.content);
+    
+    if (!validContent || !validContent.question) {
       console.error('Invalid question content detected:', q);
     }
     
     return {
       id: q.id,
-      content: q.content,
+      content: validContent,
       questionType: q.question_type
     };
   }) as Question[];

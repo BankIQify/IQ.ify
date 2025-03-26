@@ -53,11 +53,10 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
             // Ensure question content has the correct structure
             question: q.content.question || 'Question not available',
             options: q.content.options || [],
-            // Handle both correctAnswer and answer properties
-            answer: q.content.answer !== undefined ? q.content.answer : 
-                   q.content.correctAnswer !== undefined ? q.content.correctAnswer : 0
+            // Use answer property directly
+            answer: q.content.answer !== undefined ? q.content.answer : 0
           },
-          questionType: q.questionType || q.question_type
+          questionType: q.questionType
         }));
         
         console.log('Mapped questions:', mappedQuestions);
@@ -115,9 +114,7 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       
       questions.forEach(question => {
         // Get the correct answer from the question content
-        const correctAnswer = question.content.answer !== undefined 
-          ? question.content.answer 
-          : question.content.correctAnswer;
+        const correctAnswer = question.content.answer;
         
         if (correctAnswer === undefined) {
           console.error('No correct answer found for question:', question);
