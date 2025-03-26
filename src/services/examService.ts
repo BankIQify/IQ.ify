@@ -100,18 +100,31 @@ export const fetchExamQuestions = async (
   }
   
   console.log(`Retrieved ${data?.length || 0} questions`);
-  console.log('Sample question content:', data?.[0]?.content);
   
   if (!data || data.length === 0) {
     console.warn('No questions found for the exam');
     return [];
   }
   
-  return data.map(q => ({
-    id: q.id,
-    content: q.content,
-    questionType: q.question_type
-  })) as Question[];
+  // Log a sample question to understand its structure
+  console.log('Sample question:', data[0]);
+  console.log('Sample question content:', data[0]?.content);
+
+  // Map the questions to ensure consistent structure
+  const questions = data.map(q => {
+    // Verify content structure is valid
+    if (!q.content || !q.content.question) {
+      console.error('Invalid question content detected:', q);
+    }
+    
+    return {
+      id: q.id,
+      content: q.content,
+      questionType: q.question_type
+    };
+  }) as Question[];
+  
+  return questions;
 };
 
 export const submitExamResult = async (result: ExamResult): Promise<void> => {

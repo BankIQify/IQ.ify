@@ -29,10 +29,26 @@ const QuestionDisplay = ({
     );
   }
 
-  console.log('Rendering question:', question.id, question.content.question);
+  // Log the question data to identify the structure
+  console.log('Question data structure:', JSON.stringify(question, null, 2));
+
+  // Extract the correct answer - check if it's correctAnswer or answer property
+  const correctAnswer = question.content.correctAnswer !== undefined 
+    ? question.content.correctAnswer 
+    : question.content.answer;
+
+  if (correctAnswer === undefined) {
+    console.error('No correct answer found in question:', question);
+    return (
+      <Card className="p-6 mb-6">
+        <div className="text-center py-4">
+          <p className="text-red-500">Error: No correct answer found for this question</p>
+        </div>
+      </Card>
+    );
+  }
   
   // Ensure we're comparing values of the same type
-  const correctAnswer = question.content.answer;
   const isCorrect = 
     typeof currentAnswerId === 'number' && typeof correctAnswer === 'number'
       ? currentAnswerId === correctAnswer
@@ -48,7 +64,7 @@ const QuestionDisplay = ({
         <div className="space-y-3">
           {question.content.options.map((option, index) => {
             const isSelected = currentAnswerId === index;
-            const isCorrectAnswer = correctAnswer === index;
+            const isCorrectAnswer = correctAnswer === index || correctAnswer === option;
             
             // Determine the styling based on the state
             let className = "flex items-center p-3 rounded-md cursor-pointer transition-colors ";
@@ -105,7 +121,7 @@ const QuestionDisplay = ({
               ? "Correct answer! 👍" 
               : `Incorrect. The correct answer is: ${
                   question.content.options 
-                    ? question.content.options[typeof correctAnswer === 'number' ? correctAnswer : Number(correctAnswer)]
+                    ? question.content.options[typeof correctAnswer === 'number' ? correctAnswer : Number(correctAnswer)] || correctAnswer
                     : correctAnswer
                 }`
             }

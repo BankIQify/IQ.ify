@@ -12,6 +12,7 @@ import ExamNavigation from "@/components/exam/ExamNavigation";
 import ExamHeader from "@/components/exam/ExamHeader";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
+import { Card } from "@/components/ui/card";
 
 const TakeExam = () => {
   const { examId } = useParams<{ examId: string }>();
@@ -53,14 +54,53 @@ const TakeExam = () => {
     userId: user?.id 
   });
 
+  // Log exam loading state
+  console.log('TakeExam component:', { 
+    loading, 
+    examId, 
+    userId: user?.id,
+    questionsLoaded: questions.length > 0,
+    examLoaded: !!exam 
+  });
+
   // Loading state
   if (!authInitialized || loading) {
     return <LoadingState />;
   }
 
+  // No exam data state
+  if (!exam) {
+    return (
+      <Card className="p-6 m-6">
+        <div className="text-center py-6">
+          <h2 className="text-2xl font-bold text-red-600 mb-2">Exam Not Found</h2>
+          <p className="text-gray-600 mb-4">
+            We couldn't find the exam you're looking for. The exam may have been removed or the URL is incorrect.
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+          >
+            Go Back
+          </button>
+        </div>
+      </Card>
+    );
+  }
+
   // No questions state
-  if (!exam || questions.length === 0) {
-    return <NoQuestions />;
+  if (questions.length === 0) {
+    return (
+      <div className="page-container">
+        <ExamHeader
+          examName={exam.name}
+          currentQuestionNumber={0}
+          totalQuestions={0}
+          timeLimit={exam.time_limit_minutes}
+        />
+        <NoQuestions />
+      </div>
+    );
   }
 
   // Exam completed state (only if not in review mode)
@@ -99,9 +139,11 @@ const TakeExam = () => {
           reviewMode={reviewMode}
         />
       ) : (
-        <div className="text-center py-4 my-6 bg-yellow-50 rounded-lg border border-yellow-200">
-          <p className="text-yellow-700">Question data could not be loaded.</p>
-        </div>
+        <Card className="p-6 mb-6">
+          <div className="text-center py-4 my-6 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p className="text-yellow-700">Question data could not be loaded. Please try refreshing the page.</p>
+          </div>
+        </Card>
       )}
       
       <ExamNavigation

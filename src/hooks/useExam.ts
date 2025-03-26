@@ -44,8 +44,24 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
             variant: "destructive"
           });
         }
+
+        // Map the questions to ensure consistent structure
+        const mappedQuestions = questionsData.map(q => ({
+          id: q.id,
+          content: {
+            ...q.content,
+            // Ensure question content has the correct structure
+            question: q.content.question || 'Question not available',
+            options: q.content.options || [],
+            // Handle both correctAnswer and answer properties
+            answer: q.content.answer !== undefined ? q.content.answer : 
+                   q.content.correctAnswer !== undefined ? q.content.correctAnswer : 0
+          },
+          questionType: q.questionType || q.question_type
+        }));
         
-        setQuestions(questionsData);
+        console.log('Mapped questions:', mappedQuestions);
+        setQuestions(mappedQuestions);
       } catch (error: any) {
         console.error('Error fetching exam:', error);
         toast({
@@ -98,9 +114,18 @@ export const useExam = ({ examId, userId }: UseExamProps) => {
       let correctAnswers = 0;
       
       questions.forEach(question => {
+        // Get the correct answer from the question content
+        const correctAnswer = question.content.answer !== undefined 
+          ? question.content.answer 
+          : question.content.correctAnswer;
+        
+        if (correctAnswer === undefined) {
+          console.error('No correct answer found for question:', question);
+          return;
+        }
+        
         // Ensure we're comparing values of the same type
         const userAnswer = answers[question.id];
-        const correctAnswer = question.content.answer;
         
         // Strict comparison after ensuring types match
         const isCorrect = 
