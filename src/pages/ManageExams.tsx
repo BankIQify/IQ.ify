@@ -3,8 +3,10 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { CustomExamForm } from "@/components/exams/CustomExamForm";
+import { StandardExamForm } from "@/components/exams/StandardExamForm";
 import { Loader2 } from "lucide-react";
 
 const ManageExams = () => {
@@ -50,10 +52,24 @@ const ManageExams = () => {
     <div className="page-container">
       <h1 className="section-title">Create Practice Tests</h1>
       
-      {/* Since standard tests are now handled directly from Practice page, we're only showing CustomExamForm */}
-      <Card className="p-6">
-        <CustomExamForm />
-      </Card>
+      <Tabs defaultValue="standard" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="standard">Standard Tests</TabsTrigger>
+          <TabsTrigger value="custom">Custom Tests</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="standard">
+          <Card className="p-6">
+            <StandardExamForm />
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="custom">
+          <Card className="p-6">
+            <CustomExamForm />
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

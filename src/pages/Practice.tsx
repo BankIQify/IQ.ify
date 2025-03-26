@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Brain, ArrowLeft } from "lucide-react";
