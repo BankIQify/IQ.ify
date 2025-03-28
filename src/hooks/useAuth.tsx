@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,7 +92,11 @@ export const useAuth = () => {
 
       if (data.user) {
         console.log('User created successfully, updating profile for user:', data.user.id);
+<<<<<<< HEAD
         // Update profile with all user data
+=======
+        // Update profile with username and other data
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
@@ -96,6 +104,7 @@ export const useAuth = () => {
             username: profileData.username,
             avatar_url: profileData.avatar_url,
             avatar_config: profileData.avatar_config,
+<<<<<<< HEAD
             full_name: profileData.fullName,
             date_of_birth: profileData.dateOfBirth,
             country: profileData.country,
@@ -103,6 +112,8 @@ export const useAuth = () => {
             education_level: profileData.educationLevel,
             subjects: profileData.subjects || [],
             focus_areas: profileData.focus_areas || []
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           })
           .eq('id', data.user.id);
 
@@ -121,7 +132,11 @@ export const useAuth = () => {
           console.log('Adding focus areas for user:', data.user.id);
           const focusAreasToInsert = profileData.focus_areas.map(area => ({
             user_id: data.user!.id,
+<<<<<<< HEAD
             focus_area: area
+=======
+            focus_area: area as any
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           }));
 
           const { error: focusAreasError } = await supabase

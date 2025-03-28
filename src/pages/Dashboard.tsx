@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
+=======
+
+import { useEffect } from "react";
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -15,7 +20,10 @@ const Dashboard = () => {
   const { user, profile, isAdmin, authInitialized } = useAuthContext();
   const navigate = useNavigate();
   const { toast } = useToast();
+<<<<<<< HEAD
   const [activeTab, setActiveTab] = useState(isAdmin ? "admin" : "overview");
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 
   // Add debug logging
   useEffect(() => {
@@ -23,10 +31,16 @@ const Dashboard = () => {
       user: user?.id,
       profile: profile?.id,
       isAdmin,
+<<<<<<< HEAD
       authInitialized,
       activeTab
     });
   }, [user, profile, isAdmin, authInitialized, activeTab]);
+=======
+      authInitialized
+    });
+  }, [user, profile, isAdmin, authInitialized]);
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 
   useEffect(() => {
     if (authInitialized && !user) {
@@ -58,21 +72,31 @@ const Dashboard = () => {
   // Determine display name - use username or email if name is not available
   const displayName = profile?.name || profile?.username || user.email?.split('@')[0] || "User";
 
+<<<<<<< HEAD
   const handleTabChange = (tab: string) => {
     console.log("Tab changed to:", tab);
     setActiveTab(tab);
   };
+=======
+  // Determine which tab to show by default
+  const defaultTab = isAdmin ? "admin" : "overview";
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 
   return (
     <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn bg-gradient-to-b from-[rgba(30,174,219,0.2)] to-[rgba(255,105,180,0.2)] rounded-xl">
       <DashboardHeader profile={{...profile, name: displayName}} />
 
+<<<<<<< HEAD
       <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
         <DashboardTabs 
           isAdmin={isAdmin} 
           activeTab={activeTab} 
           onTabChange={handleTabChange} 
         />
+=======
+      <Tabs value={defaultTab} className="space-y-8">
+        <DashboardTabs isAdmin={isAdmin} activeTab={defaultTab} />
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 
         {/* Show different content based on user role */}
         {isAdmin && (

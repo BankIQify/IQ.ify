@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -5,7 +9,11 @@ import { Card } from "@/components/ui/card";
 import { AuthError } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
 import { LoginForm } from "@/components/auth/LoginForm";
+<<<<<<< HEAD
 import { EnhancedSignUpForm } from "@/components/auth/EnhancedSignUpForm";
+=======
+import { SignUpForm } from "@/components/auth/SignUpForm";
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
@@ -95,7 +103,11 @@ const Auth = () => {
             onGoogleSignIn={handleGoogleSignIn} 
           />
         ) : (
+<<<<<<< HEAD
           <EnhancedSignUpForm 
+=======
+          <SignUpForm 
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
             onToggleMode={toggleAuthMode} 
             onGoogleSignIn={handleGoogleSignIn} 
           />

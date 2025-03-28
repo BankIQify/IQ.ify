@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useState, useEffect } from "react";
 import { Square, Circle, Triangle, Star, Trophy } from "lucide-react";
 import { useGameState } from "@/hooks/use-game-state";
@@ -5,7 +9,10 @@ import type { Difficulty } from "@/components/games/GameSettings";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+<<<<<<< HEAD
 import { motion, AnimatePresence } from "framer-motion";
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 
 type Shape = "square" | "circle" | "triangle" | "star";
 
@@ -114,6 +121,7 @@ export const MemoryGame = ({ difficulty }: MemoryGameProps) => {
   const progressValue = (matchedPairs / 16) * 100;
 
   return (
+<<<<<<< HEAD
     <motion.div 
       className="w-full max-w-4xl mx-auto p-4 space-y-6"
       initial={{ opacity: 0, y: 20 }}
@@ -189,13 +197,46 @@ export const MemoryGame = ({ difficulty }: MemoryGameProps) => {
             }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+=======
+    <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
+      <div className="flex items-center justify-between gap-4 bg-gradient-to-r from-pastel-purple/20 to-pastel-blue/20 p-4 rounded-xl shadow-sm">
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">Pairs Found</span>
+          <span className="text-xl font-bold">{matchedPairs} / 16</span>
+        </div>
+        
+        <div className="flex-1">
+          <Progress value={progressValue} className="h-3 bg-pastel-gray/50" />
+        </div>
+        
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground">Score</span>
+          <span className="text-xl font-bold">{score}</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-8 gap-2 max-w-3xl mx-auto">
+        {cards.map((card) => (
+          <div
+            key={card.id}
+            onClick={() => handleCardClick(card.id)}
+            className={cn(
+              "aspect-square cursor-pointer transition-all duration-500 transform perspective-1000 hover:scale-105",
+              "shadow-md rounded-lg",
+              card.isMatched && "opacity-80"
+            )}
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           >
             <div className="relative w-full h-full">
               <div
                 className={cn(
                   "absolute w-full h-full backface-hidden transition-transform duration-500",
+<<<<<<< HEAD
                   "bg-gradient-to-br from-[#0047FF] to-[#FF00E5] border-2 border-white/20 rounded-xl flex items-center justify-center",
                   "shadow-lg backdrop-blur-sm",
+=======
+                  "bg-gradient-to-br from-pastel-purple/80 to-pastel-blue/80 border-2 border-white rounded-lg flex items-center justify-center",
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
                   (card.isFlipped || card.isMatched || flippedCards.includes(card.id))
                     ? "rotate-y-180 opacity-0"
                     : ""
@@ -206,26 +247,43 @@ export const MemoryGame = ({ difficulty }: MemoryGameProps) => {
               <div
                 className={cn(
                   "absolute w-full h-full backface-hidden transition-transform duration-500 rotate-y-180",
+<<<<<<< HEAD
                   "bg-gradient-to-br from-white/10 to-white/5 border-2 rounded-xl flex items-center justify-center",
                   "backdrop-blur-md",
                   (card.isFlipped || card.isMatched || flippedCards.includes(card.id))
                     ? "rotate-y-0 opacity-100"
                     : "opacity-0",
                   card.isMatched && "bg-gradient-to-br from-[#00FF94]/20 to-[#0047FF]/20"
+=======
+                  "bg-white border-2 rounded-lg flex items-center justify-center",
+                  (card.isFlipped || card.isMatched || flippedCards.includes(card.id))
+                    ? "rotate-y-0 opacity-100"
+                    : "opacity-0",
+                  card.isMatched && "bg-pastel-green/20"
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
                 )}
               >
                 <ShapeIcon
                   shape={card.shape}
                   className={cn(
+<<<<<<< HEAD
                     "w-8 h-8 transition-all duration-300",
                     card.shape === "square" && "text-[#0047FF]",
                     card.shape === "circle" && "text-[#FF00E5]",
                     card.shape === "triangle" && "text-[#00FF94]",
                     card.shape === "star" && "text-[#FFE500]"
+=======
+                    "w-8 h-8",
+                    card.shape === "square" && "text-blue-500",
+                    card.shape === "circle" && "text-red-500",
+                    card.shape === "triangle" && "text-green-500",
+                    card.shape === "star" && "text-yellow-500"
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
                   )}
                 />
               </div>
             </div>
+<<<<<<< HEAD
           </motion.div>
         ))}
       </motion.div>
@@ -268,5 +326,28 @@ export const MemoryGame = ({ difficulty }: MemoryGameProps) => {
         )}
       </AnimatePresence>
     </motion.div>
+=======
+          </div>
+        ))}
+      </div>
+
+      {isGameComplete && (
+        <div className="mt-8 text-center animate-scale-in">
+          <div className="bg-gradient-to-r from-pastel-green to-pastel-blue p-6 rounded-xl shadow-lg max-w-md mx-auto">
+            <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-white">Congratulations!</h3>
+            <p className="text-lg text-white/90 mb-4">You've completed the game with a score of {score}!</p>
+            <Button
+              onClick={initializeGame}
+              className="bg-white text-primary hover:bg-white/90 transition-colors"
+              size="lg"
+            >
+              Play Again
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   );
 };

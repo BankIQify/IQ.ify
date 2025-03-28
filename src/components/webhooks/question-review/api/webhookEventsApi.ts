@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { supabase } from "@/integrations/supabase/client";
 import { WebhookEvent, WebhookEventPayload } from "../types";
 import type { QuestionContent, QuestionType } from "@/types/questions";
@@ -81,7 +85,11 @@ export const saveQuestion = async (
     .eq('id', subTopicId)
     .single();
   
+<<<<<<< HEAD
   const isBrainTraining = subTopicData?.question_sections?.[0]?.category === 'brain_training';
+=======
+  const isBrainTraining = subTopicData?.question_sections?.category === 'brain_training';
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   
   const { error } = await supabase
     .from("questions")

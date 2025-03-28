@@ -1,5 +1,8 @@
 {
+<<<<<<< HEAD
   "extends": "./tsconfig.json",
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
@@ -10,7 +13,10 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+<<<<<<< HEAD
     "resolveJsonModule": true,
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
@@ -28,6 +34,10 @@
       "@/*": ["./src/*"]
     }
   },
+<<<<<<< HEAD
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
+=======
+  "include": ["src"]
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 }

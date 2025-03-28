@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 import { useState } from "react";
+=======
+
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { UserProgressChart } from "@/components/dashboard/UserProgressChart";
 import { Target, Brain, BookOpen, Gauge, Lightbulb, TrendingUp, Zap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+<<<<<<< HEAD
 import { SubtopicAnalysis } from "@/components/dashboard/SubtopicAnalysis";
 import { DetailedSubtopicAnalysis } from "@/components/dashboard/DetailedSubtopicAnalysis";
 import { Button } from "@/components/ui/button";
@@ -13,6 +18,10 @@ export const ProgressTab = () => {
   const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
   const { data: subtopics = [], isLoading } = useSubtopicPerformance('custom');
 
+=======
+
+export const ProgressTab = () => {
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -108,6 +117,7 @@ export const ProgressTab = () => {
         
         <Card>
           <CardHeader>
+<<<<<<< HEAD
             <div 
               className="cursor-pointer group"
               onClick={() => setShowDetailedAnalysis(true)}
@@ -128,6 +138,68 @@ export const ProgressTab = () => {
             ) : (
               <SubtopicAnalysis subtopics={subtopics} limit={3} />
             )}
+=======
+            <CardTitle>AI-Driven Insights</CardTitle>
+            <CardDescription>
+              Personalized learning recommendations based on your performance
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="p-3 border border-amber-200 bg-amber-50 rounded-md">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Target className="h-4 w-4 text-amber-600" />
+                  Pattern Recognition
+                </h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Your performance indicates you could benefit from additional practice 
+                  with sequence and pattern recognition problems.
+                </p>
+                <div className="mt-2">
+                  <div className="text-xs font-medium mb-1 flex justify-between">
+                    <span>Learning Priority</span>
+                    <span>High</span>
+                  </div>
+                  <Progress value={80} className="h-1.5 bg-amber-100" />
+                </div>
+              </div>
+              
+              <div className="p-3 border border-blue-200 bg-blue-50 rounded-md">
+                <h4 className="font-medium flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-blue-600" />
+                  Vocabulary Extension
+                </h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Consider focusing on enriching your vocabulary to improve verbal 
+                  reasoning performance.
+                </p>
+                <div className="mt-2">
+                  <div className="text-xs font-medium mb-1 flex justify-between">
+                    <span>Learning Priority</span>
+                    <span>Medium</span>
+                  </div>
+                  <Progress value={60} className="h-1.5 bg-blue-100" />
+                </div>
+              </div>
+
+              <div className="p-3 border border-green-200 bg-green-50 rounded-md">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Lightbulb className="h-4 w-4 text-green-600" />
+                  Memory Techniques
+                </h4>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Based on your recent memory game scores, try these specialized memory techniques to improve retention.
+                </p>
+                <div className="mt-2">
+                  <div className="text-xs font-medium mb-1 flex justify-between">
+                    <span>Learning Priority</span>
+                    <span>Medium</span>
+                  </div>
+                  <Progress value={50} className="h-1.5 bg-green-100" />
+                </div>
+              </div>
+            </div>
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           </CardContent>
         </Card>
       </div>
@@ -192,12 +264,15 @@ export const ProgressTab = () => {
           </div>
         </CardContent>
       </Card>
+<<<<<<< HEAD
 
       <Dialog open={showDetailedAnalysis} onOpenChange={setShowDetailedAnalysis}>
         <DialogContent className="max-w-4xl">
           <DetailedSubtopicAnalysis subtopics={subtopics} />
         </DialogContent>
       </Dialog>
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
     </div>
   );
 };

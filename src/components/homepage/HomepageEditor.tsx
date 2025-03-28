@@ -1,20 +1,32 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+<<<<<<< HEAD
 import { Paintbrush, Plus, Trash2 } from "lucide-react";
+=======
+import { Paintbrush } from "lucide-react"; // Fixed icon name (lowercase 'b')
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import type { Json } from "@/integrations/supabase/types";
+<<<<<<< HEAD
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 
 interface Feature {
   icon: string;
   title: string;
   description: string;
+<<<<<<< HEAD
 }
 
 interface Differentiator {
@@ -27,6 +39,9 @@ interface Testimonial {
   name: string;
   avatar: string;
   quote: string;
+=======
+  benefits: string[];
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 }
 
 interface HomepageContent {
@@ -34,6 +49,7 @@ interface HomepageContent {
   hero_title: string | null;
   hero_subtitle: string | null;
   features: Feature[] | null;
+<<<<<<< HEAD
   differentiators: Differentiator[] | null;
   social_proof: {
     rating: string;
@@ -41,6 +57,8 @@ interface HomepageContent {
     science: string;
   } | null;
   testimonials: Testimonial[] | null;
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   created_at: string;
   updated_at: string;
 }
@@ -62,10 +80,14 @@ export const HomepageEditor = () => {
       // Transform the fetched data to match our expected type
       const transformedData: HomepageContent = {
         ...data,
+<<<<<<< HEAD
         features: data.features ? (data.features as unknown as Feature[]) : [],
         differentiators: data.differentiators ? (data.differentiators as unknown as Differentiator[]) : [],
         social_proof: data.social_proof ? (data.social_proof as unknown as { rating: string; students: string; science: string }) : null,
         testimonials: data.testimonials ? (data.testimonials as unknown as Testimonial[]) : []
+=======
+        features: data.features ? (data.features as unknown as Feature[]) : []
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       };
       
       return transformedData;
@@ -75,6 +97,7 @@ export const HomepageEditor = () => {
   const [formData, setFormData] = useState<Partial<HomepageContent>>({
     hero_title: "",
     hero_subtitle: "",
+<<<<<<< HEAD
     features: [],
     differentiators: [],
     social_proof: {
@@ -83,6 +106,9 @@ export const HomepageEditor = () => {
       science: "Backed by cognitive science"
     },
     testimonials: []
+=======
+    features: []
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   });
 
   // Update form data when content is loaded
@@ -91,6 +117,7 @@ export const HomepageEditor = () => {
       setFormData({
         hero_title: content.hero_title || "",
         hero_subtitle: content.hero_subtitle || "",
+<<<<<<< HEAD
         features: content.features || [],
         differentiators: content.differentiators || [],
         social_proof: content.social_proof || {
@@ -99,21 +126,32 @@ export const HomepageEditor = () => {
           science: "Backed by cognitive science"
         },
         testimonials: content.testimonials || []
+=======
+        features: content.features || []
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       });
     }
   }, [content]);
 
   const handleSave = async () => {
     try {
+<<<<<<< HEAD
       // Convert the features and differentiators arrays to a JSON compatible format
+=======
+      // Convert the features array to a JSON compatible format
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       const dataToSave = {
         id: content?.id || "default",
         hero_title: formData.hero_title,
         hero_subtitle: formData.hero_subtitle,
+<<<<<<< HEAD
         features: formData.features as unknown as Json,
         differentiators: formData.differentiators as unknown as Json,
         social_proof: formData.social_proof as unknown as Json,
         testimonials: formData.testimonials as unknown as Json
+=======
+        features: formData.features as unknown as Json
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       };
 
       const { error } = await supabase
@@ -138,6 +176,7 @@ export const HomepageEditor = () => {
     }
   };
 
+<<<<<<< HEAD
   const addFeature = () => {
     setFormData(prev => ({
       ...prev,
@@ -211,6 +250,8 @@ export const HomepageEditor = () => {
     }));
   };
 
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   if (!content && !isEditing) {
     return <div>Loading...</div>;
   }
@@ -257,6 +298,7 @@ export const HomepageEditor = () => {
             />
           </div>
 
+<<<<<<< HEAD
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <Label>Features</Label>
@@ -423,6 +465,8 @@ export const HomepageEditor = () => {
             ))}
           </div>
 
+=======
+>>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           {isEditing && (
             <Button onClick={handleSave} className="w-full">
               Save Changes
