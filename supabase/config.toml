@@ -1,0 +1,5 @@
+
+project_id = "dqaihawavxlacegykwqu"
+
+[functions.fallback]
+verify_jwt = false
