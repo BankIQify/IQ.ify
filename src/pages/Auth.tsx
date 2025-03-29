@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useState, useEffect } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -9,11 +5,7 @@ import { Card } from "@/components/ui/card";
 import { AuthError } from "@supabase/supabase-js";
 import { useToast } from "@/components/ui/use-toast";
 import { LoginForm } from "@/components/auth/LoginForm";
-<<<<<<< HEAD
 import { EnhancedSignUpForm } from "@/components/auth/EnhancedSignUpForm";
-=======
-import { SignUpForm } from "@/components/auth/SignUpForm";
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
@@ -99,19 +91,49 @@ const Auth = () => {
         
         {isLogin ? (
           <LoginForm 
-            onToggleMode={toggleAuthMode} 
-            onGoogleSignIn={handleGoogleSignIn} 
+            onToggleMode={toggleAuthMode}
+            onGoogleSignIn={handleGoogleSignIn}
           />
         ) : (
-<<<<<<< HEAD
           <EnhancedSignUpForm 
-=======
-          <SignUpForm 
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
-            onToggleMode={toggleAuthMode} 
-            onGoogleSignIn={handleGoogleSignIn} 
+            onToggleMode={toggleAuthMode}
+            onGoogleSignIn={handleGoogleSignIn}
           />
         )}
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <button
+          onClick={handleGoogleSignIn}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-white text-gray-700 border border-gray-300 rounded-lg px-6 py-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <img
+            src="/google.svg"
+            alt="Google"
+            className="w-5 h-5"
+          />
+          {loading ? "Signing in..." : "Sign in with Google"}
+        </button>
+
+        <p className="text-center text-sm text-muted-foreground">
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button
+            onClick={toggleAuthMode}
+            className="text-primary hover:underline"
+          >
+            {isLogin ? "Sign up" : "Sign in"}
+          </button>
+        </p>
       </Card>
     </div>
   );

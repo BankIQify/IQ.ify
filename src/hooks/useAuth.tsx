@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./use-toast";
@@ -12,6 +8,52 @@ import { handleAuthError } from "@/components/auth/AuthUtils";
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check current session
+    const checkSession = async () => {
+      console.log('Checking current session...');
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error getting session:', error);
+        return;
+      }
+      
+      console.log('Session check result:', {
+        hasSession: !!session,
+        userId: session?.user?.id,
+        userEmail: session?.user?.email
+      });
+      
+      setUser(session?.user ?? null);
+    };
+
+    // Call immediately
+    checkSession();
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', { event, userId: session?.user?.id });
+      setUser(session?.user ?? null);
+      
+      // Double check session if we think we're logged out
+      if (!session) {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (currentSession) {
+          console.log('Found session despite auth change indicating none:', {
+            userId: currentSession.user?.id
+          });
+          setUser(currentSession.user);
+        }
+      }
+    });
+
+    // Cleanup subscription
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const signInWithEmail = async (email: string, password: string) => {
     console.log('Attempting email sign in:', email);
@@ -92,11 +134,7 @@ export const useAuth = () => {
 
       if (data.user) {
         console.log('User created successfully, updating profile for user:', data.user.id);
-<<<<<<< HEAD
         // Update profile with all user data
-=======
-        // Update profile with username and other data
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
@@ -104,7 +142,6 @@ export const useAuth = () => {
             username: profileData.username,
             avatar_url: profileData.avatar_url,
             avatar_config: profileData.avatar_config,
-<<<<<<< HEAD
             full_name: profileData.fullName,
             date_of_birth: profileData.dateOfBirth,
             country: profileData.country,
@@ -112,8 +149,6 @@ export const useAuth = () => {
             education_level: profileData.educationLevel,
             subjects: profileData.subjects || [],
             focus_areas: profileData.focus_areas || []
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           })
           .eq('id', data.user.id);
 
@@ -132,11 +167,7 @@ export const useAuth = () => {
           console.log('Adding focus areas for user:', data.user.id);
           const focusAreasToInsert = profileData.focus_areas.map(area => ({
             user_id: data.user!.id,
-<<<<<<< HEAD
             focus_area: area
-=======
-            focus_area: area as any
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           }));
 
           const { error: focusAreasError } = await supabase

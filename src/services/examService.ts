@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { supabase } from "@/integrations/supabase/client";
 import { ExamData, Question } from "@/types/exam";
 
@@ -37,7 +33,6 @@ export const fetchExamQuestions = async (
       content, 
       question_type,
       sub_topic_id,
-<<<<<<< HEAD
       sub_topics!inner (
         id,
         name,
@@ -47,9 +42,6 @@ export const fetchExamQuestions = async (
           category
         )
       )
-=======
-      sub_topics(name)
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
     `);
   
   if (exam.is_standard) {
@@ -143,11 +135,7 @@ export const fetchExamQuestions = async (
         return JSON.parse(content);
       } catch (e) {
         console.error('Failed to parse question content string:', e);
-<<<<<<< HEAD
         return content; // Return the original string if it's not JSON
-=======
-        return { question: 'Error parsing question' };
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       }
     }
     return content;
@@ -157,34 +145,40 @@ export const fetchExamQuestions = async (
   const questions = data.map(q => {
     // Verify and parse content if needed
     const validContent = validateContent(q.content);
-<<<<<<< HEAD
     const subTopicData = q.sub_topics as { name: string } | { name: string }[];
     const subTopicName = Array.isArray(subTopicData) ? subTopicData[0]?.name : subTopicData?.name;
     
     // For verbal questions, ensure content is properly structured
-    if (exam.category === 'verbal' && typeof validContent === 'string') {
-      return {
-        id: q.id,
-        content: {
-          question: validContent,
-          explanation: "Verbal reasoning question",
-          options: Array.isArray(q.content?.options) ? q.content.options : []
-        },
-        questionType: q.question_type || 'text',
-        sub_topic_id: q.sub_topic_id,
-        sub_topic_name: subTopicName
-      };
-=======
-    
-    if (!validContent || !validContent.question) {
-      console.error('Invalid question content detected:', q);
-    }
-    
-    // For verbal questions, add extra logging
     if (exam.category === 'verbal') {
-      console.log('Verbal question content:', validContent);
-      console.log('Verbal question sub_topic data:', q.sub_topics);
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+      // If content is a string, it's likely a legacy format
+      if (typeof validContent === 'string') {
+        return {
+          id: q.id,
+          content: {
+            question: validContent,
+            options: [],
+            explanation: "Verbal reasoning question"
+          },
+          questionType: q.question_type || 'text',
+          sub_topic_id: q.sub_topic_id,
+          sub_topic_name: subTopicName
+        };
+      }
+      
+      // If content is an object but missing required fields
+      if (typeof validContent === 'object' && (!validContent.question || !validContent.options)) {
+        return {
+          id: q.id,
+          content: {
+            question: validContent.question || validContent.text || "Question not available",
+            options: Array.isArray(validContent.options) ? validContent.options : [],
+            explanation: validContent.explanation || "Verbal reasoning question"
+          },
+          questionType: q.question_type || 'text',
+          sub_topic_id: q.sub_topic_id,
+          sub_topic_name: subTopicName
+        };
+      }
     }
     
     return {
@@ -192,13 +186,9 @@ export const fetchExamQuestions = async (
       content: validContent,
       questionType: q.question_type,
       sub_topic_id: q.sub_topic_id,
-<<<<<<< HEAD
       sub_topic_name: subTopicName
-=======
-      sub_topic_name: q.sub_topics?.name
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
     };
-  }) as Question[];
+  });
   
   return questions;
 };

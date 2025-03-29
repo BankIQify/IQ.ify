@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { Card, CardContent } from "@/components/ui/card";
 import { EventDetails } from "./EventDetails";
 import { WebhookEvent, QuestionItem } from "./types";
@@ -73,11 +69,7 @@ export const QuestionEditor = ({
     enabled: !!selectedEvent.payload.sub_topic_id
   });
 
-<<<<<<< HEAD
   const category = subTopicDetails?.question_sections?.[0]?.category || 'verbal';
-=======
-  const category = subTopicDetails?.question_sections?.category || 'verbal';
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   const isDataLoading = isLoading || isLoadingSubTopic || isParsing;
 
   const handleToggleEditorView = () => {

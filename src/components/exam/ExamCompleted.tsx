@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,13 +39,6 @@ const ExamCompleted = ({
           </p>
         </div>
         
-<<<<<<< HEAD
-=======
-        <div className="mt-4 mb-6 px-4 py-3 bg-amber-50 border border-amber-200 rounded-md text-sm text-amber-800">
-          <p>This exam will not be saved. You can review your answers now, but once you leave this page, all exam data will be permanently discarded.</p>
-        </div>
-        
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         <div className="flex justify-center space-x-4">
           <Button onClick={() => navigate("/practice")}>Return to Practice</Button>
           <Button variant="outline" onClick={onReviewAnswers}>

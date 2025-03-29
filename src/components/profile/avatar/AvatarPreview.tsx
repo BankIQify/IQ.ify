@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { type Profile } from "@/types/auth/types";
@@ -55,7 +51,6 @@ export const AvatarPreview = ({
   };
 
   return (
-<<<<<<< HEAD
     <div className="flex flex-col items-center bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-lg border border-blue-100">
       <div className="mb-6 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Your Avatar</h2>
@@ -80,35 +75,10 @@ export const AvatarPreview = ({
             )}
           </Avatar>
         </div>
-=======
-    <div className="md:w-1/3 flex flex-col items-center">
-      <div className="mb-4 text-center">
-        <h2 className="text-2xl font-bold mb-2">Your Avatar</h2>
-        <p className="text-gray-500">Customize your personal avatar</p>
-      </div>
-      
-      <div className="relative">
-        <Avatar className="w-48 h-48 mb-6 border-2 border-gray-200">
-          {avatarUrl && !imageError ? (
-            <AvatarImage 
-              src={avatarUrl} 
-              alt="User avatar" 
-              onError={handleImageError}
-              onLoad={handleImageLoad}
-              className="object-cover"
-            />
-          ) : (
-            <AvatarFallback className="bg-gradient-to-r from-blue-400 to-purple-400 text-white text-4xl">
-              {profile?.name?.charAt(0) || profile?.username?.charAt(0) || "?"}
-            </AvatarFallback>
-          )}
-        </Avatar>
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         
         {refreshAvatar && (
           <button 
             onClick={handleRefreshAvatar}
-<<<<<<< HEAD
             className="absolute top-0 right-0 bg-white p-2 rounded-full shadow-lg hover:bg-gray-50 transition-colors"
             title="Refresh avatar"
           >
@@ -129,38 +99,12 @@ export const AvatarPreview = ({
         
         {avatarUrl && !imageError && (
           <p className="text-sm text-green-500">Avatar loaded successfully</p>
-=======
-            className="absolute top-0 right-0 bg-white p-1.5 rounded-full shadow-md hover:bg-gray-100"
-            title="Refresh avatar"
-          >
-            <RefreshCw size={16} />
-          </button>
-        )}
-        
-        {/* Status info */}
-        {!avatarUrl && (
-          <p className="text-xs text-red-500 mt-2">No avatar URL available</p>
-        )}
-        
-        {imageError && (
-          <p className="text-xs text-red-500 mt-2">Failed to load avatar image</p>
-        )}
-        
-        {avatarUrl && !imageError && (
-          <p className="text-xs text-gray-500 mt-2 break-all max-w-full">
-            Avatar loaded successfully
-          </p>
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         )}
       </div>
       
       <Button 
         onClick={saveAvatar} 
-<<<<<<< HEAD
         className="w-full bg-education-600 hover:bg-education-700"
-=======
-        className="w-full"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         disabled={loading || imageError}
       >
         {loading ? "Saving..." : "Save Avatar"}

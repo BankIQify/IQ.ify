@@ -1,186 +1,192 @@
-
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { GridDimensions, WordToFind } from "../types";
+import type { GridDimensions } from "../types";
 
-export const generateDynamicPuzzle = (difficulty: Difficulty): {
-  grid: string[][];
-  words: WordToFind[];
-  gridDimensions: GridDimensions;
-} => {
-  // Define difficulty-specific parameters
-  let minWordLength: number;
-  let maxWordLength: number;
-  let minWordCount: number;
-  let maxWordCount: number;
-  let blankPercentage: number;
-  let rows: number;
-  let cols: number;
+const DIFFICULTY_SETTINGS = {
+  easy: {
+    gridSize: { rows: 8, cols: 8 },
+    maxWords: 8,
+    wordLength: { min: 3, max: 5 },
+  },
+  moderate: {
+    gridSize: { rows: 10, cols: 10 },
+    maxWords: 10,
+    wordLength: { min: 4, max: 6 },
+  },
+  challenging: {
+    gridSize: { rows: 12, cols: 12 },
+    maxWords: 12,
+    wordLength: { min: 5, max: 12 },
+  },
+};
 
-  switch (difficulty) {
-    case "easy":
-      minWordLength = 3;
-      maxWordLength = 5;
-      minWordCount = 5;
-      maxWordCount = 8;
-      blankPercentage = 0.05; // 5% of cells will be blank
-      rows = 8;
-      cols = 10; // Non-square grid
-      break;
-    case "medium":
-      minWordLength = 4;
-      maxWordLength = 6;
-      minWordCount = 6;
-      maxWordCount = 10;
-      blankPercentage = 0.1; // 10% of cells will be blank
-      rows = 10;
-      cols = 12; // Non-square grid
-      break;
-    case "hard":
-      minWordLength = 5;
-      maxWordLength = 10;
-      minWordCount = 8;
-      maxWordCount = 15;
-      blankPercentage = 0.15; // 15% of cells will be blank
-      rows = 12;
-      cols = 14; // Non-square grid
-      break;
-    default:
-      minWordLength = 3;
-      maxWordLength = 5;
-      minWordCount = 5;
-      maxWordCount = 8;
-      blankPercentage = 0.05;
-      rows = 8;
-      cols = 10;
+const WORD_LISTS = {
+  animals: [
+    'CAT', 'DOG', 'BIRD', 'FISH', 'LION', 'TIGER', 'BEAR', 'WOLF', 'DEER', 'FROG',
+    'EAGLE', 'SNAKE', 'HORSE', 'ZEBRA', 'PANDA', 'KOALA', 'MONKEY', 'GIRAFFE', 'ELEPHANT', 'PENGUIN'
+  ],
+  sports: [
+    'GOLF', 'SWIM', 'JUMP', 'RACE', 'SURF', 'RUGBY', 'TENNIS', 'SOCCER', 'HOCKEY', 'BOXING',
+    'CRICKET', 'CYCLING', 'RUNNING', 'SKATING', 'BASEBALL', 'FOOTBALL', 'CLIMBING', 'VOLLEYBALL'
+  ],
+  space: [
+    'STAR', 'MOON', 'MARS', 'SUN', 'EARTH', 'VENUS', 'SATURN', 'METEOR', 'GALAXY', 'COMET',
+    'JUPITER', 'NEPTUNE', 'ASTEROID', 'UNIVERSE', 'SPACESHIP', 'TELESCOPE', 'SATELLITE'
+  ],
+  nature: [
+    'TREE', 'LEAF', 'ROSE', 'RAIN', 'SNOW', 'CLOUD', 'RIVER', 'BEACH', 'FLOWER', 'FOREST',
+    'MOUNTAIN', 'VOLCANO', 'RAINBOW', 'WATERFALL', 'SUNSHINE', 'BLOSSOM', 'GARDEN'
+  ],
+  music: [
+    'JAZZ', 'ROCK', 'BEAT', 'SONG', 'BAND', 'PIANO', 'GUITAR', 'VIOLIN', 'DRUMS', 'FLUTE',
+    'TRUMPET', 'CONCERT', 'MELODY', 'RHYTHM', 'ORCHESTRA', 'SYMPHONY', 'HARMONY'
+  ],
+  technology: [
+    'WIFI', 'CHIP', 'CODE', 'DATA', 'PHONE', 'ROBOT', 'LAPTOP', 'TABLET', 'CAMERA', 'SCREEN',
+    'COMPUTER', 'INTERNET', 'SOFTWARE', 'HARDWARE', 'KEYBOARD', 'PROCESSOR', 'NETWORK'
+  ],
+  ocean: [
+    'WAVE', 'REEF', 'SEAL', 'CRAB', 'SHARK', 'WHALE', 'CORAL', 'SQUID', 'SHELL', 'BEACH',
+    'DOLPHIN', 'OCTOPUS', 'SEAWEED', 'STARFISH', 'JELLYFISH', 'SEAHORSE', 'PLANKTON'
+  ],
+  weather: [
+    'RAIN', 'SNOW', 'WIND', 'HAIL', 'STORM', 'SUNNY', 'CLOUD', 'FROST', 'FOGGY', 'THUNDER',
+    'RAINBOW', 'TORNADO', 'BLIZZARD', 'HURRICANE', 'LIGHTNING', 'SUNSHINE'
+  ],
+  countries: [
+    'USA', 'UK', 'SPAIN', 'ITALY', 'CHINA', 'JAPAN', 'INDIA', 'BRAZIL', 'EGYPT', 'FRANCE',
+    'CANADA', 'MEXICO', 'RUSSIA', 'GERMANY', 'TURKEY', 'GREECE', 'PORTUGAL', 'THAILAND'
+  ],
+  food: [
+    'PIE', 'HAM', 'RICE', 'FISH', 'MEAT', 'BREAD', 'PASTA', 'PIZZA', 'SALAD', 'SOUP',
+    'BURGER', 'SUSHI', 'TACO', 'CURRY', 'NOODLE', 'WAFFLE', 'PANCAKE', 'SANDWICH'
+  ],
+  colors: [
+    'RED', 'BLUE', 'PINK', 'GOLD', 'GREY', 'BLACK', 'WHITE', 'GREEN', 'BROWN', 'PURPLE',
+    'YELLOW', 'ORANGE', 'SILVER', 'BRONZE', 'CRIMSON', 'MAGENTA', 'INDIGO'
+  ],
+  jobs: [
+    'CHEF', 'COOK', 'MAID', 'PILOT', 'NURSE', 'ACTOR', 'JUDGE', 'ARTIST', 'DOCTOR', 'LAWYER',
+    'TEACHER', 'DENTIST', 'ENGINEER', 'SCIENTIST', 'ARCHITECT', 'DESIGNER', 'MECHANIC'
+  ],
+  emotions: [
+    'HAPPY', 'GLAD', 'CALM', 'LOVE', 'PEACE', 'ANGRY', 'BRAVE', 'PROUD', 'QUIET', 'SCARED',
+    'EXCITED', 'NERVOUS', 'CHEERFUL', 'GRATEFUL', 'HOPEFUL', 'PEACEFUL'
+  ],
+  fantasy: [
+    'WAND', 'HERO', 'MYTH', 'TROLL', 'FAIRY', 'MAGIC', 'WITCH', 'DWARF', 'GIANT', 'DRAGON',
+    'WIZARD', 'UNICORN', 'MERMAID', 'PHOENIX', 'PEGASUS', 'GOBLIN', 'VAMPIRE'
+  ],
+  science: [
+    'ATOM', 'CELL', 'GENE', 'HEAT', 'WAVE', 'FORCE', 'LIGHT', 'SOUND', 'SPACE', 'ENERGY',
+    'GRAVITY', 'MAGNET', 'BIOLOGY', 'CHEMISTRY', 'PHYSICS', 'MOLECULE', 'ELECTRON'
+  ]
+};
+
+const DIRECTIONS = [
+  [0, 1],   // right
+  [1, 0],   // down
+  [1, 1],   // diagonal down-right
+  [-1, 1],  // diagonal up-right
+];
+
+const generateEmptyGrid = (rows: number, cols: number): string[][] => {
+  return Array(rows).fill(null).map(() => Array(cols).fill(''));
+};
+
+const canPlaceWord = (
+  grid: string[][],
+  word: string,
+  startRow: number,
+  startCol: number,
+  dirRow: number,
+  dirCol: number
+): boolean => {
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  for (let i = 0; i < word.length; i++) {
+    const row = startRow + i * dirRow;
+    const col = startCol + i * dirCol;
+
+    if (row < 0 || row >= rows || col < 0 || col >= cols) {
+      return false;
+    }
+
+    if (grid[row][col] !== '' && grid[row][col] !== word[i]) {
+      return false;
+    }
   }
 
-  // Sample words based on difficulty
-  const sampleWords = [
-    // 3-letter words
-    "CAT", "DOG", "BAT", "RUN", "SUN", "FUN", "PEN", "HAT", "MAP", "BUG",
-    // 4-letter words
-    "BEAR", "FISH", "BIRD", "DUCK", "FROG", "LION", "WOLF", "GOAT", "DEER", "HAWK",
-    // 5-letter words
-    "TIGER", "EAGLE", "SNAKE", "SHARK", "WHALE", "ZEBRA", "PANDA", "KOALA", "MOUSE", "CAMEL",
-    // 6-letter words
-    "MONKEY", "BEAVER", "JAGUAR", "LIZARD", "TOUCAN", "TURTLE", "RABBIT", "COUGAR", "WALRUS", "PUFFIN",
-    // 7+ letter words
-    "ELEPHANT", "ALLIGATOR", "CROCODILE", "BUTTERFLY", "FLAMINGO", "KANGAROO", "SQUIRREL", "PENGUIN", "HEDGEHOG", "CHIMPANZEE",
-    "HIPPOPOTAMUS", "RHINOCEROS", "ORANGUTAN"
-  ];
+  return true;
+};
 
-  // Filter words based on length requirements
-  const eligibleWords = sampleWords.filter(word => 
-    word.length >= minWordLength && word.length <= maxWordLength
-  );
+const placeWord = (
+  grid: string[][],
+  word: string,
+  startRow: number,
+  startCol: number,
+  dirRow: number,
+  dirCol: number
+): void => {
+  for (let i = 0; i < word.length; i++) {
+    const row = startRow + i * dirRow;
+    const col = startCol + i * dirCol;
+    grid[row][col] = word[i];
+  }
+};
 
-  // Randomly select number of words to include
-  const wordCount = Math.floor(Math.random() * (maxWordCount - minWordCount + 1)) + minWordCount;
-  
-  // Randomly pick words
-  const shuffledWords = [...eligibleWords].sort(() => Math.random() - 0.5);
-  const selectedWords = shuffledWords.slice(0, wordCount);
-  
-  // Create empty grid with dimensions
-  const dynamicGrid: string[][] = Array(rows).fill(null).map(() => 
-    Array(cols).fill('')
-  );
-  
-  // Place words in the grid
-  const directions = [
-    [0, 1],   // right
-    [1, 0],   // down
-    [1, 1],   // diagonal down-right
-    [0, -1],  // left
-    [-1, 0],  // up
-    [-1, -1], // diagonal up-left
-    [1, -1],  // diagonal down-left
-    [-1, 1]   // diagonal up-right
-  ];
-  
-  // Function to check if a word can be placed
-  const canPlaceWord = (word: string, row: number, col: number, dRow: number, dCol: number): boolean => {
-    for (let i = 0; i < word.length; i++) {
-      const newRow = row + i * dRow;
-      const newCol = col + i * dCol;
-      
-      // Check if out of bounds
-      if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols) {
-        return false;
-      }
-      
-      // Check if cell is occupied with a different letter
-      if (dynamicGrid[newRow][newCol] !== '' && dynamicGrid[newRow][newCol] !== word[i]) {
-        return false;
+const fillEmptyCells = (grid: string[][]): void => {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let row = 0; row < grid.length; row++) {
+    for (let col = 0; col < grid[0].length; col++) {
+      if (grid[row][col] === '') {
+        grid[row][col] = letters[Math.floor(Math.random() * letters.length)];
       }
     }
-    return true;
-  };
+  }
+};
+
+export const generateWordSearchPuzzle = (difficulty: Difficulty, theme: string = 'animals') => {
+  const settings = DIFFICULTY_SETTINGS[difficulty];
+  const dimensions: GridDimensions = settings.gridSize;
+  const grid = generateEmptyGrid(dimensions.rows, dimensions.cols);
   
-  // Place words in the grid
-  selectedWords.forEach(word => {
+  // Select random words based on difficulty and theme
+  const allWords = WORD_LISTS[theme as keyof typeof WORD_LISTS] || WORD_LISTS.animals;
+  const selectedWords = allWords
+    .filter(word => 
+      word.length >= settings.wordLength.min && 
+      word.length <= settings.wordLength.max
+    )
+    .sort(() => Math.random() - 0.5)
+    .slice(0, settings.maxWords);
+
+  // Place each word
+  for (const word of selectedWords) {
     let placed = false;
     let attempts = 0;
     const maxAttempts = 100;
-    
+
     while (!placed && attempts < maxAttempts) {
-      attempts++;
-      
-      // Pick a random direction
-      const dirIndex = Math.floor(Math.random() * directions.length);
-      const [dRow, dCol] = directions[dirIndex];
-      
-      // Pick a random starting position
-      const row = Math.floor(Math.random() * rows);
-      const col = Math.floor(Math.random() * cols);
-      
-      if (canPlaceWord(word, row, col, dRow, dCol)) {
-        // Place the word
-        for (let i = 0; i < word.length; i++) {
-          const newRow = row + i * dRow;
-          const newCol = col + i * dCol;
-          dynamicGrid[newRow][newCol] = word[i];
-        }
+      const direction = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+      const startRow = Math.floor(Math.random() * dimensions.rows);
+      const startCol = Math.floor(Math.random() * dimensions.cols);
+
+      if (canPlaceWord(grid, word, startRow, startCol, direction[0], direction[1])) {
+        placeWord(grid, word, startRow, startCol, direction[0], direction[1]);
         placed = true;
       }
-    }
-    
-    // If couldn't place the word after max attempts, skip it
-    if (!placed) {
-      console.log(`Couldn't place word: ${word}`);
-    }
-  });
-  
-  // Add blank spaces (represented by null)
-  const totalCells = rows * cols;
-  const numBlankCells = Math.floor(totalCells * blankPercentage);
-  
-  let blanksAdded = 0;
-  while (blanksAdded < numBlankCells) {
-    const row = Math.floor(Math.random() * rows);
-    const col = Math.floor(Math.random() * cols);
-    
-    // Only make cells blank if they don't contain a word letter
-    if (dynamicGrid[row][col] === '') {
-      dynamicGrid[row][col] = ' '; // Using space to represent blank
-      blanksAdded++;
+
+      attempts++;
     }
   }
-  
-  // Fill remaining empty cells with random letters
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  for (let row = 0; row < rows; row++) {
-    for (let col = 0; col < cols; col++) {
-      if (dynamicGrid[row][col] === '') {
-        const randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
-        dynamicGrid[row][col] = randomLetter;
-      }
-    }
-  }
-  
+
+  // Fill remaining empty cells
+  fillEmptyCells(grid);
+
   return {
-    grid: dynamicGrid,
-    words: selectedWords.map(word => ({ word, found: false })),
-    gridDimensions: { rows, cols }
+    grid,
+    words: selectedWords,
+    dimensions,
   };
 };

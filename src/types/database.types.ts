@@ -6,6 +6,11 @@ export interface HomepageContent {
   differentiators: any;
   social_proof: any;
   testimonials: any;
+  stats_cards: {
+    id: string;
+    highlight: string;
+    supportingText: string;
+  }[];
   created_at: string;
   updated_at: string;
 } 

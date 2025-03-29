@@ -1,4 +1,3 @@
-
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, BarChart, TrendingUp, Award } from "lucide-react";
 
@@ -9,12 +8,6 @@ interface DashboardTabsProps {
 }
 
 export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabsProps) => {
-  const handleTabClick = (value: string) => {
-    if (onTabChange) {
-      onTabChange(value);
-    }
-  };
-
   // For admin users, show admin tabs
   if (isAdmin) {
     return (
@@ -22,8 +15,6 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
         <TabsTrigger 
           value="admin" 
           className="flex items-center gap-2"
-          data-state={activeTab === "admin" ? "active" : "inactive"}
-          onClick={() => handleTabClick("admin")}
         >
           <Settings className="h-4 w-4" />
           <span>Admin</span>
@@ -38,8 +29,6 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
       <TabsTrigger 
         value="overview" 
         className="flex items-center gap-2"
-        data-state={activeTab === "overview" ? "active" : "inactive"}
-        onClick={() => handleTabClick("overview")}
       >
         <BarChart className="h-4 w-4" />
         <span>Overview</span>
@@ -47,8 +36,6 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
       <TabsTrigger 
         value="progress" 
         className="flex items-center gap-2"
-        data-state={activeTab === "progress" ? "active" : "inactive"}
-        onClick={() => handleTabClick("progress")}
       >
         <TrendingUp className="h-4 w-4" />
         <span>Progress</span>
@@ -56,8 +43,6 @@ export const DashboardTabs = ({ isAdmin, activeTab, onTabChange }: DashboardTabs
       <TabsTrigger 
         value="achievements" 
         className="flex items-center gap-2"
-        data-state={activeTab === "achievements" ? "active" : "inactive"}
-        onClick={() => handleTabClick("achievements")}
       >
         <Award className="h-4 w-4" />
         <span>Achievements</span>

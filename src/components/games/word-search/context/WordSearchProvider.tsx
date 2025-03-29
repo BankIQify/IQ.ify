@@ -1,8 +1,7 @@
-
 import React from "react";
-import { useWordSearchGame } from "../hooks/useWordSearchGame";
-import WordSearchContext from "./WordSearchContext";
 import type { Difficulty } from "@/components/games/GameSettings";
+import { WordSearchContext } from "./WordSearchContext";
+import { generateWordSearchPuzzle } from "../utils/puzzleGenerator";
 
 interface WordSearchProviderProps {
   difficulty: Difficulty;
@@ -10,43 +9,68 @@ interface WordSearchProviderProps {
 }
 
 export const WordSearchProvider = ({ 
-  difficulty,
+  difficulty: initialDifficulty,
   children 
 }: WordSearchProviderProps) => {
-  const gameState = useWordSearchGame(difficulty);
-  
+  const [grid, setGrid] = React.useState<string[][]>([]);
+  const [words, setWords] = React.useState<string[]>([]);
+  const [dimensions, setDimensions] = React.useState<{ rows: number; cols: number }>({ rows: 0, cols: 0 });
+  const [foundWords, setFoundWords] = React.useState<string[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [difficulty, setDifficulty] = React.useState<Difficulty>(initialDifficulty);
+  const [theme, setTheme] = React.useState<string>('animals');
+
+  const handleNewPuzzle = React.useCallback((newDifficulty?: Difficulty, newTheme?: string) => {
+    setLoading(true);
+    const nextDifficulty = newDifficulty || difficulty;
+    const nextTheme = newTheme || theme;
+    
+    setDifficulty(nextDifficulty);
+    setTheme(nextTheme);
+    
+    const { grid: newGrid, words: newWords, dimensions: newDimensions } = generateWordSearchPuzzle(nextDifficulty, nextTheme);
+    
+    setGrid(newGrid);
+    setWords(newWords);
+    setDimensions(newDimensions);
+    setFoundWords([]);
+    setLoading(false);
+  }, [difficulty, theme]);
+
+  const markWordAsFound = React.useCallback((word: string) => {
+    if (!foundWords.includes(word)) {
+      setFoundWords(prev => [...prev, word]);
+    }
+  }, [foundWords]);
+
+  React.useEffect(() => {
+    handleNewPuzzle();
+  }, [handleNewPuzzle]);
+
+  const value = React.useMemo(() => ({
+    grid,
+    words,
+    dimensions,
+    foundWords,
+    loading,
+    difficulty,
+    theme,
+    handleNewPuzzle,
+    markWordAsFound,
+  }), [
+    grid,
+    words,
+    dimensions,
+    foundWords,
+    loading,
+    difficulty,
+    theme,
+    handleNewPuzzle,
+    markWordAsFound,
+  ]);
+
   return (
-    <WordSearchContext.Provider value={{
-      // Grid and words
-      grid: gameState.grid,
-      words: gameState.words,
-      selectedCells: gameState.selectedCells,
-      gridDimensions: gameState.gridDimensions,
-      
-      // Game state
-      isGameComplete: gameState.isGameComplete,
-      loading: gameState.loading,
-      
-      // Theme management
-      themes: gameState.themes,
-      selectedTheme: gameState.selectedTheme,
-      
-      // Game stats
-      wordsFoundCount: gameState.wordsFoundCount,
-      totalWordsCount: gameState.totalWordsCount,
-      timeTaken: gameState.timeTaken,
-      
-      // Game state from useGameState
-      isGameActive: gameState.gameState.isActive,
-      timer: gameState.gameState.timer,
-      score: gameState.gameState.score,
-      
-      // Actions
-      handleCellClick: gameState.handleCellClick,
-      checkSelection: gameState.checkSelection,
-      handleSelectTheme: gameState.handleSelectTheme,
-      handleNewPuzzle: gameState.handleNewPuzzle,
-    }}>
+    <WordSearchContext.Provider value={value}>
       {children}
     </WordSearchContext.Provider>
   );

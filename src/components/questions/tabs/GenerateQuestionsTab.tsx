@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -32,7 +28,6 @@ export const GenerateQuestionsTab = ({
 
   // Convert questions to include hasSimilar property
   const questionsWithDuplicateFlags: QuestionWithDuplicateFlag[] = questions?.map(q => ({
-<<<<<<< HEAD
     id: q.id,
     content: q.content,
     question_type: q.question_type,
@@ -41,9 +36,6 @@ export const GenerateQuestionsTab = ({
       name: st.name,
       question_sections: st.question_sections
     })),
-=======
-    ...q,
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
     hasSimilar: false  // Default to false since we're not checking for duplicates here
   })) || [];
 

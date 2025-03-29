@@ -46,11 +46,26 @@ const getLearningPriority = (score: number): {
 
 interface SubtopicAnalysisProps {
   subtopics: SubtopicPerformance[];
+  isLoading?: boolean;
+  onViewDetails?: () => void;
   limit?: number;
 }
 
-export const SubtopicAnalysis = ({ subtopics, limit }: SubtopicAnalysisProps) => {
+export const SubtopicAnalysis = ({ 
+  subtopics, 
+  isLoading = false,
+  onViewDetails,
+  limit 
+}: SubtopicAnalysisProps) => {
   const displaySubtopics = limit ? subtopics.slice(0, limit) : subtopics;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -83,6 +98,14 @@ export const SubtopicAnalysis = ({ subtopics, limit }: SubtopicAnalysisProps) =>
           </div>
         );
       })}
+      {onViewDetails && (
+        <button
+          onClick={onViewDetails}
+          className="w-full mt-4 text-sm text-primary hover:underline"
+        >
+          View Detailed Analysis
+        </button>
+      )}
     </div>
   );
 }; 

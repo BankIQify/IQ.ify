@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { User } from "@supabase/supabase-js";
 
 export type FocusArea = 
@@ -9,10 +8,6 @@ export type FocusArea =
   | "problem_solving"
   | "time_management"
   | "confidence_building";
-=======
-
-import { User } from "@supabase/supabase-js";
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 
 export interface Profile {
   id: string;
@@ -22,24 +17,17 @@ export interface Profile {
   updated_at: string;
   avatar_url: string | null;
   avatar_config: Record<string, any> | null;
-<<<<<<< HEAD
   focus_areas: FocusArea[];
-=======
-  focus_areas: string[];
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   subscription_tier: string | null;
   subscription_status: string | null;
   subscription_id: string | null;
   subscription_expires_at: string | null;
-<<<<<<< HEAD
   full_name: string | null;
   date_of_birth: string | null;
   country: string | null;
   city: string | null;
   education_level: string | null;
   subjects: string[];
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 }
 
 export interface ProfileData {
@@ -47,7 +35,6 @@ export interface ProfileData {
   username?: string;
   avatar_url?: string;
   avatar_config?: Record<string, any>;
-<<<<<<< HEAD
   focus_areas?: FocusArea[];
   fullName?: string;
   dateOfBirth?: string;
@@ -55,9 +42,6 @@ export interface ProfileData {
   city?: string;
   educationLevel?: string;
   subjects?: string[];
-=======
-  focus_areas?: string[];
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 }
 
 export interface AuthContextType {

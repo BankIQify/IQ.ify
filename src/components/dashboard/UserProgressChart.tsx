@@ -1,73 +1,3 @@
-<<<<<<< HEAD
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Card } from '@/components/ui/card';
-
-const data = [
-  { date: 'Week 1', score: 65 },
-  { date: 'Week 2', score: 72 },
-  { date: 'Week 3', score: 68 },
-  { date: 'Week 4', score: 75 },
-  { date: 'Week 5', score: 82 },
-  { date: 'Week 6', score: 78 },
-  { date: 'Week 7', score: 85 },
-  { date: 'Week 8', score: 89 }
-];
-
-export const UserProgressChart = () => {
-  return (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart
-        data={data}
-        margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-        <XAxis
-          dataKey="date"
-          className="text-xs text-muted-foreground"
-          tick={{ fill: 'currentColor' }}
-        />
-        <YAxis
-          className="text-xs text-muted-foreground"
-          tick={{ fill: 'currentColor' }}
-          domain={[0, 100]}
-        />
-        <Tooltip
-          content={({ active, payload }) => {
-            if (active && payload && payload.length) {
-              return (
-                <Card className="p-2 !bg-background border shadow-lg">
-                  <p className="text-sm font-medium">{payload[0].payload.date}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Score: {payload[0].value}%
-                  </p>
-                </Card>
-              );
-            }
-            return null;
-          }}
-        />
-        <Line
-          type="monotone"
-          dataKey="score"
-          stroke="hsl(var(--primary))"
-          strokeWidth={2}
-          dot={{
-            r: 4,
-            fill: "hsl(var(--background))",
-            stroke: "hsl(var(--primary))",
-            strokeWidth: 2
-          }}
-          activeDot={{
-            r: 6,
-            fill: "hsl(var(--primary))",
-            stroke: "hsl(var(--background))",
-            strokeWidth: 2
-          }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-=======
-
 import { useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
@@ -129,38 +59,95 @@ export const UserProgressChart = () => {
             data={filteredData}
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis domain={[0, 100]} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <XAxis 
+              dataKey="month" 
+              className="text-xs text-muted-foreground"
+              tick={{ fill: 'currentColor' }}
+            />
+            <YAxis 
+              domain={[0, 100]} 
+              className="text-xs text-muted-foreground"
+              tick={{ fill: 'currentColor' }}
+            />
+            <Tooltip
+              content={({ active, payload }) => {
+                if (active && payload && payload.length) {
+                  return (
+                    <Card className="p-2 !bg-background border shadow-lg">
+                      <p className="text-sm font-medium">{payload[0].payload.month}</p>
+                      {payload.map((entry) => (
+                        <p key={entry.name} className="text-sm text-muted-foreground">
+                          {entry.name}: {entry.value}%
+                        </p>
+                      ))}
+                    </Card>
+                  );
+                }
+                return null;
+              }}
+            />
             <Legend />
             <Line
               type="monotone"
               dataKey="verbal"
-              stroke="#8884d8"
+              stroke="hsl(var(--primary))"
               name="Verbal Reasoning"
               strokeWidth={2}
-              activeDot={{ r: 8 }}
+              dot={{
+                r: 4,
+                fill: "hsl(var(--background))",
+                stroke: "hsl(var(--primary))",
+                strokeWidth: 2
+              }}
+              activeDot={{
+                r: 6,
+                fill: "hsl(var(--primary))",
+                stroke: "hsl(var(--background))",
+                strokeWidth: 2
+              }}
             />
             <Line
               type="monotone"
               dataKey="nonVerbal"
-              stroke="#82ca9d"
+              stroke="hsl(var(--secondary))"
               name="Non-Verbal Reasoning"
               strokeWidth={2}
+              dot={{
+                r: 4,
+                fill: "hsl(var(--background))",
+                stroke: "hsl(var(--secondary))",
+                strokeWidth: 2
+              }}
+              activeDot={{
+                r: 6,
+                fill: "hsl(var(--secondary))",
+                stroke: "hsl(var(--background))",
+                strokeWidth: 2
+              }}
             />
             <Line
               type="monotone"
               dataKey="average"
-              stroke="#ff7300"
+              stroke="hsl(var(--accent))"
               name="Overall Average"
               strokeWidth={2}
-              dot={{ r: 4 }}
+              dot={{
+                r: 4,
+                fill: "hsl(var(--background))",
+                stroke: "hsl(var(--accent))",
+                strokeWidth: 2
+              }}
+              activeDot={{
+                r: 6,
+                fill: "hsl(var(--accent))",
+                stroke: "hsl(var(--background))",
+                strokeWidth: 2
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
     </div>
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   );
 };

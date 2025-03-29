@@ -18,11 +18,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { GameCarousel } from "@/components/dashboard/GameCarousel";
 
 export default function BrainTraining() {
   const defaultDifficulty: Difficulty = "easy";
   const [selectedGame, setSelectedGame] = useState<string | null>(null);
-  const [hoveredGame, setHoveredGame] = useState<string | null>(null);
   const { user } = useAuth();
   
   // Function to render the selected game component
@@ -97,7 +97,7 @@ export default function BrainTraining() {
         {
           id: "crossword",
           title: "Crossword",
-          description: "Fill in words based on clues in a crossword puzzle grid",
+          description: "Solve clue-based word puzzles that sharpen vocabulary and pattern recognition",
           icon: <Puzzle className="h-8 w-8" />,
           gradient: "from-[#FF00E5] to-[#0047FF]",
           hoverGradient: "from-[#FF00E5]/90 to-[#0047FF]/90",
@@ -105,7 +105,7 @@ export default function BrainTraining() {
         {
           id: "sudoku",
           title: "Sudoku",
-          description: "Fill the grid with numbers following specific rules",
+          description: "Use logic to fill the grid so every row, column, and box contains the numbers 1–9",
           icon: <Grid className="h-8 w-8" />,
           gradient: "from-[#FF9A9E] to-[#FAD0C4]",
           hoverGradient: "from-[#FF9A9E]/90 to-[#FAD0C4]/90",
@@ -113,7 +113,7 @@ export default function BrainTraining() {
         {
           id: "twenty-four",
           title: "24 Game",
-          description: "Use four numbers to make 24 using basic operations",
+          description: "Combine four numbers using maths operations to reach a total of 24",
           icon: <Calculator className="h-8 w-8" />,
           gradient: "from-[#FFE500] to-[#00FF94]",
           hoverGradient: "from-[#FFE500]/90 to-[#00FF94]/90",
@@ -128,7 +128,7 @@ export default function BrainTraining() {
         {
           id: "word-search",
           title: "Word Search",
-          description: "Find hidden words in a grid of letters",
+          description: "Spot hidden words in a grid, boosting spelling and visual tracking skills",
           icon: <BookOpen className="h-8 w-8" />,
           gradient: "from-[#00FF94] to-[#0047FF]",
           hoverGradient: "from-[#00FF94]/90 to-[#0047FF]/90",
@@ -136,7 +136,7 @@ export default function BrainTraining() {
         {
           id: "times-tables",
           title: "Times Tables",
-          description: "Practise multiplication tables with rapid-fire questions",
+          description: "Strengthen multiplication recall with rapid-fire maths questions",
           icon: <Calculator className="h-8 w-8" />,
           gradient: "from-[#FFD700] to-[#FFA500]",
           hoverGradient: "from-[#FFD700]/90 to-[#FFA500]/90",
@@ -144,7 +144,7 @@ export default function BrainTraining() {
         {
           id: "geography",
           title: "Geography Quiz",
-          description: "Test your knowledge of countries, capitals, and landmarks",
+          description: "Test your knowledge of global countries, capitals, and landmarks",
           icon: <Globe className="h-8 w-8" />,
           gradient: "from-[#4CAF50] to-[#8BC34A]",
           hoverGradient: "from-[#4CAF50]/90 to-[#8BC34A]/90",
@@ -184,66 +184,23 @@ export default function BrainTraining() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto p-4 space-y-12">
       <h1 className="text-3xl font-bold mb-6">Brain Training Games</h1>
-      <Accordion type="single" collapsible className="w-full">
-        {gameCategories.map((category) => (
-          <AccordionItem key={category.id} value={category.id}>
-            <AccordionTrigger className="text-xl font-semibold">
-              {category.title}
-            </AccordionTrigger>
-            <AccordionContent>
-              <p className="text-muted-foreground mb-4">{category.description}</p>
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: true,
-                }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2 md:-ml-4">
-                  {category.games.map((game) => (
-                    <CarouselItem key={game.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                      <motion.div
-                        whileHover={{ scale: 1.02 }}
-                        className="h-full"
-                      >
-                        <Card className="h-full border-2 hover:border-primary transition-colors">
-                          <CardHeader>
-                            <div className="flex items-center gap-2">
-                              <div className={cn(
-                                "p-2 rounded-lg bg-gradient-to-br",
-                                game.gradient
-                              )}>
-                                {game.icon}
-                              </div>
-                              <CardTitle>{game.title}</CardTitle>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <CardDescription>{game.description}</CardDescription>
-                          </CardContent>
-                          <CardFooter>
-                            <Button
-                              className="w-full"
-                              onClick={() => handleGameSelect(game.id)}
-                              disabled={!user}
-                            >
-                              {user ? "Play Now" : "Sign in to Play"}
-                            </Button>
-                          </CardFooter>
-                        </Card>
-                      </motion.div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
+      
+      {gameCategories.map((category) => (
+        <div key={category.id} className="space-y-6">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-2">{category.title}</h2>
+            <p className="text-muted-foreground">{category.description}</p>
+          </div>
+          
+          <GameCarousel
+            games={category.games}
+            onGameSelect={handleGameSelect}
+            user={user}
+          />
+        </div>
+      ))}
     </div>
   );
 }

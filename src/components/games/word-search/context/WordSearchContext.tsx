@@ -1,49 +1,81 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { generateWordSearchPuzzle } from '../utils/puzzleGenerator';
+import type { Difficulty } from '@/components/games/GameSettings';
+import type { GridDimensions } from '../types';
 
-import { createContext, useContext } from "react";
-import type { WordToFind, GridDimensions } from "../types";
-
-export interface WordSearchContextValue {
-  // Grid and words
+interface WordSearchContextValue {
   grid: string[][];
-  words: WordToFind[];
-  selectedCells: [number, number][];
-  gridDimensions: GridDimensions;
-  
-  // Game state
-  isGameComplete: boolean;
+  words: string[];
+  dimensions: GridDimensions;
+  foundWords: string[];
   loading: boolean;
-  
-  // Theme management
-  themes: { id: string; name: string }[];
-  selectedTheme: string;
-  
-  // Game stats
-  wordsFoundCount: number;
-  totalWordsCount: number;
-  timeTaken: number;
-  
-  // Game state from useGameState
-  isGameActive: boolean;
-  timer: number;
-  score: number;
-  
-  // Actions
-  handleCellClick: (row: number, col: number) => void;
-  checkSelection: () => void;
-  handleSelectTheme: (themeId: string) => void;
-  handleNewPuzzle: () => void;
+  difficulty: Difficulty;
+  theme: string;
+  handleNewPuzzle: (newDifficulty?: Difficulty, newTheme?: string) => void;
+  markWordAsFound: (word: string) => void;
 }
 
-const WordSearchContext = createContext<WordSearchContextValue | undefined>(undefined);
+export const WordSearchContext = createContext<WordSearchContextValue | undefined>(undefined);
+
+export const WordSearchProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [grid, setGrid] = useState<string[][]>([]);
+  const [words, setWords] = useState<string[]>([]);
+  const [dimensions, setDimensions] = useState<GridDimensions>({ rows: 0, cols: 0 });
+  const [foundWords, setFoundWords] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [theme, setTheme] = useState<string>('animals');
+
+  const handleNewPuzzle = (newDifficulty?: Difficulty, newTheme?: string) => {
+    setLoading(true);
+    const nextDifficulty = newDifficulty || difficulty;
+    const nextTheme = newTheme || theme;
+    
+    setDifficulty(nextDifficulty);
+    setTheme(nextTheme);
+    
+    const { grid: newGrid, words: newWords, dimensions: newDimensions } = generateWordSearchPuzzle(nextDifficulty, nextTheme);
+    
+    setGrid(newGrid);
+    setWords(newWords);
+    setDimensions(newDimensions);
+    setFoundWords([]);
+    setLoading(false);
+  };
+
+  const markWordAsFound = (word: string) => {
+    if (!foundWords.includes(word)) {
+      setFoundWords([...foundWords, word]);
+    }
+  };
+
+  useEffect(() => {
+    handleNewPuzzle();
+  }, []);
+
+  const value = {
+    grid,
+    words,
+    dimensions,
+    foundWords,
+    loading,
+    difficulty,
+    theme,
+    handleNewPuzzle,
+    markWordAsFound,
+  };
+
+  return (
+    <WordSearchContext.Provider value={value}>
+      {children}
+    </WordSearchContext.Provider>
+  );
+};
 
 export const useWordSearchContext = () => {
   const context = useContext(WordSearchContext);
-  
   if (context === undefined) {
-    throw new Error("useWordSearchContext must be used within a WordSearchProvider");
+    throw new Error('useWordSearchContext must be used within a WordSearchProvider');
   }
-  
   return context;
 };
-
-export default WordSearchContext;

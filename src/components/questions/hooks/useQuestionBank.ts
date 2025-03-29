@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,13 +89,9 @@ export const useQuestionBank = () => {
         .select(`
           id,
           content,
-<<<<<<< HEAD
           question_type,
           sub_topics (
             id,
-=======
-          sub_topics (
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
             name,
             question_sections (
               category
@@ -134,16 +126,12 @@ export const useQuestionBank = () => {
       const formattedQuestions = data.map(q => ({
         id: q.id,
         content: q.content as any,
-<<<<<<< HEAD
         question_type: q.question_type,
         sub_topics: q.sub_topics.map((st: any) => ({
           id: st.id,
           name: st.name,
           question_sections: st.question_sections
         }))
-=======
-        sub_topics: q.sub_topics
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       }));
 
       return formattedQuestions;

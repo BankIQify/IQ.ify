@@ -160,6 +160,35 @@ export interface Database {
           updated_at?: string
         }
       }
+      differentiators: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          icon: string
+          order_index: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          icon: string
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          icon?: string
+          order_index?: number
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Functions: {
       update_achievement_progress: {
@@ -167,6 +196,13 @@ export interface Database {
           p_user_id: string
           p_achievement_id: string
           p_progress: { current: number; target: number }
+        }
+        Returns: void
+      }
+      reorder_differentiators: {
+        Args: {
+          p_differentiator_id: string
+          p_new_order: number
         }
         Returns: void
       }

@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AvatarCreator from "./pages/AvatarCreator";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { TestimonialForm } from "@/components/testimonials/TestimonialForm";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -149,6 +150,7 @@ const App = () => (
               />
               <Route path="/auth" element={<Auth />} />
               <Route path="/avatar-creator" element={<AvatarCreator />} />
+              <Route path="/testimonials/new" element={<TestimonialForm />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>

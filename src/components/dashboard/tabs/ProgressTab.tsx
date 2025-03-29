@@ -1,13 +1,8 @@
-<<<<<<< HEAD
 import { useState } from "react";
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { UserProgressChart } from "@/components/dashboard/UserProgressChart";
 import { Target, Brain, BookOpen, Gauge, Lightbulb, TrendingUp, Zap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-<<<<<<< HEAD
 import { SubtopicAnalysis } from "@/components/dashboard/SubtopicAnalysis";
 import { DetailedSubtopicAnalysis } from "@/components/dashboard/DetailedSubtopicAnalysis";
 import { Button } from "@/components/ui/button";
@@ -18,10 +13,6 @@ export const ProgressTab = () => {
   const [showDetailedAnalysis, setShowDetailedAnalysis] = useState(false);
   const { data: subtopics = [], isLoading } = useSubtopicPerformance('custom');
 
-=======
-
-export const ProgressTab = () => {
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -44,47 +35,11 @@ export const ProgressTab = () => {
               <CardDescription>Areas of strength and improvement</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Verbal Reasoning</span>
-                    <span className="font-medium">78%</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="bg-green-500 h-full rounded-full" style={{ width: "78%" }}></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Non-Verbal Reasoning</span>
-                    <span className="font-medium">62%</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="bg-blue-500 h-full rounded-full" style={{ width: "62%" }}></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Mathematical Reasoning</span>
-                    <span className="font-medium">85%</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="bg-purple-500 h-full rounded-full" style={{ width: "85%" }}></div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Problem Solving</span>
-                    <span className="font-medium">71%</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="bg-amber-500 h-full rounded-full" style={{ width: "71%" }}></div>
-                  </div>
-                </div>
-              </div>
+              <SubtopicAnalysis 
+                subtopics={subtopics} 
+                isLoading={isLoading}
+                onViewDetails={() => setShowDetailedAnalysis(true)}
+              />
             </CardContent>
           </Card>
         </div>
@@ -117,28 +72,6 @@ export const ProgressTab = () => {
         
         <Card>
           <CardHeader>
-<<<<<<< HEAD
-            <div 
-              className="cursor-pointer group"
-              onClick={() => setShowDetailedAnalysis(true)}
-            >
-              <CardTitle className="group-hover:text-primary transition-colors">
-                Cognitive Performance Analysis
-              </CardTitle>
-              <CardDescription className="line-clamp-2">
-                Adaptive learning pathways generated from real-time data on strengths and skill development.
-              </CardDescription>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center h-48">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-              </div>
-            ) : (
-              <SubtopicAnalysis subtopics={subtopics} limit={3} />
-            )}
-=======
             <CardTitle>AI-Driven Insights</CardTitle>
             <CardDescription>
               Personalized learning recommendations based on your performance
@@ -199,7 +132,6 @@ export const ProgressTab = () => {
                 </div>
               </div>
             </div>
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           </CardContent>
         </Card>
       </div>
@@ -264,15 +196,15 @@ export const ProgressTab = () => {
           </div>
         </CardContent>
       </Card>
-<<<<<<< HEAD
 
       <Dialog open={showDetailedAnalysis} onOpenChange={setShowDetailedAnalysis}>
         <DialogContent className="max-w-4xl">
-          <DetailedSubtopicAnalysis subtopics={subtopics} />
+          <DetailedSubtopicAnalysis 
+            subtopics={subtopics} 
+            isLoading={isLoading}
+          />
         </DialogContent>
       </Dialog>
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
     </div>
   );
 };

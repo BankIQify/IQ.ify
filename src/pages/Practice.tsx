@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -42,15 +38,11 @@ const Practice = () => {
     try {
       console.log(`Creating standard exam for category: ${examCategory}`);
       
-<<<<<<< HEAD
       const examName = `Standard ${getCategoryTitle(examCategory).toLowerCase()} test`;
       
       // Standard configuration for all exam categories
       const questionCount = 15;  // All exams have 15 questions
       const timeLimit = 20;      // All exams have 20 minutes
-=======
-      const examName = `Standard ${getCategoryTitle(examCategory).toLowerCase()} Test`;
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       
       const { data: exam, error } = await supabase
         .from('exams')
@@ -58,13 +50,8 @@ const Practice = () => {
           name: examName,
           category: examCategory,
           is_standard: true,
-<<<<<<< HEAD
           question_count: questionCount,
           time_limit_minutes: timeLimit,
-=======
-          question_count: 10,
-          time_limit_minutes: 15,
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           created_by: user.id
         })
         .select()

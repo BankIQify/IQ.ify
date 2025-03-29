@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Question } from "@/types/exam";
@@ -54,24 +50,16 @@ export const useExamAnswers = ({
       
       questions.forEach(question => {
         // Get the correct answer from the question content
-<<<<<<< HEAD
-        const correctAnswer = question.content.correctAnswer ?? question.content.answer;
-=======
         const correctAnswer = question.content.answer !== undefined 
           ? question.content.answer 
           : question.content.correctAnswer;
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         
         if (correctAnswer === undefined) {
           console.error('No correct answer found for question:', question);
           return;
         }
         
-<<<<<<< HEAD
-        // Get user's answer for this question
-=======
         // Ensure we're comparing values of the same type
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
         const userAnswer = answers[question.id];
         
         if (userAnswer === undefined) {
@@ -79,13 +67,6 @@ export const useExamAnswers = ({
           return;
         }
         
-<<<<<<< HEAD
-        // Convert both to strings for comparison to handle different formats
-        const normalizedUserAnswer = String(userAnswer).trim().toLowerCase();
-        const normalizedCorrectAnswer = String(correctAnswer).trim().toLowerCase();
-        
-        if (normalizedUserAnswer === normalizedCorrectAnswer) {
-=======
         // Strict comparison after ensuring types match
         const isCorrect = 
           typeof userAnswer === 'number' && typeof correctAnswer === 'number' 
@@ -93,7 +74,6 @@ export const useExamAnswers = ({
             : String(userAnswer) === String(correctAnswer);
         
         if (isCorrect) {
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           correctAnswers++;
         }
       });

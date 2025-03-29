@@ -1,68 +1,78 @@
+import { useState, useEffect } from 'react';
+import { usePuzzleLoader } from './usePuzzleLoader';
+import type { Difficulty } from '@/components/games/GameSettings';
+import type { WordToFind } from '../types';
 
-import { useGameState } from "@/hooks/use-game-state";
-import type { Difficulty } from "@/components/games/GameSettings";
-import { useThemeSelector } from "./useThemeSelector";
-import { usePuzzleLoader } from "./usePuzzleLoader";
-import { useGameInteraction } from "./useGameInteraction";
+export const useWordSearchGame = (initialDifficulty: Difficulty) => {
+  const [selectedTheme, setSelectedTheme] = useState<string>('animals');
+  const [difficulty, setDifficulty] = useState<Difficulty>(initialDifficulty);
+  const [selectedCells, setSelectedCells] = useState<number[][]>([]);
+  const [score, setScore] = useState(0);
+  const [timeElapsed, setTimeElapsed] = useState(0);
 
-export const useWordSearchGame = (difficulty: Difficulty) => {
-  // Initialize game state with timer
-  const gameState = useGameState({
-    initialTimer: 300,
-    gameType: "word_search",
-  });
-
-  // Theme selection
-  const { themes, selectedTheme, loading: themesLoading, handleSelectTheme } = useThemeSelector();
-
-  // Puzzle loading and management
-  const { 
-    grid, 
-    words, 
-    gridDimensions, 
-    loading: puzzleLoading, 
-    handleNewPuzzle,
-    setWords
+  const {
+    grid,
+    words,
+    handleNewPuzzle: loaderHandleNewPuzzle,
+    setWords,
   } = usePuzzleLoader(selectedTheme, difficulty);
 
-  // Game interaction
-  const { 
-    selectedCells, 
-    isGameComplete, 
-    handleCellClick, 
-    checkSelection 
-  } = useGameInteraction(grid, words, setWords, gameState);
+  // Start timer when game starts
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeElapsed(prev => prev + 1);
+    }, 1000);
 
-  // Combined loading state
-  const loading = themesLoading || puzzleLoading;
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleCellClick = (row: number, col: number) => {
+    setSelectedCells(prev => {
+      const isSelected = prev.some(([r, c]) => r === row && c === col);
+      if (isSelected) {
+        return prev.filter(([r, c]) => !(r === row && c === col));
+      }
+      return [...prev, [row, col]];
+    });
+  };
+
+  const updateSelection = (row: number, col: number) => {
+    setSelectedCells(prev => {
+      const isSelected = prev.some(([r, c]) => r === row && c === col);
+      if (!isSelected) {
+        return [...prev, [row, col]];
+      }
+      return prev;
+    });
+  };
+
+  const handleNewPuzzle = (newDifficulty?: Difficulty) => {
+    setSelectedCells([]);
+    setScore(0);
+    setTimeElapsed(0);
+    if (newDifficulty) {
+      setDifficulty(newDifficulty);
+    }
+    loaderHandleNewPuzzle(newDifficulty);
+  };
+
+  const foundWords = words.filter(word => word.found).length;
+  const totalWords = words.length;
 
   return {
-    // Grid and words
     grid,
     words,
     selectedCells,
-    gridDimensions,
-    
-    // Game state
-    isGameComplete,
-    loading,
-    
-    // Theme management
-    themes,
-    selectedTheme,
-    
-    // Game stats
-    wordsFoundCount: words.filter(w => w.found).length,
-    totalWordsCount: words.length,
-    timeTaken: 300 - gameState.timer,
-    
-    // Game state from useGameState
-    gameState,
-    
-    // Actions
     handleCellClick,
-    checkSelection,
-    handleSelectTheme,
     handleNewPuzzle,
+    selectedTheme,
+    setSelectedTheme,
+    difficulty,
+    setDifficulty,
+    score,
+    timeElapsed,
+    foundWords,
+    totalWords,
+    updateSelection,
   };
 };

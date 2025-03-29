@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { useGameState } from "@/hooks/use-game-state";
 import { GameLayout } from "./GameLayout";
-import { GameSettings } from "./GameSettings";
+import { DifficultySelector } from "./DifficultySelector";
 import type { Difficulty } from "./GameSettings";
 import { RopeUntangleBoard } from "./rope-untangle/RopeUntangleBoard";
 import { GameInstructions } from "./rope-untangle/GameInstructions";
@@ -51,7 +50,7 @@ export const RopeUntangleGame = ({ difficulty: initialDifficulty = "easy" }: { d
 
   const settingsContent = (
     <div className="space-y-4">
-      <GameSettings
+      <DifficultySelector
         difficulty={gameState.difficulty}
         onDifficultyChange={gameState.setDifficulty}
       />

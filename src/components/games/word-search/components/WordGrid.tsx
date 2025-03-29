@@ -1,166 +1,198 @@
-
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { useWordSearchContext } from "../context/WordSearchContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 export const WordGrid = () => {
   const { 
     grid, 
-    gridDimensions, 
-    selectedCells, 
-    handleCellClick,
-    checkSelection 
+    dimensions,
+    foundWords,
+    markWordAsFound,
   } = useWordSearchContext();
+  
   const isMobile = useIsMobile();
   const gridRef = useRef<HTMLDivElement>(null);
   
-  // Track drag state
   const [isDragging, setIsDragging] = useState(false);
-  const [lastCellVisited, setLastCellVisited] = useState<[number, number] | null>(null);
+  const [startCell, setStartCell] = useState<[number, number] | null>(null);
+  const [currentCell, setCurrentCell] = useState<[number, number] | null>(null);
+  const [selectedCells, setSelectedCells] = useState<[number, number][]>([]);
 
-  // Function to determine cell color based on various conditions
-  const getCellColor = (rowIndex: number, colIndex: number) => {
-    const isSelected = selectedCells.some(([r, c]) => r === rowIndex && c === colIndex);
-    const isBlank = grid[rowIndex][colIndex] === ' ';
+  // Calculate cells between start and current
+  const getSelectedCellsInDrag = (start: [number, number], end: [number, number]) => {
+    if (!start || !end) return [];
     
-    if (isBlank) {
-      return "bg-slate-200 cursor-default";
+    const [startRow, startCol] = start;
+    const [endRow, endCol] = end;
+    
+    // Calculate direction vector
+    const rowDiff = endRow - startRow;
+    const colDiff = endCol - startCol;
+    const length = Math.max(Math.abs(rowDiff), Math.abs(colDiff));
+    
+    if (length === 0) return [start];
+    
+    // Normalize direction
+    const rowStep = rowDiff / length;
+    const colStep = colDiff / length;
+    
+    // Generate cells
+    const cells: [number, number][] = [];
+    for (let i = 0; i <= length; i++) {
+      const row = Math.round(startRow + rowStep * i);
+      const col = Math.round(startCol + colStep * i);
+      cells.push([row, col]);
     }
     
-    if (isSelected) {
-      return "bg-pastel-purple text-white";
-    }
-    
-    // Create a checkered pattern for non-blank cells
-    return (rowIndex + colIndex) % 2 === 0 
-      ? "bg-white hover:bg-pastel-purple/10 cursor-pointer" 
-      : "bg-slate-50 hover:bg-pastel-purple/10 cursor-pointer";
+    return cells;
   };
 
-  // Function to get cell element from coordinates
-  const getCellFromPoint = (x: number, y: number): [number, number] | null => {
-    if (!gridRef.current) return null;
-    
-    const gridRect = gridRef.current.getBoundingClientRect();
-    const relativeX = x - gridRect.left;
-    const relativeY = y - gridRect.top;
-    
-    // Check if point is within grid
-    if (relativeX < 0 || relativeY < 0 || relativeX > gridRect.width || relativeY > gridRect.height) {
-      return null;
-    }
-    
-    const cellWidth = gridRect.width / gridDimensions.cols;
-    const cellHeight = gridRect.height / gridDimensions.rows;
-    
-    const col = Math.floor(relativeX / cellWidth);
-    const row = Math.floor(relativeY / cellHeight);
-    
-    // Ensure we're within bounds
-    if (row >= 0 && row < gridDimensions.rows && col >= 0 && col < gridDimensions.cols) {
-      return [row, col];
-    }
-    
-    return null;
+  const handlePointerDown = (row: number, col: number) => {
+    setIsDragging(true);
+    setStartCell([row, col]);
+    setCurrentCell([row, col]);
+    setSelectedCells([[row, col]]);
   };
 
-  // Handle mouse/touch move during drag
-  const handlePointerMove = (e: PointerEvent) => {
-    if (!isDragging) return;
+  const handlePointerMove = (row: number, col: number) => {
+    if (!isDragging || !startCell) return;
     
-    const x = e.clientX;
-    const y = e.clientY;
-    const cellCoords = getCellFromPoint(x, y);
+    setCurrentCell([row, col]);
     
-    if (cellCoords && (lastCellVisited?.[0] !== cellCoords[0] || lastCellVisited?.[1] !== cellCoords[1])) {
-      const [row, col] = cellCoords;
-      
-      // Skip blank cells
-      if (grid[row][col] === ' ') return;
-      
-      // Add to selection
-      handleCellClick(row, col);
-      setLastCellVisited(cellCoords);
+    // Get all cells in the drag path
+    const cellsInDrag = getSelectedCellsInDrag(startCell, [row, col]);
+    
+    // Update selection with all cells in the drag path
+    setSelectedCells(cellsInDrag);
+  };
+
+  const checkSelection = () => {
+    if (!selectedCells.length) return;
+
+    // Convert selected cells to word
+    const word = selectedCells
+      .map(([row, col]) => grid[row][col])
+      .join('');
+    
+    // Check if word exists in any direction
+    const wordReversed = word.split('').reverse().join('');
+    
+    if (!foundWords.includes(word) && !foundWords.includes(wordReversed)) {
+      if (word.length >= 3) {
+        markWordAsFound(word);
+      }
     }
   };
 
-  // Handle mouse/touch up to end drag
   const handlePointerUp = () => {
     if (isDragging) {
       setIsDragging(false);
-      setLastCellVisited(null);
-      
-      // Check if a word was formed
+      setStartCell(null);
+      setCurrentCell(null);
       checkSelection();
-      
-      // Clean up event listeners
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
+      setSelectedCells([]);
     }
   };
 
-  // Start drag when pointer down on a cell
-  const handlePointerDown = (rowIndex: number, colIndex: number) => {
-    // Skip if cell is blank
-    if (grid[rowIndex][colIndex] === ' ') return;
+  // Add pointer capture release handler
+  useEffect(() => {
+    const handlePointerCaptureLoss = () => {
+      setIsDragging(false);
+      setStartCell(null);
+      setCurrentCell(null);
+      checkSelection();
+      setSelectedCells([]);
+    };
+
+    window.addEventListener('pointerup', handlePointerCaptureLoss);
+    return () => window.removeEventListener('pointerup', handlePointerCaptureLoss);
+  }, []);
+
+  const getCellColor = (rowIndex: number, colIndex: number) => {
+    const isSelected = selectedCells.some(([r, c]) => r === rowIndex && c === colIndex);
+    const isInDragPath = startCell && currentCell && 
+      getSelectedCellsInDrag(startCell, currentCell)
+        .some(([r, c]) => r === rowIndex && c === colIndex);
     
-    // Clear previous selection
-    // Don't clear selection, just start new drag
-    setIsDragging(true);
-    setLastCellVisited([rowIndex, colIndex]);
+    if (isSelected || isInDragPath) {
+      return "bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg";
+    }
     
-    // Handle the initial cell click
-    handleCellClick(rowIndex, colIndex);
-    
-    // Add event listeners for dragging
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp);
-    window.addEventListener('pointercancel', handlePointerUp);
+    return (rowIndex + colIndex) % 2 === 0 
+      ? "bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50" 
+      : "bg-slate-50 hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50";
   };
 
-  // Clean up event listeners when component unmounts
-  useEffect(() => {
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      window.removeEventListener('pointercancel', handlePointerUp);
-    };
-  }, [isDragging]);
+  if (!dimensions || !grid.length) {
+    return null;
+  }
 
   return (
-    <Card className="overflow-hidden border-none shadow-lg">
-      <CardContent className={`p-0 ${isMobile ? 'max-w-full overflow-x-auto' : ''}`}>
-        <div 
+    <Card className="overflow-hidden border-none shadow-lg bg-gradient-to-br from-white to-slate-50">
+      <CardContent className={cn(
+        "p-4",
+        isMobile ? "max-w-full overflow-x-auto" : ""
+      )}>
+        <motion.div 
           ref={gridRef}
-          className={`grid gap-0 bg-white touch-none`} 
+          className="grid gap-1 bg-transparent rounded-lg p-2 touch-none"
           style={{ 
-            gridTemplateColumns: `repeat(${gridDimensions.cols}, minmax(0, 1fr))`,
-            gridTemplateRows: `repeat(${gridDimensions.rows}, minmax(0, 1fr))`
+            gridTemplateColumns: `repeat(${dimensions.cols}, minmax(0, 1fr))`,
+            gridTemplateRows: `repeat(${dimensions.rows}, minmax(0, 1fr))`
           }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
         >
           {grid.map((row, rowIndex) => (
-            row.map((letter, colIndex) => (
-              <div
-                key={`${rowIndex}-${colIndex}`}
-                className={cn(
-                  "aspect-square flex items-center justify-center text-lg font-medium border border-slate-100",
-                  "transition-colors",
-                  isMobile ? "min-w-8 min-h-8" : "hover:scale-105 transition-all duration-200 transform",
-                  getCellColor(rowIndex, colIndex)
-                )}
-                onPointerDown={(e) => {
-                  e.preventDefault(); // Prevent default behaviors
-                  handlePointerDown(rowIndex, colIndex);
-                }}
-              >
-                {letter !== ' ' ? letter : ''}
-              </div>
-            ))
+            row.map((letter, colIndex) => {
+              const isSelected = selectedCells.some(([r, c]) => r === rowIndex && c === colIndex);
+              const isInDragPath = startCell && currentCell && 
+                getSelectedCellsInDrag(startCell, currentCell)
+                  .some(([r, c]) => r === rowIndex && c === colIndex);
+
+              return (
+                <motion.div
+                  key={`${rowIndex}-${colIndex}`}
+                  className={cn(
+                    "aspect-square flex items-center justify-center",
+                    "text-lg md:text-xl font-medium",
+                    "rounded-lg cursor-pointer select-none",
+                    "transition-all duration-200",
+                    getCellColor(rowIndex, colIndex)
+                  )}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    handlePointerDown(rowIndex, colIndex);
+                  }}
+                  onPointerEnter={() => handlePointerMove(rowIndex, colIndex)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <motion.span
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.3,
+                      delay: (rowIndex * dimensions.cols + colIndex) * 0.02
+                    }}
+                    className={cn(
+                      "font-semibold",
+                      (isSelected || isInDragPath) ? "text-white" : "text-gray-700"
+                    )}
+                  >
+                    {letter}
+                  </motion.span>
+                </motion.div>
+              );
+            })
           ))}
-        </div>
+        </motion.div>
       </CardContent>
     </Card>
   );

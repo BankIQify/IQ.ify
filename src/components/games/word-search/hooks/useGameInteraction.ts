@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "@/components/ui/use-toast";
 import type { WordToFind } from "../types";
@@ -29,22 +28,24 @@ export const useGameInteraction = (
     }
     
     setSelectedCells((prev) => {
-      if (prev.some(([r, c]) => r === row && c === col)) {
-        return prev.filter(([r, c]) => !(r === row && c === col));
-      }
-      return [...prev, [row, col]];
+      // For drag selection, we want to replace the selection rather than toggle
+      return [[row, col]];
     });
   }, [grid, gameState]);
 
   const checkSelection = useCallback(() => {
     if (selectedCells.length < 2) return;
 
+    // Get the word in both forward and reverse directions
     const selectedWord = selectedCells
       .map(([row, col]) => grid[row][col])
       .join('');
+    
+    const reversedWord = selectedWord.split('').reverse().join('');
 
+    // Check both forward and reversed words
     const foundWord = words.find(
-      ({ word, found }) => !found && (word === selectedWord || word === selectedWord.split('').reverse().join(''))
+      ({ word, found }) => !found && (word === selectedWord || word === reversedWord)
     );
 
     if (foundWord) {
@@ -52,11 +53,13 @@ export const useGameInteraction = (
         w.word === foundWord.word ? { ...w, found: true } : w
       ));
       
-      gameState.updateScore(foundWord.word.length * 5);
+      // Award points based on word length and difficulty
+      const points = foundWord.word.length * 10;
+      gameState.updateScore(points);
       
       toast({
         title: "Word Found!",
-        description: `You found "${foundWord.word}"!`,
+        description: `You found "${foundWord.word}"! (+${points} points)`,
         variant: "default",
       });
     }
@@ -66,9 +69,10 @@ export const useGameInteraction = (
     // Check if all words are found
     const remainingWords = words.filter(w => !w.found).length - (foundWord ? 1 : 0);
     if (remainingWords === 0) {
+      const finalScore = gameState.score;
       toast({
-        title: "Congratulations!",
-        description: "You found all the words!",
+        title: "🎉 Congratulations!",
+        description: `You found all the words! Final score: ${finalScore}`,
         variant: "default",
       });
       setIsGameComplete(true);
@@ -76,10 +80,16 @@ export const useGameInteraction = (
     }
   }, [selectedCells, grid, words, setWords, gameState]);
 
+  // Add a function to update selection during drag
+  const updateSelection = useCallback((cells: [number, number][]) => {
+    setSelectedCells(cells);
+  }, []);
+
   return {
     selectedCells,
     isGameComplete,
     handleCellClick,
-    checkSelection
+    checkSelection,
+    updateSelection
   };
 };

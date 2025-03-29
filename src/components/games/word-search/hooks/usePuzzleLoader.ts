@@ -1,98 +1,68 @@
-
 import { useState, useEffect } from "react";
-import { fetchPuzzlesByTheme } from "../utils/puzzleDataFetcher";
-import { generateDynamicPuzzle } from "../utils/puzzleGenerator";
+import { generateWordSearchPuzzle } from "../utils/puzzleGenerator";
 import type { Difficulty } from "@/components/games/GameSettings";
-import type { WordSearchPuzzle, GridDimensions, WordToFind } from "../types";
+import type { WordToFind, GridDimensions } from "../types";
+import { supabase } from '@/integrations/supabase/client';
 
-export const usePuzzleLoader = (
-  selectedTheme: string,
-  difficulty: Difficulty
-) => {
-  const [puzzles, setPuzzles] = useState<WordSearchPuzzle[]>([]);
-  const [currentPuzzle, setCurrentPuzzle] = useState<WordSearchPuzzle | null>(null);
+export const usePuzzleLoader = (difficulty: Difficulty, themeId: string) => {
   const [grid, setGrid] = useState<string[][]>([]);
-  const [words, setWords] = useState<WordToFind[]>([]);
-  const [gridDimensions, setGridDimensions] = useState<GridDimensions>({ rows: 8, cols: 8 });
-  const [loading, setLoading] = useState(true);
+  const [words, setWords] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch puzzles when theme or difficulty changes
-  useEffect(() => {
-    if (selectedTheme) {
-      setLoading(true);
-      fetchPuzzlesByTheme(selectedTheme, difficulty).then(puzzlesData => {
-        setPuzzles(puzzlesData);
-        setCurrentPuzzle(null);
-        setLoading(false);
-      });
+  const fetchPuzzle = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Try to get a pre-generated puzzle
+      const { data: puzzle, error: fetchError } = await supabase
+        .from('word_search_puzzles')
+        .select('*')
+        .eq('theme_id', themeId)
+        .eq('difficulty', difficulty)
+        .is('used_at', null)
+        .limit(1)
+        .single();
+
+      if (fetchError) {
+        // If no pre-generated puzzle is available, generate one on the fly
+        console.log('No pre-generated puzzle available, generating one...');
+        const generatedPuzzle = generateWordSearchPuzzle(difficulty, themeId);
+        setGrid(generatedPuzzle.grid);
+        setWords(generatedPuzzle.words);
+        return;
+      }
+
+      // Mark the puzzle as used
+      await supabase
+        .from('word_search_puzzles')
+        .update({ used_at: new Date().toISOString() })
+        .eq('id', puzzle.id);
+
+      setGrid(puzzle.grid);
+      setWords(puzzle.words);
+    } catch (err) {
+      console.error('Error loading puzzle:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load puzzle');
+    } finally {
+      setIsLoading(false);
     }
-  }, [selectedTheme, difficulty]);
-
-  // Select a random puzzle when puzzles are loaded
-  useEffect(() => {
-    if (puzzles.length > 0 && !currentPuzzle) {
-      const randomIndex = Math.floor(Math.random() * puzzles.length);
-      setCurrentPuzzle(puzzles[randomIndex]);
-    }
-  }, [puzzles, currentPuzzle]);
-
-  // Initialize game when current puzzle changes
-  useEffect(() => {
-    if (currentPuzzle) {
-      initializeGameFromPuzzle(currentPuzzle);
-    } else if (selectedTheme) {
-      // Fallback to dynamically generated puzzle
-      generateDynamicPuzzleForGame(difficulty);
-    }
-  }, [currentPuzzle, difficulty, selectedTheme]);
-
-  const initializeGameFromPuzzle = (puzzle: WordSearchPuzzle) => {
-    const puzzleGrid = puzzle.puzzle_data.grid;
-    const puzzleWords = puzzle.puzzle_data.words.map(word => ({
-      word,
-      found: false
-    }));
-
-    setGrid(puzzleGrid);
-    setWords(puzzleWords);
-    
-    // Set grid dimensions based on the puzzle grid
-    setGridDimensions({
-      rows: puzzleGrid.length,
-      cols: puzzleGrid[0].length
-    });
   };
 
-  const generateDynamicPuzzleForGame = (difficulty: Difficulty) => {
-    const { grid: dynamicGrid, words: dynamicWords, gridDimensions: dimensions } = generateDynamicPuzzle(difficulty);
-    
-    setGrid(dynamicGrid);
-    setWords(dynamicWords);
-    setGridDimensions(dimensions);
-  };
+  useEffect(() => {
+    fetchPuzzle();
+  }, [difficulty, themeId]);
 
   const handleNewPuzzle = () => {
-    if (puzzles.length > 1) {
-      // Select a different puzzle
-      let newPuzzle;
-      do {
-        const randomIndex = Math.floor(Math.random() * puzzles.length);
-        newPuzzle = puzzles[randomIndex];
-      } while (newPuzzle.id === currentPuzzle?.id);
-      
-      setCurrentPuzzle(newPuzzle);
-    } else {
-      // Generate a new dynamic puzzle
-      generateDynamicPuzzleForGame(difficulty);
-    }
+    fetchPuzzle();
   };
 
   return {
     grid,
     words,
-    gridDimensions,
-    loading,
+    isLoading,
+    error,
     handleNewPuzzle,
-    setWords
   };
 };

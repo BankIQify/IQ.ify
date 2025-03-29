@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-<<<<<<< HEAD
 import { BookOpen, Brain, Trophy, Lock, CheckCircle, Target, Users, Clock, RefreshCw, Accessibility, Sparkles, Star, MessageSquare, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthContext } from "@/contexts/AuthContext";
@@ -8,6 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { AboutUs } from "@/components/home/AboutUs";
+import { Testimonials } from "@/components/home/Testimonials";
 
 const Index = () => {
   const { user } = useAuthContext();
@@ -98,171 +100,188 @@ const Index = () => {
       name: "Emma Patel",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
       rating: 5,
-      quote: "The community support was amazing. I learned so much from discussing with other students. The platform helped me build confidence and develop a growth mindset."
-    },
-    {
-      name: "Oliver Chen",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Oliver",
-      rating: 5,
-      quote: "The expert-led questions were challenging but rewarding. I appreciated how each question helped me understand the underlying concepts, not just memorise answers."
-    },
-    {
-      name: "Sophie Anderson",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie",
-      rating: 5,
-      quote: "The flexible learning schedule was perfect for me. I could practice whenever I wanted, and the progress tracking helped me stay motivated. Highly recommend!"
-    },
-    {
-      name: "Lucas Rodriguez",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Lucas",
-      rating: 5,
-      quote: "The platform's accessibility features made it easy for me to use with my learning differences. The support team was always helpful when I needed assistance."
+      quote: "The platform's flexibility allowed me to fit learning around my busy schedule. The progress tracking helped me stay motivated and see my improvement over time."
     }
   ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTestimonialIndex((prev) => (prev + 1) % testimonials.length);
-    }, 5000); // Change testimonial every 5 seconds
-
+    }, 5000);
     return () => clearInterval(interval);
   }, [testimonials.length]);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] font-sans">
+    <div className="min-h-screen bg-gradient-to-b from-[rgba(30,174,219,0.1)] to-[rgba(255,105,180,0.1)]">
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-32 px-4">
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 via-white to-blue-50/50" />
-          <div className="absolute top-0 right-0 w-96 h-96 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-          <div className="absolute top-0 left-0 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-          <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-green-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
-        </div>
-        <div className="container mx-auto relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
+      <section className="container mx-auto px-4 py-16 relative min-h-[600px]">
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          <div className="text-center">
+            <motion.h1 
+              className="text-4xl md:text-6xl font-bold mb-6 text-gray-900"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-left"
+              transition={{ duration: 0.5 }}
             >
-              <h1 className="text-4xl md:text-6xl font-bold text-slate-800 mb-6 font-display">
-                {homepageContent?.hero_title || "Master the 11+ Exam"}
-              </h1>
-              <p className="text-xl text-slate-600 mb-8 font-body">
-                {homepageContent?.hero_subtitle || "Comprehensive preparation for verbal and non-verbal reasoning with interactive practice and brain training."}
-              </p>
-              <div className="space-y-4">
-                {user ? (
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Link to="/lets-practice">
-                      <Button size="lg" className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-                        Start Practising
-                      </Button>
-                    </Link>
-                    <Link to="/brain-training">
-                      <Button size="lg" variant="outline" className="border-2 border-slate-200 text-slate-800 hover:bg-slate-50 px-8 py-6 text-lg rounded-full">
-                        Play Brain Games
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <Link to="/auth">
-                    <Button size="lg" className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-                      Get Started
-                    </Button>
-                  </Link>
-                )}
+              Connecting the Cognitive Dots To A Boundless Mind
+            </motion.h1>
+            
+            {/* Ratings and Stats */}
+            <div className="mb-8">
+              <div className="flex items-center justify-center gap-2 mb-6">
+                {[...Array(5)].map((_, i) => (
+                  <Star 
+                    key={i} 
+                    className="h-6 w-6 text-yellow-400 fill-current" 
+                    strokeWidth={1}
+                  />
+                ))}
+                <span className="ml-2 font-semibold text-gray-900">4.8/5 on App Store</span>
               </div>
-              <div className="mt-8 text-slate-600 flex flex-wrap gap-6">
-                <span className="flex items-center bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-8 h-8 fill-[#FFD700] text-[#FFD700]" />
-                    <Star className="w-8 h-8 fill-[#FFD700] text-[#FFD700]" />
-                    <Star className="w-8 h-8 fill-[#FFD700] text-[#FFD700]" />
-                    <Star className="w-8 h-8 fill-[#FFD700] text-[#FFD700]" />
-                    <Star className="w-8 h-8 fill-[#FFD700] text-[#FFD700]" />
-                    <span className="text-sm ml-2 text-slate-700">4.8</span>
-                  </div>
-                </span>
-                <span className="flex items-center bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <Users className="w-5 h-5 text-green-500 mr-2" />
-                  Trusted by over 8,000+ students
-                </span>
-                <span className="flex items-center bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <Brain className="w-5 h-5 text-blue-500 mr-2" />
-                  Built on cognitive science and informed by research-based methods proven to improve retention and reasoning
-                </span>
+              
+              <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
+                <div className="flex flex-col items-center">
+                  <Users className="h-6 w-6 mb-2 text-primary" />
+                  <span className="font-semibold text-gray-900">over 5,000</span>
+                  <span className="text-sm text-gray-600">Active Users</span>
+                </div>
+                
+                <div className="flex flex-col items-center">
+                  <Trophy className="h-6 w-6 mb-2 text-primary" />
+                  <span className="font-semibold text-gray-900">Best Cognitive</span>
+                  <span className="text-sm text-gray-600">App 2023</span>
+                </div>
               </div>
-            </motion.div>
+            </div>
+
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+                <span className="font-semibold text-gray-900">Grounded in neuroscience. Powered by personalised learning insights</span>
+              </div>
+            </div>
+
+            <motion.p 
+              className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              Personalised learning experiences, expert-led questions, and interactive content to help you achieve your educational goals.
+            </motion.p>
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative"
+              className="flex justify-center gap-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <div className="relative w-full h-[600px] rounded-[2rem] overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1610484826967-09c5720778c7"
-                  alt="Young student in red hoodie wearing headphones, focused on learning with his laptop"
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-white/80 to-transparent" />
-              </div>
-              <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-pink-100 rounded-full mix-blend-multiply filter blur-xl opacity-70" />
+              <Link to={user ? "/dashboard" : "/auth"}>
+                <Button size="lg">
+                  {user ? "Go to Dashboard" : "Get Started"}
+                </Button>
+              </Link>
+              <Link to="/practice">
+                <Button size="lg" variant="outline">
+                  Try Practice Questions
+                </Button>
+              </Link>
             </motion.div>
           </div>
+          <motion.div 
+            className="relative h-full min-h-[400px]"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <img 
+              src="https://images.unsplash.com/photo-1642982156172-Y8TiLvKnLeg?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
+              alt="Student learning with headphones" 
+              className="w-full h-full object-cover rounded-2xl shadow-2xl"
+              onError={(e) => {
+                console.error('Image failed to load:', e);
+                e.currentTarget.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80";
+              }}
+            />
+          </motion.div>
         </div>
       </section>
 
+      {/* About Us Section */}
+      <AboutUs />
+
       {/* Features Section */}
-      <section className="py-24 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-800 mb-4 font-display">Why Choose Us</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto font-body">
-              Our platform combines cutting-edge technology with proven educational methods to help you succeed
-            </p>
-          </div>
-          <div className="space-y-32">
-            {features.map((feature, index) => (
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold text-center mb-12">Why Choose iQify?</h2>
+        <div className="space-y-16">
+          {features.map((feature, index) => (
+            <motion.div
+              key={feature.title}
+              className="bg-white rounded-xl shadow-lg overflow-hidden"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                <div className="p-8 md:w-1/2 flex flex-col justify-center">
+                  <div className="mb-4">{feature.icon}</div>
+                  <h3 className="text-2xl font-semibold mb-4">{feature.title}</h3>
+                  <p className="text-muted-foreground text-lg">{feature.description}</p>
+                </div>
+                <div className="md:w-1/2 h-64 md:h-auto">
+                  <img 
+                    src={feature.image} 
+                    alt={feature.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Differentiators Section */}
+      <section className="py-16 relative">
+        {/* Pinboard background */}
+        <div className="absolute inset-0 bg-[#f5f1e6] opacity-90" 
+          style={{
+            backgroundImage: `
+              radial-gradient(#00000011 1px, transparent 1px),
+              radial-gradient(#00000011 1px, transparent 1px)
+            `,
+            backgroundSize: '20px 20px',
+            backgroundPosition: '0 0, 10px 10px'
+          }}
+        />
+        
+        <div className="container mx-auto px-4 relative">
+          <h2 className="text-3xl font-bold text-center mb-16">Differentiators</h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {differentiators.map((differentiator, index) => (
               <motion.div
-                key={index}
+                key={differentiator.title}
+                className={`
+                  p-6 rounded-sm shadow-lg transform rotate-${Math.floor(Math.random() * 3) - 1}
+                  ${index === 0 ? 'bg-[#fff8b8]' : index === 1 ? 'bg-[#b8fff9]' : 'bg-[#ffb8ee]'}
+                  hover:rotate-0 transition-transform duration-300
+                  relative
+                `}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`relative ${
-                  index % 2 === 0 
-                    ? "lg:ml-0" 
-                    : "lg:ml-16"
-                }`}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
+                style={{
+                  boxShadow: '2px 2px 5px rgba(0,0,0,0.1), -1px -1px 2px rgba(0,0,0,0.05)'
+                }}
               >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                  <div className={`space-y-6 ${
-                    index % 2 === 0 ? "lg:order-1" : "lg:order-2"
-                  }`}>
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-${feature.color}-100`}>
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-2xl font-semibold text-slate-800 font-display">
-                      {feature.title}
-                    </h3>
-                    <p className="text-slate-600 text-lg font-body">
-                      {feature.description}
-                    </p>
+                {/* Fake pin */}
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-gray-300 shadow-inner border-2 border-gray-400" />
+                
+                <div className="flex flex-col items-center text-center">
+                  <div className="mb-4 transform hover:scale-110 transition-transform">
+                    {differentiator.icon}
                   </div>
-                  <div className={`relative ${
-                    index % 2 === 0 ? "lg:order-2" : "lg:order-1"
-                  }`}>
-                    <div className="relative w-full h-[400px] rounded-[2rem] overflow-hidden">
-                      <img
-                        src={feature.image}
-                        alt={feature.title}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className={`absolute -bottom-8 -left-8 w-32 h-32 bg-${feature.color}-100 rounded-full mix-blend-multiply filter blur-xl opacity-70`} />
-                  </div>
+                  <h3 className="text-xl font-semibold mb-3 font-handwriting">{differentiator.title}</h3>
+                  <p className="text-gray-700 font-handwriting">{differentiator.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -271,254 +290,20 @@ const Index = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 px-4 bg-gradient-to-b from-slate-50/50 to-white">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-800 mb-4 font-display">What Our Students Say</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto font-body">
-              Join thousands of students who have improved their skills with our platform
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative overflow-hidden">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ 
-                  opacity: index >= currentTestimonialIndex && index < currentTestimonialIndex + 3 ? 1 : 0,
-                  x: index >= currentTestimonialIndex && index < currentTestimonialIndex + 3 ? 0 : 100
-                }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.5 }}
-                className={`bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden ${
-                  index >= currentTestimonialIndex && index < currentTestimonialIndex + 3 ? 'block' : 'hidden'
-                }`}
-              >
-                <div className="absolute -top-4 -left-4 w-8 h-8 bg-pink-100 rounded-full mix-blend-multiply filter blur-sm opacity-70" />
-                <div className="absolute -bottom-4 -right-4 w-8 h-8 bg-blue-100 rounded-full mix-blend-multiply filter blur-sm opacity-70" />
-                <div className="flex flex-col">
-                  <div className="flex items-center mb-6">
-                    <Avatar className="h-12 w-12 mr-4">
-                      <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
-                      <AvatarFallback>{testimonial.name[0]}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h4 className="font-semibold text-slate-800 font-display">{testimonial.name}</h4>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-8 h-8 fill-[#FFD700] text-[#FFD700]" />
-                    ))}
-                  </div>
-                  <p className="text-slate-600 italic font-body">"{testimonial.quote}"</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-          {user && (
-            <div className="text-center mt-12">
-              <Link to="/profile">
-                <Button variant="outline" className="border-slate-200 text-slate-700 hover:bg-slate-50 rounded-full">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Write a Testimonial
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Differentiators Section */}
-      <section className="py-24 px-4">
-        <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-800 mb-4 font-display">What Sets Us Apart</h2>
-            <p className="text-slate-600 max-w-2xl mx-auto font-body">
-              Our commitment to excellence and innovation makes us the preferred choice for students
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {differentiators.map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="text-center bg-white/80 backdrop-blur-sm p-8 rounded-[2rem] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-              >
-                <div className="absolute -top-4 -left-4 w-8 h-8 bg-pink-100 rounded-full mix-blend-multiply filter blur-sm opacity-70" />
-                <div className="absolute -bottom-4 -right-4 w-8 h-8 bg-blue-100 rounded-full mix-blend-multiply filter blur-sm opacity-70" />
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-slate-100 mb-6">
-                  {item.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-slate-800 mb-4 font-display">
-                  {item.title}
-                </h3>
-                <p className="text-slate-600 font-body">
-                  {item.description}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Testimonials />
 
       {/* CTA Section */}
-      {!user && (
-        <section className="py-24 px-4 bg-gradient-to-b from-white to-slate-50/50">
-          <div className="container mx-auto">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="text-center bg-white/80 backdrop-blur-sm p-12 rounded-[2rem] shadow-xl relative overflow-hidden"
-            >
-              <div className="absolute -top-8 -left-8 w-32 h-32 bg-pink-100 rounded-full mix-blend-multiply filter blur-xl opacity-70" />
-              <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-100 rounded-full mix-blend-multiply filter blur-xl opacity-70" />
-              <h2 className="text-3xl font-bold text-slate-800 mb-4 font-display">
-                Ready to Begin Your Journey?
-              </h2>
-              <p className="text-slate-600 mb-8 max-w-2xl mx-auto font-body">
-                Join now to access all our features and start improving your skills today.
-              </p>
-              <Link to="/auth">
-                <Button size="lg" className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300">
-                  Sign Up Now
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </section>
-=======
-import { BookOpen, Brain, Trophy, Lock, CheckCircle, Target } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuthContext } from "@/contexts/AuthContext";
-
-const Index = () => {
-  const { user } = useAuthContext();
-
-  const features = [
-    {
-      icon: <BookOpen className="w-12 h-12 text-education-600" />,
-      title: "Comprehensive Practice",
-      description:
-        "Access a wide range of verbal and non-verbal reasoning questions tailored for 11+ exam preparation.",
-      benefits: [
-        "Diverse question types",
-        "Structured learning paths",
-        "Regular content updates"
-      ]
-    },
-    {
-      icon: <Brain className="w-12 h-12 text-education-600" />,
-      title: "Brain Training Games",
-      description:
-        "Enhance cognitive skills with fun, interactive games and puzzles designed to boost learning.",
-      benefits: [
-        "Memory games",
-        "Sudoku challenges",
-        "Word puzzles",
-        "Geography quizzes"
-      ]
-    },
-    {
-      icon: <Trophy className="w-12 h-12 text-education-600" />,
-      title: "Progress Tracking",
-      description:
-        "Monitor your improvement with detailed analytics and performance tracking.",
-      benefits: [
-        "Detailed statistics",
-        "Progress visualization",
-        "Performance insights"
-      ]
-    },
-  ];
-
-  return (
-    <div className="page-container">
-      {/* Hero Section */}
-      <div className="text-center mb-16 animate-fadeIn">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          Master the 11+ Exam
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Comprehensive preparation for verbal and non-verbal reasoning with
-          interactive practice and brain training.
+      <section className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-3xl font-bold mb-6">Ready to Start Your Learning Journey?</h2>
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          Join thousands of students who are already improving their skills with iQify.
         </p>
-        {user ? (
-          <div className="space-y-4">
-            <Link
-              to="/lets-practice"
-              className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-education-600 rounded-lg hover:bg-education-700 transition-colors mx-2"
-            >
-              Start Practicing
-            </Link>
-            <Link
-              to="/brain-training"
-              className="inline-flex items-center px-6 py-3 text-lg font-medium text-education-600 border-2 border-education-600 rounded-lg hover:bg-education-50 transition-colors mx-2"
-            >
-              Play Brain Games
-            </Link>
-          </div>
-        ) : (
-          <Link
-            to="/auth"
-            className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-education-600 rounded-lg hover:bg-education-700 transition-colors"
-          >
-            Get Started
-          </Link>
-        )}
-      </div>
-
-      {/* Features Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className="bg-white p-6 rounded-xl shadow-sm card-hover"
-          >
-            <div className="mb-4">{feature.icon}</div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              {feature.title}
-            </h3>
-            <p className="text-gray-600 mb-4">{feature.description}</p>
-            <ul className="space-y-2">
-              {feature.benefits.map((benefit, i) => (
-                <li key={i} className="flex items-center text-gray-600">
-                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                  {benefit}
-                </li>
-              ))}
-            </ul>
-            {!user && (
-              <div className="mt-4 flex items-center text-gray-500">
-                <Lock className="w-4 h-4 mr-2" />
-                Sign in to unlock
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* Call to Action */}
-      {!user && (
-        <div className="text-center bg-education-50 p-8 rounded-xl">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Ready to Begin Your Journey?
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Join now to access all our features and start improving your skills today.
-          </p>
-          <Link
-            to="/auth"
-            className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-education-600 rounded-lg hover:bg-education-700 transition-colors"
-          >
-            Sign Up Now
-          </Link>
-        </div>
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
-      )}
+        <Link to={user ? "/dashboard" : "/auth"}>
+          <Button size="lg">
+            {user ? "Continue Learning" : "Sign Up Now"}
+          </Button>
+        </Link>
+      </section>
     </div>
   );
 };

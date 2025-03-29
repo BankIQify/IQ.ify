@@ -300,53 +300,35 @@ export type Database = {
       homepage_content: {
         Row: {
           created_at: string
-<<<<<<< HEAD
           differentiators: Json | null
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           features: Json | null
           hero_subtitle: string | null
           hero_title: string | null
           id: string
-<<<<<<< HEAD
           social_proof: Json | null
           testimonials: Json | null
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           updated_at: string
         }
         Insert: {
           created_at?: string
-<<<<<<< HEAD
           differentiators?: Json | null
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           features?: Json | null
           hero_subtitle?: string | null
           hero_title?: string | null
           id: string
-<<<<<<< HEAD
           social_proof?: Json | null
           testimonials?: Json | null
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           updated_at?: string
         }
         Update: {
           created_at?: string
-<<<<<<< HEAD
           differentiators?: Json | null
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           features?: Json | null
           hero_subtitle?: string | null
           hero_title?: string | null
           id?: string
-<<<<<<< HEAD
           social_proof?: Json | null
           testimonials?: Json | null
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           updated_at?: string
         }
         Relationships: []
@@ -517,7 +499,6 @@ export type Database = {
           },
         ]
       }
-<<<<<<< HEAD
       user_activities: {
         Row: {
           access_count: number | null
@@ -572,8 +553,6 @@ export type Database = {
         }
         Relationships: []
       }
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       user_focus_areas: {
         Row: {
           created_at: string | null
@@ -770,14 +749,11 @@ export type Database = {
       }
     }
     Enums: {
-<<<<<<< HEAD
       activity_type:
         | "practice_test"
         | "brain_game"
         | "verbal_reasoning"
         | "achievement"
-=======
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
       focus_area:
         | "eleven_plus_prep"
         | "iq_improvement"

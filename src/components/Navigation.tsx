@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useAuthContext } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -80,11 +76,7 @@ const Navigation = () => {
 
   if (!authInitialized) {
     return (
-<<<<<<< HEAD
-      <nav className="border-b bg-white shadow-sm">
-=======
-      <nav className="border-b bg-gradient-to-r from-[#1EAEDB] via-[#FFD700] to-[#FF69B4] shadow-sm">
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+      <nav className="border-b bg-[#1EAEDB] shadow-sm">
         <div className="container mx-auto px-4 py-2">
           <div className="flex justify-between items-center">
             <Link to="/" className="hover:scale-105 transition-transform">
@@ -94,11 +86,7 @@ const Navigation = () => {
                 className="h-12 md:h-14"
               />
             </Link>
-<<<<<<< HEAD
-            <Loader2 className="h-5 w-5 animate-spin text-slate-600" />
-=======
             <Loader2 className="h-5 w-5 animate-spin text-white" />
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
           </div>
         </div>
       </nav>
@@ -110,11 +98,7 @@ const Navigation = () => {
       {user && (
         <Link 
           to="/dashboard" 
-<<<<<<< HEAD
-          className="block px-4 py-2 text-sm hover:bg-slate-50 rounded-md font-medium text-slate-700"
-=======
-          className="block px-4 py-2 text-sm hover:bg-[rgba(30,174,219,0.2)] rounded-md font-medium text-[#001F3F]"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+          className="block px-4 py-2 text-sm hover:bg-white/20 rounded-md font-medium text-white"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           Dashboard
@@ -122,22 +106,14 @@ const Navigation = () => {
       )}
       <Link 
         to="/lets-practice" 
-<<<<<<< HEAD
-        className="block px-4 py-2 text-sm hover:bg-slate-50 rounded-md font-medium text-slate-700"
-=======
-        className="block px-4 py-2 text-sm hover:bg-[rgba(255,105,180,0.2)] rounded-md font-medium text-[#001F3F]"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+        className="block px-4 py-2 text-sm hover:bg-white/20 rounded-md font-medium text-white"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Let's Practice!
       </Link>
       <Link 
         to="/brain-training" 
-<<<<<<< HEAD
-        className="block px-4 py-2 text-sm hover:bg-slate-50 rounded-md font-medium text-slate-700"
-=======
-        className="block px-4 py-2 text-sm hover:bg-[rgba(255,215,0,0.2)] rounded-md font-medium text-[#001F3F]"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+        className="block px-4 py-2 text-sm hover:bg-white/20 rounded-md font-medium text-white"
         onClick={() => setIsMobileMenuOpen(false)}
       >
         Brain Training Games
@@ -145,11 +121,7 @@ const Navigation = () => {
       {!checkingRoles && (isAdmin || hasDataInputRole) && (
         <Link 
           to="/manage-questions" 
-<<<<<<< HEAD
-          className="block px-4 py-2 text-sm hover:bg-slate-50 rounded-md font-medium text-slate-700"
-=======
-          className="block px-4 py-2 text-sm hover:bg-[rgba(0,255,127,0.2)] rounded-md font-medium text-[#001F3F]"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+          className="block px-4 py-2 text-sm hover:bg-white/20 rounded-md font-medium text-white"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           Manage Questions
@@ -159,11 +131,7 @@ const Navigation = () => {
   );
 
   return (
-<<<<<<< HEAD
-    <nav className="border-b bg-white shadow-sm">
-=======
-    <nav className="border-b bg-gradient-to-r from-[#1EAEDB] via-[#FFD700] to-[#FF69B4] shadow-sm">
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+    <nav className="border-b bg-[#1EAEDB] shadow-sm">
       <div className="container mx-auto px-4 py-2">
         <div className="flex justify-between items-center">
           <Link to="/" className="hover:scale-105 transition-transform">
@@ -198,46 +166,27 @@ const Navigation = () => {
           {/* Auth/Profile Button */}
           <div className="hidden md:flex items-center gap-2">
             {checkingRoles ? (
-<<<<<<< HEAD
-              <Loader2 className="h-5 w-5 animate-spin text-slate-600" />
-            ) : user ? (
-              <div className="flex items-center gap-3">
-                <Link to="/avatar-creator" className="flex items-center gap-2 hover:bg-slate-50 py-1 px-2 rounded">
-=======
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : user ? (
               <div className="flex items-center gap-3">
                 <Link to="/avatar-creator" className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-1 px-2 rounded">
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
                   <Avatar className="h-8 w-8">
                     {profile?.avatar_url ? (
                       <AvatarImage src={profile.avatar_url} alt="User avatar" />
                     ) : (
-<<<<<<< HEAD
-                      <AvatarFallback className="bg-slate-100 text-slate-700">
-=======
                       <AvatarFallback className="bg-[#00FF7F] text-white">
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
                         {profile?.name?.charAt(0) || profile?.username?.charAt(0) || "U"}
                       </AvatarFallback>
                     )}
                   </Avatar>
-<<<<<<< HEAD
-                  <span className="text-sm font-medium text-slate-700">
-=======
                   <span className="text-sm font-medium">
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
                     Character
                   </span>
                 </Link>
                 <Link to="/profile">
                   <Button 
                     variant="outline"
-<<<<<<< HEAD
-                    className="hover:bg-slate-50 border-slate-200 text-slate-700"
-=======
                     className="hover:bg-[rgba(0,255,127,0.2)] border-[#00FF7F] text-[#001F3F]"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
                   >
                     <Settings className="h-4 w-4 mr-1" />
                     Profile
@@ -246,98 +195,78 @@ const Navigation = () => {
                 <Button 
                   variant="outline" 
                   onClick={handleSignOut}
-<<<<<<< HEAD
-                  className="hover:bg-slate-50 border-slate-200 text-slate-700"
-=======
-                  className="hover:bg-[rgba(255,105,180,0.2)] border-[#FF69B4] text-[#001F3F]"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+                  className="hover:bg-[rgba(0,255,127,0.2)] border-[#00FF7F] text-[#001F3F]"
                 >
                   Sign Out
                 </Button>
               </div>
             ) : (
-              location.pathname !== "/auth" && (
+              <Link to="/auth">
                 <Button 
-                  onClick={() => navigate("/auth")}
-<<<<<<< HEAD
-                  className="bg-slate-800 hover:bg-slate-900 text-white"
-=======
-                  className="bg-[#00FF7F] hover:bg-opacity-80 text-white"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+                  variant="outline"
+                  className="hover:bg-[rgba(0,255,127,0.2)] border-[#00FF7F] text-[#001F3F]"
                 >
+                  <User className="h-4 w-4 mr-1" />
                   Sign In
                 </Button>
-              )
+              </Link>
             )}
           </div>
         </div>
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-white border-t animate-fadeIn">
-            <div className="py-2 space-y-1">
-              <NavLinks />
-              {user && (
-                <>
-                  <Link 
-                    to="/avatar-creator" 
-<<<<<<< HEAD
-                    className="flex items-center px-4 py-2 text-sm hover:bg-slate-50 rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <User className="w-4 h-4 mr-2 text-slate-600" />
-=======
-                    className="flex items-center px-4 py-2 text-sm hover:bg-[rgba(0,255,127,0.2)] rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <User className="w-4 h-4 mr-2" />
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
-                    Character Creation
-                  </Link>
-                  <Link 
-                    to="/profile" 
-<<<<<<< HEAD
-                    className="flex items-center px-4 py-2 text-sm hover:bg-slate-50 rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Settings className="w-4 h-4 mr-2 text-slate-600" />
-=======
-                    className="flex items-center px-4 py-2 text-sm hover:bg-[rgba(139,92,246,0.2)] rounded-md"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
-                    Profile Settings
-                  </Link>
-                </>
-              )}
-              {user ? (
-                <Button 
-                  variant="outline" 
-                  onClick={handleSignOut}
-<<<<<<< HEAD
-                  className="w-full mt-2 hover:bg-slate-50 border-slate-200 text-slate-700"
-=======
-                  className="w-full mt-2 hover:bg-[rgba(255,105,180,0.2)] border-[#FF69B4] text-[#001F3F]"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
+          <div className="md:hidden mt-4 pb-4">
+            <NavLinks />
+            {user ? (
+              <div className="mt-4 space-y-2 px-4">
+                <Link 
+                  to="/avatar-creator"
+                  className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-2 px-3 rounded text-[#001F3F]"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Sign Out
-                </Button>
-              ) : (
-                location.pathname !== "/auth" && (
-                  <Button 
-                    onClick={() => navigate("/auth")}
-<<<<<<< HEAD
-                    className="w-full mt-2 bg-slate-800 hover:bg-slate-900 text-white"
-=======
-                    className="w-full mt-2 bg-[#00FF7F] hover:bg-opacity-80 text-white"
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
-                  >
-                    Sign In
-                  </Button>
-                )
-              )}
-            </div>
+                  <Avatar className="h-6 w-6">
+                    {profile?.avatar_url ? (
+                      <AvatarImage src={profile.avatar_url} alt="User avatar" />
+                    ) : (
+                      <AvatarFallback className="bg-[#00FF7F] text-white">
+                        {profile?.name?.charAt(0) || profile?.username?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  <span className="text-sm font-medium">Character</span>
+                </Link>
+                <Link 
+                  to="/profile"
+                  className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-2 px-3 rounded text-[#001F3F]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="text-sm font-medium">Profile</span>
+                </Link>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-2 px-3 rounded text-[#001F3F] w-full text-left"
+                >
+                  <User className="h-4 w-4" />
+                  <span className="text-sm font-medium">Sign Out</span>
+                </button>
+              </div>
+            ) : (
+              <div className="mt-4 px-4">
+                <Link 
+                  to="/auth"
+                  className="flex items-center gap-2 hover:bg-[rgba(30,174,219,0.2)] py-2 px-3 rounded text-[#001F3F]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <User className="h-4 w-4" />
+                  <span className="text-sm font-medium">Sign In</span>
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>

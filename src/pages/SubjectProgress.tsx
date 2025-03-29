@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 import { useParams } from 'react-router-dom';
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -21,11 +17,7 @@ interface ExamResult {
   score: number | null;
   created_at: string;
   exam_id: string | null;
-<<<<<<< HEAD
   exams: ExamWithResults;
-=======
-  exams?: ExamWithResults;
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
 }
 
 const SubjectProgress = () => {
@@ -49,7 +41,6 @@ const SubjectProgress = () => {
         .eq('exams.category', subject as QuestionCategory);
       
       if (error) throw error;
-<<<<<<< HEAD
       
       // Transform the data to match our types
       const formattedResults: ExamResult[] = data.map((result: any) => ({
@@ -64,9 +55,6 @@ const SubjectProgress = () => {
       }));
       
       return formattedResults;
-=======
-      return data as ExamResult[];
->>>>>>> 9b53aeac26cb6664558c884b2774875971f06916
     },
     enabled: !!subject,
   });
