@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -36,24 +35,17 @@ export const AdminUsersList = () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch all users from auth.users (this requires an admin role)
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) {
-        throw authError;
-      }
-
-      if (!authUsers || !authUsers.users) {
-        throw new Error("No users returned from Supabase.");
-      }
-
-      // Fetch user profiles to get additional information
+      // Fetch all users from profiles table instead of auth.users
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
-        .select('id, username, name, avatar_url');
+        .select('id, email, username, name, created_at, last_sign_in_at');
       
       if (profileError) {
         throw profileError;
+      }
+
+      if (!profiles) {
+        throw new Error("No users returned from Supabase.");
       }
 
       // Fetch user roles to determine admin status
@@ -69,25 +61,16 @@ export const AdminUsersList = () => {
       // Map to create a set of admin user IDs for quick lookup
       const adminUserIds = new Set((userRoles || []).map(role => role.user_id));
 
-      // Create a map of profiles by user ID
-      const profileMap = new Map();
-      (profiles || []).forEach(profile => {
-        profileMap.set(profile.id, profile);
-      });
-
-      // Combine auth users with profile data
-      const combinedUsers = authUsers.users.map(user => {
-        const profile = profileMap.get(user.id) || {};
-        return {
-          id: user.id,
-          email: user.email,
-          username: profile.username || null,
-          name: profile.name || null,
-          last_sign_in_at: user.last_sign_in_at,
-          created_at: user.created_at,
-          isAdmin: adminUserIds.has(user.id)
-        };
-      });
+      // Combine profiles with admin status
+      const combinedUsers = profiles.map(profile => ({
+        id: profile.id,
+        email: profile.email || '',
+        username: profile.username || null,
+        name: profile.name || null,
+        last_sign_in_at: profile.last_sign_in_at,
+        created_at: profile.created_at,
+        isAdmin: adminUserIds.has(profile.id)
+      }));
 
       setUsers(combinedUsers);
       setFilteredUsers(combinedUsers);

@@ -1,183 +1,95 @@
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { Achievement, UserAchievement } from '@/types/achievements/types';
 
 interface StickerBookProps {
-  achievements: Achievement[];
-  userAchievements: UserAchievement[];
-  className?: string;
+  stickers: Array<{
+    id: string;
+    name: string;
+    imageUrl: string;
+    unlocked: boolean;
+    theme: string;
+    task: string;
+    chapter: number;
+  }>;
+  currentChapter?: number;
 }
 
-const STICKER_CHAPTERS = [
-  { 
-    id: 'general',
-    name: 'Getting Started',
-    bgColor: 'from-pink-50/50 to-purple-50/50',
-    icon: '🌟'
-  },
-  { 
-    id: 'quiz_mastery',
-    name: 'Quiz Master',
-    bgColor: 'from-amber-50/50 to-yellow-50/50',
-    icon: '📚'
-  },
-  { 
-    id: 'daily_streaks',
-    name: 'Daily Rewards',
-    bgColor: 'from-emerald-50/50 to-teal-50/50',
-    icon: '🔥'
-  }
+const CHAPTERS = [
+  { id: 1, name: "Getting Started", theme: "space" },
+  { id: 2, name: "Brain Training", theme: "animals" },
+  { id: 3, name: "Quiz Master", theme: "toys" },
+  { id: 4, name: "Daily Champion", theme: "nature" },
 ];
 
-export const StickerBook = ({ achievements, userAchievements, className }: StickerBookProps) => {
-  const [activeChapter, setActiveChapter] = useState(STICKER_CHAPTERS[0].id);
+export const StickerBook = ({ stickers, currentChapter = 1 }: StickerBookProps) => {
+  const [selectedChapter, setSelectedChapter] = useState(currentChapter);
+  const [hoveredSticker, setHoveredSticker] = useState<string | null>(null);
 
-  // Filter sticker achievements
-  const stickerAchievements = achievements.filter(a => a.type === 'sticker');
-  const achievementMap = new Map(
-    userAchievements.map(ua => [ua.achievement_id, ua])
-  );
+  const chapterStickers = stickers.filter(s => Math.ceil(s.chapter) === selectedChapter);
 
   return (
-    <div className={cn("space-y-6", className)}>
-      <Tabs value={activeChapter} onValueChange={setActiveChapter}>
-        <TabsList className="w-full justify-start h-12">
-          {STICKER_CHAPTERS.map(chapter => (
-            <TabsTrigger
+    <Card className="card-iqify card-iqify-blue overflow-hidden">
+      <CardHeader className="relative">
+        <CardTitle className="text-xl text-iqify-navy flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-iqify-yellow" />
+          Sticker Book
+        </CardTitle>
+        <div className="absolute right-4 top-4 flex gap-2">
+          {CHAPTERS.map((chapter) => (
+            <button
               key={chapter.id}
-              value={chapter.id}
-              className="flex items-center gap-2"
+              onClick={() => setSelectedChapter(chapter.id)}
+              className={cn(
+                "px-3 py-1 rounded-full text-sm font-medium transition-colors",
+                selectedChapter === chapter.id
+                  ? "bg-iqify-blue text-white"
+                  : "bg-iqify-blue/10 text-iqify-blue hover:bg-iqify-blue/20"
+              )}
             >
-              <span className="text-xl">{chapter.icon}</span>
               {chapter.name}
-            </TabsTrigger>
+            </button>
           ))}
-        </TabsList>
-
-        {STICKER_CHAPTERS.map(chapter => {
-          const chapterStickers = stickerAchievements.filter(
-            sticker => sticker.category === chapter.id
-          );
-
-          if (chapterStickers.length === 0) return null;
-
-          return (
-            <TabsContent
-              key={chapter.id}
-              value={chapter.id}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-4 p-4">
+          {chapterStickers.map((sticker) => (
+            <motion.div
+              key={sticker.id}
+              className="relative aspect-square"
+              whileHover={{ scale: 1.1 }}
+              onHoverStart={() => setHoveredSticker(sticker.id)}
+              onHoverEnd={() => setHoveredSticker(null)}
             >
-              <div className="relative">
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-r rounded-3xl opacity-40 -z-10",
-                  chapter.bgColor
-                )} />
-                
-                <div className="px-8 py-6">
-                  <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                    <span className="text-3xl">{chapter.icon}</span>
-                    {chapter.name}
-                  </h3>
-
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-8">
-                    {chapterStickers.map(sticker => {
-                      const userAchievement = achievementMap.get(sticker.id);
-                      const isUnlocked = userAchievement?.unlocked ?? false;
-                      const progress = userAchievement?.progress ?? { current: 0, target: sticker.unlock_condition.target };
-                      const progressPercentage = Math.min(100, (progress.current / progress.target) * 100);
-
-                      return (
-                        <TooltipProvider key={sticker.id}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="group relative">
-                                {/* Sticker Container */}
-                                <div className={cn(
-                                  "relative aspect-square flex items-center justify-center",
-                                  "transition-all duration-300 transform",
-                                  "cursor-help hover:scale-110",
-                                  isUnlocked ? "hover:-translate-y-2" : "hover:-translate-y-1"
-                                )}>
-                                  {/* Sticker Image */}
-                                  <img
-                                    src={sticker.visual_asset}
-                                    alt={sticker.title}
-                                    className={cn(
-                                      "w-full h-full object-contain transition-all duration-300",
-                                      !isUnlocked && "opacity-75 filter brightness-75"
-                                    )}
-                                  />
-
-                                  {/* Glow Effect for Unlocked Stickers */}
-                                  {isUnlocked && (
-                                    <div className="absolute inset-0 -z-10">
-                                      <div className="absolute inset-0 animate-pulse">
-                                        <div className="absolute inset-0 bg-purple-400/20 rounded-full blur-2xl" />
-                                        <div className="absolute inset-0 bg-pink-200/10 rounded-full blur-xl animate-ping" />
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {/* Lock Indicator */}
-                                  {!isUnlocked && (
-                                    <div className="absolute top-2 right-2 text-xl opacity-50">
-                                      🔒
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Sticker Title */}
-                                <div className="text-center mt-4">
-                                  <h4 className={cn(
-                                    "font-semibold text-lg transition-colors duration-300",
-                                    isUnlocked ? "text-purple-700" : "text-gray-600"
-                                  )}>
-                                    {sticker.title}
-                                  </h4>
-                                </div>
-                              </div>
-                            </TooltipTrigger>
-
-                            <TooltipContent 
-                              side="top" 
-                              className="max-w-xs bg-black/90 text-white border-none shadow-xl"
-                              sideOffset={8}
-                            >
-                              <div className="space-y-2 p-3">
-                                <h4 className="font-semibold text-white/90">{sticker.title}</h4>
-                                <p className="text-sm text-white/70">{sticker.description}</p>
-                                {!isUnlocked && (
-                                  <div className="mt-3 pt-2 border-t border-white/20">
-                                    <div className="text-xs text-white/60">
-                                      Progress: {progress.current}/{progress.target}
-                                    </div>
-                                    <div className="h-1.5 bg-white/20 rounded-full mt-1.5">
-                                      <div
-                                        className="h-full bg-gradient-to-r from-purple-400 to-pink-500 rounded-full transition-all duration-300"
-                                        style={{ width: `${progressPercentage}%` }}
-                                      />
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      );
-                    })}
-                  </div>
-                </div>
+              <div
+                className={cn(
+                  "w-full h-full rounded-lg overflow-hidden",
+                  !sticker.unlocked && "opacity-50 grayscale"
+                )}
+              >
+                <img
+                  src={sticker.imageUrl}
+                  alt={sticker.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
-            </TabsContent>
-          );
-        })}
-      </Tabs>
-    </div>
-  );
+              {hoveredSticker === sticker.id && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded-lg shadow-lg z-10 w-48"
+                >
+                  <p className="text-sm font-medium text-iqify-navy">{sticker.name}</p>
+                  <p className="text-xs text-muted-foreground">{sticker.task}</p>
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
 }; 

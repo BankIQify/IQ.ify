@@ -3,15 +3,20 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 
 // Get the environment variables
-const supabaseUrl = 'https://dqaihawavxlacegykwqu.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRxYWloYXdhdnhsYWNlZ3lrd3F1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNjQyMzksImV4cCI6MjA1NTg0MDIzOX0.kEenDC5rURK5SFuf9hDQOn51hlryeMsTrVFFuEm0n7o';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 console.log('Initializing Supabase client with:', {
   url: supabaseUrl,
-  hasKey: !!supabaseAnonKey
+  hasKey: !!supabaseAnonKey,
+  env: import.meta.env.MODE
 });
 
 if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables:', {
+    url: supabaseUrl,
+    hasKey: !!supabaseAnonKey
+  });
   throw new Error('Missing Supabase environment variables');
 }
 
@@ -19,14 +24,27 @@ const options = {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
+    storageKey: 'iqify_auth',
+    storage: window.localStorage,
+    flowType: 'implicit' as const
   },
   global: {
-    headers: { 'x-application-name': 'brain-training-app' },
-  },
+    headers: { 
+      'x-application-name': 'brain-training-app',
+      'x-client-info': 'supabase-js-web'
+    },
+  }
 };
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
+// Create the Supabase client with explicit URL
+export const supabase = createClient<Database>(
+  supabaseUrl,
+  supabaseAnonKey,
+  options
+);
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, options);
+// Add connection status check
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Auth state changed:', event, 'Session:', session ? 'exists' : 'none');
+});

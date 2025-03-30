@@ -1,159 +1,146 @@
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Trophy } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { Achievement, UserAchievement } from '@/types/achievements/types';
 
 interface TrophyCabinetProps {
-  achievements: Achievement[];
-  userAchievements: UserAchievement[];
-  className?: string;
+  trophies: Array<{
+    id: string;
+    name: string;
+    description: string;
+    imageUrl: string;
+    unlocked: boolean;
+    rarity: 'common' | 'rare' | 'legendary';
+    progress?: {
+      current: number;
+      target: number;
+    };
+  }>;
 }
 
-const TROPHY_CATEGORIES = [
-  {
-    id: 'quiz_mastery',
-    name: 'Quiz Mastery',
-    color: 'from-amber-50/50 to-yellow-50/50',
-    icon: '🏆'
+const RARITY_STYLES = {
+  common: {
+    glow: "bg-blue-400/20",
+    text: "text-blue-600",
+    border: "border-blue-400",
   },
-  {
-    id: 'game_master',
-    name: 'Game Master',
-    color: 'from-purple-50/50 to-pink-50/50',
-    icon: '🎮'
+  rare: {
+    glow: "bg-purple-400/20",
+    text: "text-purple-600",
+    border: "border-purple-400",
   },
-  {
-    id: 'brain_training',
-    name: 'Brain Training',
-    color: 'from-emerald-50/50 to-teal-50/50',
-    icon: '🧠'
-  }
-];
+  legendary: {
+    glow: "bg-yellow-400/20",
+    text: "text-yellow-600",
+    border: "border-yellow-400",
+  },
+};
 
-export const TrophyCabinet = ({ achievements, userAchievements, className }: TrophyCabinetProps) => {
-  // Filter trophy achievements
-  const trophyAchievements = achievements.filter(a => a.type === 'trophy');
-  const achievementMap = new Map(
-    userAchievements.map(ua => [ua.achievement_id, ua])
-  );
+export const TrophyCabinet = ({ trophies }: TrophyCabinetProps) => {
+  const [hoveredTrophy, setHoveredTrophy] = useState<string | null>(null);
+  const [selectedTrophy, setSelectedTrophy] = useState<string | null>(null);
 
   return (
-    <div className={cn("space-y-12", className)}>
-      {TROPHY_CATEGORIES.map(category => {
-        const categoryTrophies = trophyAchievements.filter(
-          trophy => trophy.category === category.id
-        );
+    <Card className="card-iqify card-iqify-green">
+      <CardHeader>
+        <CardTitle className="text-xl text-iqify-navy flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-iqify-green" />
+          Trophy Cabinet
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="relative min-h-[400px] bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg p-8">
+          {/* Glass cabinet effect */}
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-sm rounded-lg" />
+          
+          {/* Shelves */}
+          <div className="relative grid grid-cols-1 md:grid-cols-2 gap-8">
+            {trophies.map((trophy, index) => (
+              <motion.div
+                key={trophy.id}
+                className="relative"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={() => setSelectedTrophy(trophy.id)}
+                onHoverStart={() => setHoveredTrophy(trophy.id)}
+                onHoverEnd={() => setHoveredTrophy(null)}
+              >
+                <div
+                  className={cn(
+                    "relative aspect-square rounded-lg p-4",
+                    "bg-white/80 shadow-lg cursor-pointer",
+                    "transition-all duration-300 transform",
+                    trophy.unlocked ? "hover:-translate-y-2" : "opacity-50 grayscale hover:-translate-y-1",
+                    RARITY_STYLES[trophy.rarity].border
+                  )}
+                >
+                  {/* Trophy image */}
+                  <div className="relative w-full h-full">
+                    <img
+                      src={trophy.imageUrl}
+                      alt={trophy.name}
+                      className="w-full h-full object-contain"
+                    />
+                    
+                    {/* Glow effect for unlocked trophies */}
+                    {trophy.unlocked && (
+                      <div className="absolute inset-0 -z-10 animate-pulse">
+                        <div className={cn(
+                          "absolute inset-0 rounded-full blur-2xl",
+                          RARITY_STYLES[trophy.rarity].glow
+                        )} />
+                      </div>
+                    )}
+                  </div>
 
-        if (categoryTrophies.length === 0) return null;
-
-        return (
-          <div key={category.id} className="relative">
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-r rounded-3xl opacity-40 -z-10",
-              category.color
-            )} />
-            
-            <div className="px-8 py-6">
-              <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                <span className="text-3xl">{category.icon}</span>
-                {category.name}
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                {categoryTrophies.map(trophy => {
-                  const userAchievement = achievementMap.get(trophy.id);
-                  const isUnlocked = userAchievement?.unlocked ?? false;
-                  const progress = userAchievement?.progress ?? { current: 0, target: trophy.unlock_condition.target };
-                  const progressPercentage = Math.min(100, (progress.current / progress.target) * 100);
-
-                  return (
-                    <TooltipProvider key={trophy.id}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="group relative">
-                            {/* Trophy Container */}
-                            <div className={cn(
-                              "relative aspect-square flex items-center justify-center",
-                              "transition-all duration-300 transform",
-                              "cursor-help hover:scale-105",
-                              isUnlocked ? "hover:-translate-y-2" : "hover:-translate-y-1"
-                            )}>
-                              {/* Trophy Image */}
-                              <img
-                                src={trophy.visual_asset}
-                                alt={trophy.title}
-                                className={cn(
-                                  "w-full h-full object-contain transition-all duration-300",
-                                  !isUnlocked && "opacity-75 filter brightness-75"
-                                )}
-                              />
-
-                              {/* Glow Effect for Unlocked Trophies */}
-                              {isUnlocked && (
-                                <div className="absolute inset-0 -z-10">
-                                  <div className="absolute inset-0 animate-pulse">
-                                    <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-2xl" />
-                                    <div className="absolute inset-0 bg-yellow-200/10 rounded-full blur-xl animate-ping" />
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Lock Indicator */}
-                              {!isUnlocked && (
-                                <div className="absolute top-2 right-2 text-xl opacity-50">
-                                  🔒
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Trophy Title */}
-                            <div className="text-center mt-4">
-                              <h4 className={cn(
-                                "font-semibold text-lg transition-colors duration-300",
-                                isUnlocked ? "text-yellow-700" : "text-gray-600"
-                              )}>
-                                {trophy.title}
-                              </h4>
-                            </div>
+                  {/* Trophy info on hover */}
+                  {hoveredTrophy === trophy.id && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white p-4 rounded-lg shadow-lg z-10 w-64"
+                    >
+                      <p className={cn(
+                        "text-sm font-medium",
+                        RARITY_STYLES[trophy.rarity].text
+                      )}>
+                        {trophy.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {trophy.description}
+                      </p>
+                      {!trophy.unlocked && trophy.progress && (
+                        <div className="mt-2">
+                          <div className="text-xs text-muted-foreground">
+                            Progress: {trophy.progress.current}/{trophy.progress.target}
                           </div>
-                        </TooltipTrigger>
-
-                        <TooltipContent 
-                          side="top" 
-                          className="max-w-xs bg-black/90 text-white border-none shadow-xl"
-                          sideOffset={8}
-                        >
-                          <div className="space-y-2 p-3">
-                            <h4 className="font-semibold text-white/90">{trophy.title}</h4>
-                            <p className="text-sm text-white/70">{trophy.description}</p>
-                            {!isUnlocked && (
-                              <div className="mt-3 pt-2 border-t border-white/20">
-                                <div className="text-xs text-white/60">
-                                  Progress: {progress.current}/{progress.target}
-                                </div>
-                                <div className="h-1.5 bg-white/20 rounded-full mt-1.5">
-                                  <div
-                                    className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full transition-all duration-300"
-                                    style={{ width: `${progressPercentage}%` }}
-                                  />
-                                </div>
-                              </div>
-                            )}
+                          <div className="h-1 bg-gray-200 rounded-full mt-1">
+                            <div
+                              className={cn(
+                                "h-full rounded-full transition-all duration-300",
+                                RARITY_STYLES[trophy.rarity].text
+                              )}
+                              style={{
+                                width: `${(trophy.progress.current / trophy.progress.target) * 100}%`
+                              }}
+                            />
                           </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  );
-                })}
-              </div>
-            </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
           </div>
-        );
-      })}
-    </div>
+
+          {/* Shelf shadows */}
+          <div className="absolute left-0 right-0 bottom-0 h-4 bg-gradient-to-t from-gray-300/50 to-transparent" />
+        </div>
+      </CardContent>
+    </Card>
   );
 }; 

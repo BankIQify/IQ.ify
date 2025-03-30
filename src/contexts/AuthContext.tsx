@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthContextType } from "@/types/auth/types";
@@ -10,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+function AuthProvider({ children }: { children: React.ReactNode }) {
   const { user, setUser, signInWithEmail, signInWithGoogle, signUp, signOut } = useAuth();
   const { profile, getProfile, updateProfile } = useProfile(user);
   const { isAdmin, checkAdminStatus } = useAdminStatus();
@@ -149,13 +148,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-// Rename this function to avoid naming conflict with the imported useAuth
-export const useAuthContext = () => {
+function useAuthContext() {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuthContext must be used within an AuthProvider");
   }
   return context;
-};
+}
+
+export { AuthProvider, useAuthContext };

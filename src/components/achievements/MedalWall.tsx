@@ -1,171 +1,142 @@
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Medal } from "lucide-react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { Achievement, UserAchievement } from '@/types/achievements/types';
 
 interface MedalWallProps {
-  achievements: Achievement[];
-  userAchievements: UserAchievement[];
-  className?: string;
+  medals: Array<{
+    id: string;
+    name: string;
+    description: string;
+    tier: 'bronze' | 'silver' | 'gold';
+    unlocked: boolean;
+    progress?: {
+      current: number;
+      target: number;
+    };
+  }>;
 }
 
-const MEDAL_CATEGORIES = [
-  {
-    id: 'quiz_mastery',
-    name: 'Quiz Mastery',
-    color: 'from-amber-50/50 to-yellow-50/50',
-    icon: '⚡'
+const TIER_COLORS = {
+  bronze: {
+    bg: "from-orange-200 to-orange-300",
+    border: "border-orange-400",
+    text: "text-orange-900",
   },
-  {
-    id: 'verbal_reasoning',
-    name: 'Verbal Reasoning',
-    color: 'from-blue-50/50 to-indigo-50/50',
-    icon: '📚'
+  silver: {
+    bg: "from-slate-200 to-slate-300",
+    border: "border-slate-400",
+    text: "text-slate-900",
   },
-  {
-    id: 'non_verbal_reasoning',
-    name: 'Non-Verbal Reasoning',
-    color: 'from-purple-50/50 to-pink-50/50',
-    icon: '🎯'
+  gold: {
+    bg: "from-yellow-200 to-yellow-300",
+    border: "border-yellow-400",
+    text: "text-yellow-900",
   },
-  {
-    id: 'brain_training',
-    name: 'Brain Training',
-    color: 'from-emerald-50/50 to-teal-50/50',
-    icon: '🧠'
-  },
-  {
-    id: 'daily_streaks',
-    name: 'Daily Streaks',
-    color: 'from-amber-50/50 to-yellow-50/50',
-    icon: '🔥'
-  }
-];
+};
 
-export const MedalWall = ({ achievements, userAchievements, className }: MedalWallProps) => {
-  // Filter medal achievements
-  const medalAchievements = achievements.filter(a => a.type === 'medal');
-  const achievementMap = new Map(
-    userAchievements.map(ua => [ua.achievement_id, ua])
-  );
+export const MedalWall = ({ medals }: MedalWallProps) => {
+  const [hoveredMedal, setHoveredMedal] = useState<string | null>(null);
 
   return (
-    <div className={cn("space-y-12", className)}>
-      {MEDAL_CATEGORIES.map(category => {
-        const categoryMedals = medalAchievements.filter(
-          medal => medal.category === category.id
-        );
+    <Card className="card-iqify card-iqify-yellow">
+      <CardHeader>
+        <CardTitle className="text-xl text-iqify-navy flex items-center gap-2">
+          <Medal className="h-5 w-5 text-iqify-yellow" />
+          Medal Wall
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 p-4">
+          {medals.map((medal) => (
+            <motion.div
+              key={medal.id}
+              className="relative"
+              whileHover={{ scale: 1.05, y: -5 }}
+              onHoverStart={() => setHoveredMedal(medal.id)}
+              onHoverEnd={() => setHoveredMedal(null)}
+            >
+              <div
+                className={cn(
+                  "relative aspect-square rounded-full p-1",
+                  "border-4 shadow-lg transform transition-all duration-300",
+                  medal.unlocked ? TIER_COLORS[medal.tier].border : "border-gray-300",
+                  medal.unlocked ? "rotate-0" : "rotate-12 opacity-50"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-full h-full rounded-full flex items-center justify-center",
+                    "bg-gradient-to-br",
+                    medal.unlocked ? TIER_COLORS[medal.tier].bg : "from-gray-200 to-gray-300"
+                  )}
+                >
+                  <Medal
+                    className={cn(
+                      "w-8 h-8",
+                      medal.unlocked ? TIER_COLORS[medal.tier].text : "text-gray-400"
+                    )}
+                  />
+                </div>
 
-        if (categoryMedals.length === 0) return null;
-
-        return (
-          <div key={category.id} className="relative">
-            <div className={cn(
-              "absolute inset-0 bg-gradient-to-r rounded-3xl opacity-40 -z-10",
-              category.color
-            )} />
-            
-            <div className="px-8 py-6">
-              <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
-                <span className="text-3xl">{category.icon}</span>
-                {category.name}
-              </h3>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-8">
-                {categoryMedals.map(medal => {
-                  const userAchievement = achievementMap.get(medal.id);
-                  const isUnlocked = userAchievement?.unlocked ?? false;
-                  const progress = userAchievement?.progress ?? { current: 0, target: medal.unlock_condition.target };
-                  const progressPercentage = Math.min(100, (progress.current / progress.target) * 100);
-
-                  return (
-                    <TooltipProvider key={medal.id}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="group relative">
-                            {/* Medal Container */}
-                            <div className={cn(
-                              "relative aspect-square flex items-center justify-center",
-                              "transition-all duration-300 transform",
-                              "cursor-help hover:scale-105",
-                              isUnlocked ? "hover:-translate-y-2" : "hover:-translate-y-1"
-                            )}>
-                              {/* Medal Image */}
-                              <img
-                                src={medal.visual_asset}
-                                alt={medal.title}
-                                className={cn(
-                                  "w-full h-full object-contain transition-all duration-300",
-                                  !isUnlocked && "opacity-75 filter brightness-75"
-                                )}
-                              />
-
-                              {/* Glow Effect for Unlocked Medals */}
-                              {isUnlocked && (
-                                <div className="absolute inset-0 -z-10">
-                                  <div className="absolute inset-0 animate-pulse">
-                                    <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-2xl" />
-                                    <div className="absolute inset-0 bg-yellow-200/10 rounded-full blur-xl animate-ping" />
-                                  </div>
-                                </div>
-                              )}
-
-                              {/* Lock Indicator */}
-                              {!isUnlocked && (
-                                <div className="absolute top-2 right-2 text-xl opacity-50">
-                                  🔒
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Medal Title */}
-                            <div className="text-center mt-4">
-                              <h4 className={cn(
-                                "font-semibold text-lg transition-colors duration-300",
-                                isUnlocked ? "text-yellow-700" : "text-gray-600"
-                              )}>
-                                {medal.title}
-                              </h4>
-                            </div>
-                          </div>
-                        </TooltipTrigger>
-
-                        <TooltipContent 
-                          side="top" 
-                          className="max-w-xs bg-black/90 text-white border-none shadow-xl"
-                          sideOffset={8}
-                        >
-                          <div className="space-y-2 p-3">
-                            <h4 className="font-semibold text-white/90">{medal.title}</h4>
-                            <p className="text-sm text-white/70">{medal.description}</p>
-                            {!isUnlocked && (
-                              <div className="mt-3 pt-2 border-t border-white/20">
-                                <div className="text-xs text-white/60">
-                                  Progress: {progress.current}/{progress.target}
-                                </div>
-                                <div className="h-1.5 bg-white/20 rounded-full mt-1.5">
-                                  <div
-                                    className="h-full bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full transition-all duration-300"
-                                    style={{ width: `${progressPercentage}%` }}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  );
-                })}
+                {/* Progress ring for locked medals */}
+                {!medal.unlocked && medal.progress && (
+                  <svg
+                    className="absolute inset-0 w-full h-full -rotate-90"
+                    viewBox="0 0 100 100"
+                  >
+                    <circle
+                      className="text-gray-200"
+                      strokeWidth="4"
+                      stroke="currentColor"
+                      fill="transparent"
+                      r="45"
+                      cx="50"
+                      cy="50"
+                    />
+                    <circle
+                      className="text-iqify-blue transition-all duration-300"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                      stroke="currentColor"
+                      fill="transparent"
+                      r="45"
+                      cx="50"
+                      cy="50"
+                      strokeDasharray={`${2 * Math.PI * 45}`}
+                      strokeDashoffset={`${2 * Math.PI * 45 * (1 - medal.progress.current / medal.progress.target)}`}
+                    />
+                  </svg>
+                )}
               </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+
+              {hoveredMedal === medal.id && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-white p-3 rounded-lg shadow-lg z-10 w-48"
+                >
+                  <p className={cn(
+                    "text-sm font-medium",
+                    medal.unlocked ? TIER_COLORS[medal.tier].text : "text-gray-600"
+                  )}>
+                    {medal.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {medal.description}
+                  </p>
+                  {!medal.unlocked && medal.progress && (
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      Progress: {medal.progress.current}/{medal.progress.target}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }; 
