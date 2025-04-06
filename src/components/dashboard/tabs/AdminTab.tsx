@@ -8,30 +8,21 @@ import {
   Award, 
   Users, 
   Settings, 
-  PieChart, 
-  User, 
   ShieldCheck, 
   ActivitySquare,
   FileText,
-  Presentation,
-  Layout,
   LayoutDashboard,
   Shield,
   Activity,
-  StickyNote
+  StickyNote,
+  FileEdit
 } from "lucide-react";
-import { AdminStats } from "@/components/dashboard/admin/AdminStats";
 import { AdminUsersList } from "@/components/dashboard/admin/AdminUsersList";
 import { AdminRolesManager } from "@/components/dashboard/admin/AdminRolesManager";
 import { AdminActivityLog } from "@/components/dashboard/admin/AdminActivityLog";
-import { StatsManager } from "@/components/admin/StatsManager";
-import { HomepageManager } from "@/components/admin/HomepageManager";
-import { TestimonialManager } from "@/components/admin/TestimonialManager";
-import { Overview } from "@/components/admin/Overview";
-import { UserManagement } from "@/components/admin/UserManagement";
-import { RolesPermissions } from "@/components/admin/RolesPermissions";
-import { ActivityLogs } from "@/components/admin/ActivityLogs";
 import { DifferentiatorManager } from "@/components/admin/DifferentiatorManager";
+import { AdminDashboard } from "@/components/dashboard/admin/AdminDashboard";
+import { AboutUsManager } from "@/components/admin/AboutUsManager";
 
 export const AdminTab = () => {
   return (
@@ -57,6 +48,10 @@ export const AdminTab = () => {
           <StickyNote className="w-4 h-4" />
           Differentiators
         </TabsTrigger>
+        <TabsTrigger value="about" className="flex items-center gap-2">
+          <FileEdit className="w-4 h-4" />
+          About Us
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="overview">
@@ -64,12 +59,12 @@ export const AdminTab = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart className="h-5 w-5" />
-              Site Statistics
+              Admin Dashboard
             </CardTitle>
-            <CardDescription>Overview of platform usage and performance metrics</CardDescription>
+            <CardDescription>Overview of system metrics and recent activity</CardDescription>
           </CardHeader>
           <CardContent>
-            <AdminStats />
+            <AdminDashboard />
           </CardContent>
         </Card>
       </TabsContent>
@@ -121,6 +116,21 @@ export const AdminTab = () => {
 
       <TabsContent value="differentiators">
         <DifferentiatorManager />
+      </TabsContent>
+
+      <TabsContent value="about">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileEdit className="h-5 w-5" />
+              About Us Content
+            </CardTitle>
+            <CardDescription>Manage the content displayed on the About Us page</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AboutUsManager />
+          </CardContent>
+        </Card>
       </TabsContent>
     </Tabs>
   );

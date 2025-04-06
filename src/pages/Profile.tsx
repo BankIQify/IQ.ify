@@ -1,5 +1,4 @@
-
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -11,14 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 
 const Profile = () => {
-  const { user, profile } = useAuthContext();
-  const [searchParams] = useSearchParams();
+  const { user, profile } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   
   const subscription = searchParams.get('subscription');
+  const sessionId = searchParams.get('session_id');
+  const activeTab = searchParams.get('tab') || 'subscription';
 
   useEffect(() => {
-    if (subscription === 'success') {
+    if (sessionId) {
       toast({
         title: "Subscription successful!",
         description: "Thank you for subscribing. Your account has been upgraded.",
@@ -31,7 +32,7 @@ const Profile = () => {
         variant: "default",
       });
     }
-  }, [subscription, toast]);
+  }, [sessionId, subscription, toast]);
 
   if (!user) {
     return <Navigate to="/auth" replace />;
@@ -39,6 +40,14 @@ const Profile = () => {
 
   // Determine display name
   const displayName = profile?.name || profile?.username || user.email?.split('@')[0] || "Scholar";
+
+  const handleTabChange = (value: string) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('tab', value);
+      return newParams;
+    });
+  };
 
   return (
     <div className="page-container max-w-5xl mx-auto py-8 px-4">
@@ -97,7 +106,7 @@ const Profile = () => {
         </Card>
       </div>
       
-      <Tabs defaultValue="subscription" className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-2 bg-blue-100/30">
           <TabsTrigger value="subscription" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">Subscription</TabsTrigger>
           <TabsTrigger value="settings" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">Account Settings</TabsTrigger>

@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
 
 interface StatCard {
   id: string;
@@ -139,8 +140,8 @@ export const AboutUs = () => {
               Our global approach has empowered students in Britain and China to achieve exceptional academic success. 
               Explore how our approach can bridge the gap between potential and achievement.
             </p>
-            <Button size="lg" className="mt-4">
-              Learn More
+            <Button size="lg" className="mt-4" asChild>
+              <Link to="/about">Learn More</Link>
             </Button>
           </div>
 

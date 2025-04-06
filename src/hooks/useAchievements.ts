@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { Achievement, UserAchievement, AchievementStreak } from '@/types/achievements/types';
 
 export const useAchievements = () => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // Fetch all achievements

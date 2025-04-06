@@ -50,6 +50,12 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Brand colours
+        'neon-green': '#39FF14',
+        'bright-pink': '#FF1493',
+        'yellow': '#FFD700',
+        'bright-blue': '#00BFFF',
+        'royal-blue': '#4169E1',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -94,6 +100,10 @@ module.exports = {
         "confetti": "confetti 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
         "fadeIn": "fadeIn 0.5s ease-in-out",
         "slideIn": "slideIn 0.3s ease-out"
+      },
+      fontFamily: {
+        'playfair': ['Playfair Display', 'serif'],
+        'inter': ['Inter', 'sans-serif'],
       },
     },
   },

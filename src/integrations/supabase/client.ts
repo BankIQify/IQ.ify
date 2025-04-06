@@ -6,45 +6,29 @@ import type { Database } from '@/types/supabase';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-console.log('Initializing Supabase client with:', {
-  url: supabaseUrl,
-  hasKey: !!supabaseAnonKey,
-  env: import.meta.env.MODE
-});
+console.log('Supabase URL:', supabaseUrl);
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables:', {
-    url: supabaseUrl,
-    hasKey: !!supabaseAnonKey
-  });
-  throw new Error('Missing Supabase environment variables');
-}
+// Create a single instance of the Supabase client
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
 
-const options = {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    storageKey: 'iqify_auth',
-    storage: window.localStorage,
-    flowType: 'implicit' as const
-  },
-  global: {
-    headers: { 
-      'x-application-name': 'brain-training-app',
-      'x-client-info': 'supabase-js-web'
-    },
+export const supabase = (() => {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        storageKey: 'iqify-auth-token',
+        storage: window.localStorage
+      }
+    });
   }
-};
-
-// Create the Supabase client with explicit URL
-export const supabase = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey,
-  options
-);
+  return supabaseInstance;
+})();
 
 // Add connection status check
 supabase.auth.onAuthStateChange((event, session) => {
-  console.log('Auth state changed:', event, 'Session:', session ? 'exists' : 'none');
+  console.log('Auth state changed:', event, 'Session:', session ? 'exists' : 'none', {
+    event,
+    user: session?.user?.email,
+    expires: session?.expires_at ? new Date(session.expires_at * 1000).toISOString() : null
+  });
 });

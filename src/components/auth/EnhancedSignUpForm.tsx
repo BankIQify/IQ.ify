@@ -3,12 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { AuthError } from "@supabase/supabase-js";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { UsernameField } from "./UsernameField";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { FocusArea } from "@/types/auth/types";
 import { DateSelector } from "@/components/ui/date-selector";
+import { defaultConfig } from '@/components/profile/avatar/avatarConfig';
 
 interface SignUpFormProps {
   onToggleMode: () => void;
@@ -60,7 +61,7 @@ const FOCUS_AREAS: { value: FocusArea; label: string }[] = [
 ];
 
 export const EnhancedSignUpForm = ({ onToggleMode, onGoogleSignIn }: SignUpFormProps) => {
-  const { signUp } = useAuthContext();
+  const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -174,24 +175,19 @@ export const EnhancedSignUpForm = ({ onToggleMode, onGoogleSignIn }: SignUpFormP
       await signUp(email, password, { 
         name: fullName,
         username,
-        dateOfBirth,
+        date_of_birth: dateOfBirth,
         country,
         city,
-        educationLevel,
+        education_level: educationLevel,
         subjects: subjectsToSubmit,
         focus_areas: selectedFocusAreas,
-        avatar_url: avatarUrl || `https://api.dicebear.com/9.x/micah/svg?seed=${username}`
+        avatar_config: defaultConfig
       });
     } catch (error) {
       handleAuthError(error as AuthError);
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateAvatar = () => {
-    const seed = username || Math.random().toString(36).substring(7);
-    setAvatarUrl(`https://api.dicebear.com/9.x/micah/svg?seed=${seed}`);
   };
 
   return (
@@ -360,14 +356,6 @@ export const EnhancedSignUpForm = ({ onToggleMode, onGoogleSignIn }: SignUpFormP
                 </div>
               )}
             </div>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={generateAvatar}
-              disabled={loading}
-            >
-              Generate New Avatar
-            </Button>
           </div>
         </div>
       )}

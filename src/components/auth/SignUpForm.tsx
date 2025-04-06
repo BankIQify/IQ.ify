@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { AuthError } from "@supabase/supabase-js";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { UsernameField } from "./UsernameField";
 
 interface SignUpFormProps {
@@ -13,7 +12,7 @@ interface SignUpFormProps {
 }
 
 export const SignUpForm = ({ onToggleMode, onGoogleSignIn }: SignUpFormProps) => {
-  const { signUp } = useAuthContext();
+  const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 

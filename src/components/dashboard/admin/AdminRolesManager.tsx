@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -68,6 +67,20 @@ export const AdminRolesManager = () => {
     },
     {
       id: "3",
+      name: "Pro User",
+      description: "Premium user with advanced features and priority support",
+      permissions: [
+        { id: "p6", name: "profile.read", description: "View own profile" },
+        { id: "p7", name: "profile.write", description: "Edit own profile" },
+        { id: "p8", name: "content.access", description: "Access learning content" },
+        { id: "p9", name: "reports.access", description: "Access detailed reports and analytics" },
+        { id: "p11", name: "priority.support", description: "Access priority support" },
+        { id: "p12", name: "advanced.features", description: "Access advanced features" },
+      ],
+      userCount: 156,
+    },
+    {
+      id: "4",
       name: "User",
       description: "Standard user with basic access",
       permissions: [

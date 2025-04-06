@@ -1,11 +1,10 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Brain, CheckCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 export const RecentActivity = () => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   // Mock data for brain training games only (no exams)
   const mockGames = [

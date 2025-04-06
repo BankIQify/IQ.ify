@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { CheckCircle, Circle, X, AlertTriangle } from "lucide-react";
 import { Question } from "@/types/exam";
@@ -9,6 +8,7 @@ interface QuestionDisplayProps {
   examCompleted: boolean;
   onSelectAnswer: (answerId: string | number) => void;
   reviewMode?: boolean;
+  examType?: 'custom' | 'practice';
 }
 
 const QuestionDisplay = ({ 
@@ -16,7 +16,8 @@ const QuestionDisplay = ({
   currentAnswerId, 
   examCompleted, 
   onSelectAnswer,
-  reviewMode = false
+  reviewMode = false,
+  examType = 'practice'
 }: QuestionDisplayProps) => {
   // Validate question data
   if (!question) {
@@ -83,6 +84,14 @@ const QuestionDisplay = ({
       ? currentAnswerId === correctAnswer
       : String(currentAnswerId) === String(correctAnswer)
   );
+
+  // Determine if we should show the explanation
+  const shouldShowExplanation = (
+    // For custom exams, show explanation immediately after answering if incorrect
+    (examType === 'custom' && currentAnswerId !== undefined && !isCorrect) ||
+    // For practice exams, only show explanation in review mode and if incorrect
+    (examType === 'practice' && reviewMode && currentAnswerId !== undefined && !isCorrect)
+  );
   
   return (
     <Card className="p-6 mb-6 animate-fade-in">
@@ -111,11 +120,13 @@ const QuestionDisplay = ({
               correctAnswer === option ||
               (typeof correctAnswer === 'string' && option === correctAnswer);
             
+            // Determine if we should show answer feedback
+            const showAnswerFeedback = examType === 'custom' ? isSelected : reviewMode;
+            
             // Determine the styling based on the state
             let className = "flex items-center p-3 rounded-md cursor-pointer transition-colors ";
             
-            // Enhanced styling for review mode
-            if (reviewMode && examCompleted) {
+            if (showAnswerFeedback) {
               if (isCorrectAnswer) {
                 className += "bg-green-100 border border-green-500 ";
               } else if (isSelected && !isCorrectAnswer) {
@@ -141,7 +152,7 @@ const QuestionDisplay = ({
                 aria-selected={isSelected}
                 role="option"
               >
-                {reviewMode && examCompleted ? (
+                {showAnswerFeedback ? (
                   isCorrectAnswer ? (
                     <CheckCircle className="w-5 h-5 text-green-500 mr-3 flex-shrink-0" />
                   ) : isSelected ? (
@@ -170,7 +181,8 @@ const QuestionDisplay = ({
         </div>
       )}
       
-      {reviewMode && examCompleted && currentAnswerId !== undefined && (
+      {/* Show answer feedback for custom exams immediately after answering */}
+      {examType === 'custom' && currentAnswerId !== undefined && (
         <div className="mt-6 pt-4 border-t">
           <p className={isCorrect ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
             {isCorrect 
@@ -182,26 +194,16 @@ const QuestionDisplay = ({
                 }`
             }
           </p>
-          
-          {/* Always show explanation in review mode if available */}
-          {question.content.explanation && (
-            <div className="mt-3 p-4 bg-gray-50 rounded-md border border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Explanation:</h3>
-              <p className="text-gray-600">
-                {question.content.explanation}
-              </p>
-            </div>
-          )}
-
-          {/* Show a generic explanation if none is provided */}
-          {!question.content.explanation && (
-            <div className="mt-3 p-4 bg-gray-50 rounded-md border border-gray-200">
-              <h3 className="text-sm font-medium text-gray-700 mb-1">Explanation:</h3>
-              <p className="text-gray-600">
-                Understanding this question type helps build your reasoning skills. Practice similar questions to improve.
-              </p>
-            </div>
-          )}
+        </div>
+      )}
+      
+      {/* Show explanation based on the rules */}
+      {shouldShowExplanation && (
+        <div className="mt-3 p-4 bg-gray-50 rounded-md border border-gray-200">
+          <h3 className="text-sm font-medium text-gray-700 mb-1">Explanation:</h3>
+          <p className="text-gray-600">
+            {question.content.explanation || 'Understanding this question type helps build your reasoning skills. Practice similar questions to improve.'}
+          </p>
         </div>
       )}
     </Card>

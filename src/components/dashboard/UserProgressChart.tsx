@@ -4,12 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const progressData = [
-  { month: "Jan", verbal: 65, nonVerbal: 50, average: 58 },
-  { month: "Feb", verbal: 68, nonVerbal: 55, average: 62 },
-  { month: "Mar", verbal: 70, nonVerbal: 62, average: 66 },
-  { month: "Apr", verbal: 73, nonVerbal: 68, average: 71 },
-  { month: "May", verbal: 76, nonVerbal: 72, average: 74 },
-  { month: "Jun", verbal: 80, nonVerbal: 75, average: 78 },
+  { month: "Jan", verbal: 65, nonVerbal: 50, brainTraining: 45, average: 53 },
+  { month: "Feb", verbal: 68, nonVerbal: 55, brainTraining: 52, average: 58 },
+  { month: "Mar", verbal: 70, nonVerbal: 62, brainTraining: 60, average: 64 },
+  { month: "Apr", verbal: 73, nonVerbal: 68, brainTraining: 65, average: 69 },
+  { month: "May", verbal: 76, nonVerbal: 72, brainTraining: 70, average: 73 },
+  { month: "Jun", verbal: 80, nonVerbal: 75, brainTraining: 78, average: 78 },
 ];
 
 const timeRanges = [
@@ -59,7 +59,7 @@ export const UserProgressChart = () => {
             data={filteredData}
             margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
           >
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
             <XAxis 
               dataKey="month" 
               className="text-xs text-muted-foreground"
@@ -74,7 +74,7 @@ export const UserProgressChart = () => {
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   return (
-                    <Card className="p-2 !bg-background border shadow-lg">
+                    <Card className="p-2 !bg-background/95 border shadow-lg backdrop-blur">
                       <p className="text-sm font-medium">{payload[0].payload.month}</p>
                       {payload.map((entry) => (
                         <p key={entry.name} className="text-sm text-muted-foreground">
@@ -91,18 +91,18 @@ export const UserProgressChart = () => {
             <Line
               type="monotone"
               dataKey="verbal"
-              stroke="hsl(var(--primary))"
+              stroke="#3b82f6"
               name="Verbal Reasoning"
               strokeWidth={2}
               dot={{
                 r: 4,
                 fill: "hsl(var(--background))",
-                stroke: "hsl(var(--primary))",
+                stroke: "#3b82f6",
                 strokeWidth: 2
               }}
               activeDot={{
                 r: 6,
-                fill: "hsl(var(--primary))",
+                fill: "#3b82f6",
                 stroke: "hsl(var(--background))",
                 strokeWidth: 2
               }}
@@ -110,18 +110,37 @@ export const UserProgressChart = () => {
             <Line
               type="monotone"
               dataKey="nonVerbal"
-              stroke="hsl(var(--secondary))"
+              stroke="#10b981"
               name="Non-Verbal Reasoning"
               strokeWidth={2}
               dot={{
                 r: 4,
                 fill: "hsl(var(--background))",
-                stroke: "hsl(var(--secondary))",
+                stroke: "#10b981",
                 strokeWidth: 2
               }}
               activeDot={{
                 r: 6,
-                fill: "hsl(var(--secondary))",
+                fill: "#10b981",
+                stroke: "hsl(var(--background))",
+                strokeWidth: 2
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey="brainTraining"
+              stroke="#8b5cf6"
+              name="Brain Training"
+              strokeWidth={2}
+              dot={{
+                r: 4,
+                fill: "hsl(var(--background))",
+                stroke: "#8b5cf6",
+                strokeWidth: 2
+              }}
+              activeDot={{
+                r: 6,
+                fill: "#8b5cf6",
                 stroke: "hsl(var(--background))",
                 strokeWidth: 2
               }}
@@ -129,18 +148,19 @@ export const UserProgressChart = () => {
             <Line
               type="monotone"
               dataKey="average"
-              stroke="hsl(var(--accent))"
+              stroke="#6b7280"
               name="Overall Average"
               strokeWidth={2}
+              strokeDasharray="4 4"
               dot={{
                 r: 4,
                 fill: "hsl(var(--background))",
-                stroke: "hsl(var(--accent))",
+                stroke: "#6b7280",
                 strokeWidth: 2
               }}
               activeDot={{
                 r: 6,
-                fill: "hsl(var(--accent))",
+                fill: "#6b7280",
                 stroke: "hsl(var(--background))",
                 strokeWidth: 2
               }}

@@ -7,167 +7,197 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Star, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CustomAvatar } from '@/components/profile/avatar/CustomAvatar';
+import { defaultConfig } from '@/components/profile/avatar/avatarConfig';
 
-interface Testimonial {
-  id: string;
+export interface Testimonial {
   name: string;
-  role: string | null;
-  avatar_url: string | null;
-  quote: string;
+  role: string;
   rating: number;
+  quote: string;
+  avatar_component: React.ReactNode;
 }
 
-export const Testimonials = () => {
+const preloadedTestimonials: Testimonial[] = [
+  {
+    name: "John Smith",
+    role: "Student",
+    rating: 5,
+    quote: "IQify has transformed my learning experience. The personalised approach and interactive lessons have helped me grasp complex concepts with ease.",
+    avatar_component: (
+      <div className="w-16 h-16 rounded-full overflow-hidden bg-white">
+        <CustomAvatar
+          config={defaultConfig}
+          username="John Smith"
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
+    )
+  },
+  {
+    name: "Sarah Johnson",
+    role: "Parent",
+    rating: 5,
+    quote: "As a parent, I'm impressed by how engaging and effective IQify is. My child's academic performance has improved significantly.",
+    avatar_component: (
+      <div className="w-16 h-16 rounded-full overflow-hidden bg-white">
+        <CustomAvatar
+          config={{...defaultConfig, gender: 'female'}}
+          username="Sarah Johnson"
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
+    )
+  },
+  {
+    name: "David Williams",
+    role: "Teacher",
+    rating: 5,
+    quote: "IQify is an excellent tool that complements classroom teaching. It helps students learn at their own pace whilst maintaining high educational standards.",
+    avatar_component: (
+      <div className="w-16 h-16 rounded-full overflow-hidden bg-white">
+        <CustomAvatar
+          config={defaultConfig}
+          username="David Williams"
+          style={{ width: '100%', height: '100%' }}
+        />
+      </div>
+    )
+  }
+];
+
+export const Testimonials = ({ testimonials = preloadedTestimonials }: { testimonials?: Testimonial[] }) => {
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Pre-loaded testimonials for demonstration
-  const preloadedTestimonials: Testimonial[] = [
-    {
-      id: "1",
-      name: "Emily Thompson",
-      role: "Year 6 Student",
-      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily",
-      quote: "IQify has completely transformed my approach to learning. The personalised practice questions helped me improve my verbal reasoning scores dramatically. I'm now consistently at the top of my class!",
-      rating: 5
-    },
-    {
-      id: "2",
-      name: "James Chen",
-      role: "Secondary School Student",
-      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=James",
-      quote: "The brain training exercises are brilliant! They're challenging but fun, and I've noticed a real improvement in my problem-solving abilities. My teachers have noticed the difference too!",
-      rating: 5
-    },
-    {
-      id: "3",
-      name: "Sophie Williams",
-      role: "Grammar School Student",
-      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sophie",
-      quote: "Thanks to IQify's non-verbal reasoning practice, I passed my grammar school entrance exam with flying colours. The interactive format made studying enjoyable rather than a chore.",
-      rating: 5
-    },
-    {
-      id: "4",
-      name: "Alexander Kumar",
-      role: "Year 5 Student",
-      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alexander",
-      quote: "I love how IQify adapts to my learning pace. The questions get more challenging as I improve, which keeps me motivated. It's like having a personal tutor available 24/7!",
-      rating: 5
-    },
-    {
-      id: "5",
-      name: "Olivia Parker",
-      role: "Independent School Student",
-      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Olivia",
-      quote: "The variety of questions and puzzles keeps me engaged. I've seen a massive improvement in my cognitive skills, and my confidence has grown tremendously. Highly recommend!",
-      rating: 5
-    },
-    {
-      id: "6",
-      name: "William Foster",
-      role: "Year 7 Student",
-      avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=William",
-      quote: "IQify made preparing for my entrance exams so much easier. The practice questions are spot-on, and the explanations really help you understand where you went wrong. Brilliant platform!",
-      rating: 5
-    }
-  ];
-
-  const { data: testimonials = preloadedTestimonials } = useQuery({
-    queryKey: ["approved-testimonials"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("testimonials")
-        .select("id, name, role, avatar_url, quote, rating")
-        .eq("status", "approved")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      return data.length > 0 ? data : preloadedTestimonials;
-    },
-  });
+  const [direction, setDirection] = useState(0);
 
   useEffect(() => {
-    if (testimonials.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentIndex((prev) => (prev + 1) % testimonials.length);
-      }, 5000);
-      return () => clearInterval(interval);
-    }
+    const timer = setInterval(() => {
+      setDirection(1);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
   }, [testimonials.length]);
+
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0
+    })
+  };
+
+  const swipeConfidenceThreshold = 10000;
+  const swipePower = (offset: number, velocity: number) => {
+    return Math.abs(offset) * velocity;
+  };
+
+  const paginate = (newDirection: number) => {
+    setDirection(newDirection);
+    setCurrentIndex((prevIndex) => (prevIndex + newDirection + testimonials.length) % testimonials.length);
+  };
 
   const handleAddTestimonial = () => {
     navigate("/testimonials/new");
   };
 
   return (
-    <section className="py-16 bg-muted/30">
+    <section className="relative py-16 overflow-hidden bg-gradient-to-b from-royal-blue to-bright-blue">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">What Our Users Say</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Join our growing community of satisfied learners and experience the difference for yourself.
-          </p>
-        </div>
-
-        <div className="max-w-4xl mx-auto">
-          <AnimatePresence mode="wait">
+        <h2 className="text-4xl font-bold text-center text-white mb-12">
+          What Our Users Say
+        </h2>
+        <div className="relative h-[400px]">
+          <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={currentIndex}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 }
+              }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={1}
+              onDragEnd={(e, { offset, velocity }) => {
+                const swipe = swipePower(offset.x, velocity.x);
+
+                if (swipe < -swipeConfidenceThreshold) {
+                  paginate(1);
+                } else if (swipe > swipeConfidenceThreshold) {
+                  paginate(-1);
+                }
+              }}
+              className="absolute w-full"
             >
-              <Card className="p-8">
-                <div className="flex flex-col items-center text-center">
-                  <Avatar className="h-16 w-16 mb-4">
-                    {testimonials[currentIndex].avatar_url ? (
-                      <AvatarImage
-                        src={testimonials[currentIndex].avatar_url}
-                        alt={testimonials[currentIndex].name}
-                      />
-                    ) : (
-                      <AvatarFallback>
-                        {testimonials[currentIndex].name[0]}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="space-y-2">
-                    <div className="flex justify-center">
-                      {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
-                        <Star
-                          key={i}
-                          className="h-5 w-5 text-yellow-400 fill-current"
-                        />
-                      ))}
-                    </div>
-                    <p className="text-lg italic text-muted-foreground">
-                      "{testimonials[currentIndex].quote}"
-                    </p>
-                    <div>
-                      <p className="font-semibold">{testimonials[currentIndex].name}</p>
-                      {testimonials[currentIndex].role && (
-                        <p className="text-sm text-muted-foreground">
-                          {testimonials[currentIndex].role}
-                        </p>
-                      )}
+              <div className="max-w-3xl mx-auto">
+                <div className="bg-white rounded-xl p-8 shadow-lg">
+                  <div className="flex items-center mb-6">
+                    {testimonials[currentIndex].avatar_component}
+                    <div className="ml-4">
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {testimonials[currentIndex].name}
+                      </h3>
+                      <p className="text-gray-600">{testimonials[currentIndex].role}</p>
+                      <div className="flex items-center mt-1">
+                        {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className="w-5 h-5 text-yellow fill-current"
+                          />
+                        ))}
+                      </div>
                     </div>
                   </div>
+                  <p className="text-gray-700 text-lg leading-relaxed">
+                    "{testimonials[currentIndex].quote}"
+                  </p>
                 </div>
-              </Card>
+              </div>
             </motion.div>
           </AnimatePresence>
+        </div>
 
-          <div className="mt-8 text-center">
-            <Button
-              onClick={handleAddTestimonial}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Share Your Experience
-            </Button>
-          </div>
+        {/* Navigation Dots */}
+        <div className="flex justify-center mt-8 gap-2">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => {
+                setDirection(index > currentIndex ? 1 : -1);
+                setCurrentIndex(index);
+              }}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentIndex
+                  ? "bg-white scale-125"
+                  : "bg-white/50 hover:bg-white/75"
+              }`}
+            />
+          ))}
+        </div>
+
+        <div className="mt-8 text-center">
+          <Button
+            onClick={handleAddTestimonial}
+            className="bg-primary hover:bg-primary/90"
+          >
+            <MessageSquare className="w-4 h-4 mr-2" />
+            Share Your Experience
+          </Button>
         </div>
       </div>
     </section>

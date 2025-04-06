@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label";
@@ -6,13 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
 export function StandardExamForm() {
   const { toast } = useToast();
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [standardCategory, setStandardCategory] = useState<QuestionCategory | ''>('');
   const [isLoading, setIsLoading] = useState(false);

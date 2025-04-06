@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -21,45 +20,66 @@ export const QuestionHeader = ({
   onEdit, 
   onDelete 
 }: QuestionHeaderProps) => {
+  // Get the category (subject) from the question's sub_topics
+  const category = question.sub_topics?.[0]?.question_sections?.[0]?.category;
+  const subTopicName = question.sub_topics?.[0]?.name;
+
+  // Format category for display
+  const formatCategory = (category: string) => {
+    return category
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
     <div className="space-y-2">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          <h3 className="font-medium">Question {index + 1}</h3>
-          {question.hasSimilar && (
-            <Badge variant="destructive" className="flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              <span>Possible Duplicate</span>
-              {question.similarityScore && (
-                <span className="ml-1 text-xs">
-                  ({(question.similarityScore * 100).toFixed(0)}% match)
-                </span>
-              )}
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-500">
-            {question.sub_topics?.name}
-          </span>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => onEdit(question.id)}
-              title="Edit Question"
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="destructive" 
-              size="sm" 
-              onClick={() => onDelete(question.id)}
-              title="Delete Question"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+      <div className="flex justify-between items-start">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium">Question {index + 1}</h3>
+            {question.hasSimilar && (
+              <Badge variant="destructive" className="flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                <span>Possible Duplicate</span>
+                {question.similarityScore && (
+                  <span className="ml-1 text-xs">
+                    ({(question.similarityScore * 100).toFixed(0)}% match)
+                  </span>
+                )}
+              </Badge>
+            )}
           </div>
+          <div className="flex items-center gap-2 text-sm">
+            {category && (
+              <Badge variant="secondary" className="font-normal">
+                {formatCategory(category)}
+              </Badge>
+            )}
+            {subTopicName && (
+              <Badge variant="outline" className="font-normal">
+                {subTopicName}
+              </Badge>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => onEdit(question.id)}
+            title="Edit Question"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            onClick={() => onDelete(question.id)}
+            title="Delete Question"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
       

@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { BookOpen, Brain, Trophy, Lock, CheckCircle, Target, Users, Clock, RefreshCw, Accessibility, Sparkles, Star, MessageSquare, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useAuthContext } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,12 +9,16 @@ import { useState, useEffect } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { AboutUs } from "@/components/home/AboutUs";
 import { Testimonials } from "@/components/home/Testimonials";
+import { CustomAvatar } from "@/components/profile/avatar/CustomAvatar";
+import { defaultConfig } from "@/components/profile/avatar/avatarConfig";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
+  const [homepageContent, setHomepageContent] = useState<any>(null);
 
-  const { data: homepageContent } = useQuery({
+  const { data: homepageContentData } = useQuery({
     queryKey: ["homepage-content"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -83,24 +86,51 @@ const Index = () => {
     },
   ];
 
-  const testimonials = homepageContent?.testimonials || [
+  const testimonials = homepageContentData?.testimonials || [
     {
-      name: "Sarah Thompson",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
+      name: "John Smith",
+      role: "Student",
       rating: 5,
-      quote: "The personalised learning approach helped me identify my weak areas and improve significantly. I went from struggling with verbal reasoning to scoring in the top 10% of my year group!"
+      quote: "IQify has transformed my learning experience. The personalised approach and interactive lessons have helped me grasp complex concepts with ease.",
+      avatar_component: (
+        <div className="w-16 h-16 rounded-full overflow-hidden bg-white">
+          <CustomAvatar
+            config={defaultConfig}
+            username="John Smith"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+      )
     },
     {
-      name: "James Wilson",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=James",
+      name: "Sarah Johnson",
+      role: "Parent",
       rating: 5,
-      quote: "The interactive content made learning fun and engaging. I actually looked forward to practising! The brain training games were particularly helpful for improving my problem-solving skills."
+      quote: "As a parent, I'm impressed by how engaging and effective IQify is. My child's academic performance has improved significantly.",
+      avatar_component: (
+        <div className="w-16 h-16 rounded-full overflow-hidden bg-white">
+          <CustomAvatar
+            config={{...defaultConfig, gender: 'female'}}
+            username="Sarah Johnson"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+      )
     },
     {
-      name: "Emma Patel",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emma",
+      name: "David Williams",
+      role: "Teacher",
       rating: 5,
-      quote: "The platform's flexibility allowed me to fit learning around my busy schedule. The progress tracking helped me stay motivated and see my improvement over time."
+      quote: "IQify is an excellent tool that complements classroom teaching. It helps students learn at their own pace whilst maintaining high educational standards.",
+      avatar_component: (
+        <div className="w-16 h-16 rounded-full overflow-hidden bg-white">
+          <CustomAvatar
+            config={defaultConfig}
+            username="David Williams"
+            style={{ width: '100%', height: '100%' }}
+          />
+        </div>
+      )
     }
   ];
 
@@ -192,15 +222,18 @@ const Index = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <img 
-              src="https://images.unsplash.com/photo-1642982156172-Y8TiLvKnLeg?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-              alt="Student learning with headphones" 
-              className="w-full h-full object-cover rounded-2xl shadow-2xl"
-              onError={(e) => {
-                console.error('Image failed to load:', e);
-                e.currentTarget.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80";
-              }}
-            />
+            <div className="w-full h-full rounded-2xl shadow-2xl overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
+              <img 
+                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200" 
+                alt="Student learning with headphones" 
+                className="w-full h-full object-cover"
+                loading="eager"
+                onError={(e) => {
+                  console.error('Hero image failed to load');
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            </div>
           </motion.div>
         </div>
       </section>

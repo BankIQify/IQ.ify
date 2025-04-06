@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { AuthError } from "@supabase/supabase-js";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LoginFormProps {
   onToggleMode: () => void;
@@ -12,11 +11,11 @@ interface LoginFormProps {
 }
 
 export const LoginForm = ({ onToggleMode, onGoogleSignIn }: LoginFormProps) => {
-  const { signInWithEmail } = useAuthContext();
+  const { signInWithPassword } = useAuth();
+  const { toast } = useToast();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const handleAuthError = (error: AuthError) => {
     console.error("Authentication error:", error);
@@ -54,7 +53,7 @@ export const LoginForm = ({ onToggleMode, onGoogleSignIn }: LoginFormProps) => {
 
     setLoading(true);
     try {
-      await signInWithEmail(email, password);
+      await signInWithPassword(email, password);
     } catch (error) {
       handleAuthError(error as AuthError);
     } finally {
@@ -63,38 +62,39 @@ export const LoginForm = ({ onToggleMode, onGoogleSignIn }: LoginFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          disabled={loading}
-          aria-label="Email"
-        />
-      </div>
-      <div>
-        <Input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          disabled={loading}
-          aria-label="Password"
-        />
-      </div>
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+            aria-label="Email"
+          />
+        </div>
+        <div className="space-y-2">
+          <Input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={loading}
+            aria-label="Password"
+          />
+        </div>
 
-      <Button
-        type="submit"
-        className="w-full"
-        variant="default"
-        disabled={loading}
-      >
-        {loading ? "Loading..." : "Sign In"}
-      </Button>
+        <Button
+          type="submit"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+          disabled={loading}
+        >
+          {loading ? "Signing in..." : "Sign in"}
+        </Button>
+      </form>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
@@ -114,18 +114,25 @@ export const LoginForm = ({ onToggleMode, onGoogleSignIn }: LoginFormProps) => {
         onClick={onGoogleSignIn}
         disabled={loading}
       >
+        <img
+          src="/google.svg"
+          alt="Google"
+          className="w-5 h-5 mr-2"
+        />
         Sign in with Google
       </Button>
 
-      <div className="text-center text-sm">
-        <button
+      <div className="text-center">
+        <Button
           type="button"
-          className="text-primary hover:underline"
+          variant="link"
+          className="text-sm text-muted-foreground hover:text-primary"
           onClick={onToggleMode}
+          disabled={loading}
         >
           Don't have an account? Sign up
-        </button>
+        </Button>
       </div>
-    </form>
+    </div>
   );
 };

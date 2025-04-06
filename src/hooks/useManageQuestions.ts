@@ -1,20 +1,17 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useManageQuestions = () => {
-  const { user, isAdmin, authInitialized } = useAuthContext();
+  const { user, isAdmin, isDataInput, authInitialized } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
   const [sections, setSections] = useState<any[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
   const [activeTab, setActiveTab] = useState("bank");
-  const [hasDataInputRole, setHasDataInputRole] = useState(false);
-  const [dataRoleChecked, setDataRoleChecked] = useState(false);
 
   // Extract the tab from URL parameters
   useEffect(() => {
@@ -25,47 +22,6 @@ export const useManageQuestions = () => {
       console.log("Setting active tab from URL:", tab);
     }
   }, [location]);
-
-  // Check for data_input role specifically
-  useEffect(() => {
-    const checkDataInputRole = async () => {
-      if (!user) {
-        setHasDataInputRole(false);
-        setDataRoleChecked(true);
-        return;
-      }
-      
-      try {
-        console.log("Checking data_input role for user:", user.id);
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('role', 'data_input')
-          .maybeSingle();
-
-        if (error) {
-          console.error('Error checking data_input role:', error);
-          setDataRoleChecked(true);
-          return;
-        }
-
-        console.log("Data input role check result:", data);
-        setHasDataInputRole(!!data);
-        setDataRoleChecked(true);
-      } catch (error) {
-        console.error('Error in checkDataInputRole:', error);
-        setDataRoleChecked(true);
-      }
-    };
-
-    if (authInitialized && user) {
-      checkDataInputRole();
-    } else if (authInitialized) {
-      setHasDataInputRole(false);
-      setDataRoleChecked(true);
-    }
-  }, [user, authInitialized]);
 
   // Fetch sections for the CategoriesTable
   useEffect(() => {
@@ -97,10 +53,10 @@ export const useManageQuestions = () => {
       }
     };
 
-    if (user && (isAdmin || hasDataInputRole) && dataRoleChecked) {
+    if (user && (isAdmin || isDataInput) && authInitialized) {
       fetchSections();
     }
-  }, [toast, user, isAdmin, hasDataInputRole, dataRoleChecked]);
+  }, [toast, user, isAdmin, isDataInput, authInitialized]);
 
   // Fetch pending webhook events count
   useEffect(() => {
@@ -118,14 +74,14 @@ export const useManageQuestions = () => {
       }
     };
     
-    if (user && (isAdmin || hasDataInputRole) && dataRoleChecked) {
+    if (user && (isAdmin || isDataInput) && authInitialized) {
       fetchPendingCount();
       
       // Set up a polling interval to refresh the count
       const interval = setInterval(fetchPendingCount, 30000); // every 30 seconds
       return () => clearInterval(interval);
     }
-  }, [user, isAdmin, hasDataInputRole, dataRoleChecked]);
+  }, [user, isAdmin, isDataInput, authInitialized]);
 
   const handleTabChange = (value: string) => {
     console.log("Tab change requested to:", value);
@@ -142,13 +98,13 @@ export const useManageQuestions = () => {
   return {
     user,
     isAdmin,
-    hasDataInputRole,
+    isDataInput,
     sections,
     pendingCount,
     activeTab,
     handleTabChange,
     showHomepageTab: isAdmin,
     showWebhooksTab: isAdmin,
-    authInitialized: authInitialized && dataRoleChecked
+    authInitialized
   };
 };

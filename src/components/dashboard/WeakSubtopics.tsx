@@ -1,151 +1,132 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Target, Zap, BookOpen, AlertCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
-import { type MainSubject, type WeakSubTopic } from "@/types/performance/types";
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
+import { type MainSubject } from '@/types/performance/types';
 
-// Map of main subjects to their display info
-const mainSubjectInfo: Record<MainSubject, {
-  icon: any;
-  iconColor: string;
-  bgColor: string;
-  textColor: string;
-  borderColor: string;
-}> = {
+interface SubtopicPerformance {
+  id: string;
+  name: string;
+  main_subject: MainSubject;
+  averageScore: number;
+  totalAttempts: number;
+  mainSubjectInfo: {
+    icon: string;
+    color: string;
+  };
+}
+
+interface DatabaseSubtopic {
+  id: string;
+  name: string;
+  main_subject: MainSubject;
+}
+
+interface DatabasePerformance {
+  subtopic: DatabaseSubtopic;
+  average_score: number;
+  total_attempts: number;
+}
+
+const mainSubjectInfo = {
   verbal_reasoning: {
-    icon: BookOpen,
-    iconColor: "text-blue-500",
-    bgColor: "bg-blue-50",
-    textColor: "text-blue-700",
-    borderColor: "border-blue-200"
+    icon: '📚',
+    color: 'text-blue-500',
   },
   non_verbal_reasoning: {
-    icon: Target,
-    iconColor: "text-green-500",
-    bgColor: "bg-green-50",
-    textColor: "text-green-700",
-    borderColor: "border-green-200"
+    icon: '🧩',
+    color: 'text-purple-500',
   },
   brain_training: {
-    icon: Zap,
-    iconColor: "text-purple-500",
-    bgColor: "bg-purple-50",
-    textColor: "text-purple-700",
-    borderColor: "border-purple-200"
-  }
-};
+    icon: '🧠',
+    color: 'text-green-500',
+  },
+} as const;
 
 interface WeakSubtopicsProps {
   className?: string;
 }
 
 export const WeakSubtopics = ({ className }: WeakSubtopicsProps) => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
+  const [weakSubtopics, setWeakSubtopics] = useState<SubtopicPerformance[]>([]);
 
-  const { data: weakSubtopics = [] } = useQuery<WeakSubTopic[]>({
-    queryKey: ['weakSubtopics', user?.id],
-    queryFn: async () => {
-      if (!user) return [];
+  useEffect(() => {
+    const fetchWeakSubtopics = async () => {
+      if (!user) return;
 
       try {
-        // Fetch all subtopics with performance below 50%
         const { data: performance, error } = await supabase
           .from('subtopic_performance')
           .select(`
-            *,
             subtopic:subtopics (
               id,
               name,
-              main_subject,
-              description,
-              path
-            )
+              main_subject
+            ),
+            average_score,
+            total_attempts
           `)
           .eq('user_id', user.id)
-          .lt('average_score', 50) // Only get scores below 50%
           .order('average_score', { ascending: true })
-          .limit(3);
+          .limit(5);
 
         if (error) throw error;
 
-        // If no weak performance data, fetch default subtopics
-        if (!performance || performance.length === 0) {
-          const { data: defaultSubtopics, error: subtopicsError } = await supabase
-            .from('subtopics')
-            .select('*')
-            .limit(3);
+        if (!performance) return;
 
-          if (subtopicsError) throw subtopicsError;
-
-          return (defaultSubtopics || []).map(subtopic => ({
-            ...subtopic,
-            averageScore: 0,
-            totalAttempts: 0,
-            mainSubjectInfo: mainSubjectInfo[subtopic.main_subject as MainSubject]
-          }));
-        }
-
-        // Map performance data to weak subtopics
-        return performance.map(perf => ({
-          ...perf.subtopic,
+        // Map performance data to weak subtopics with type assertion
+        const typedPerformance = performance as unknown as DatabasePerformance[];
+        const mappedSubtopics: SubtopicPerformance[] = typedPerformance.map(perf => ({
+          id: perf.subtopic.id,
+          name: perf.subtopic.name,
+          main_subject: perf.subtopic.main_subject,
           averageScore: perf.average_score,
           totalAttempts: perf.total_attempts,
-          mainSubjectInfo: mainSubjectInfo[perf.subtopic.main_subject as MainSubject]
+          mainSubjectInfo: mainSubjectInfo[perf.subtopic.main_subject]
         }));
+
+        setWeakSubtopics(mappedSubtopics);
       } catch (error) {
         console.error('Error fetching weak subtopics:', error);
-        return [];
       }
-    },
-    enabled: !!user
-  });
+    };
+
+    fetchWeakSubtopics();
+  }, [user]);
 
   return (
-    <Card className={className}>
+    <Card className={cn("col-span-3", className)}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <span>Areas for Improvement</span>
-          <AlertCircle className="h-4 w-4 text-muted-foreground" />
-        </CardTitle>
+        <CardTitle>Areas for Improvement</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {weakSubtopics.map((subtopic) => {
-            const Icon = mainSubjectInfo[subtopic.mainSubject].icon;
-            return (
-              <div 
-                key={subtopic.id} 
-                className={`p-3 rounded-md border ${subtopic.mainSubjectInfo.bgColor} flex items-start gap-3`}
-              >
-                <div className="p-2 rounded-full bg-white">
-                  <Icon className={`h-4 w-4 ${subtopic.mainSubjectInfo.iconColor}`} />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-medium">{subtopic.name}</h4>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    {subtopic.description}
-                    {subtopic.averageScore > 0 && (
-                      <span className="ml-2">
-                        (Average: {Math.round(subtopic.averageScore)}%)
-                      </span>
-                    )}
+          {weakSubtopics.map((subtopic) => (
+            <div
+              key={subtopic.id}
+              className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{subtopic.mainSubjectInfo.icon}</span>
+                <div>
+                  <p className="font-medium">{subtopic.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {subtopic.totalAttempts} attempts
                   </p>
-                  <Link to={subtopic.path}>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className={`mt-1 ${subtopic.mainSubjectInfo.textColor} ${subtopic.mainSubjectInfo.borderColor}`}
-                    >
-                      Practice Now
-                    </Button>
-                  </Link>
                 </div>
               </div>
-            );
-          })}
+              <div className={cn("font-medium", subtopic.mainSubjectInfo.color)}>
+                {subtopic.averageScore}%
+              </div>
+            </div>
+          ))}
+          {weakSubtopics.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">
+              Complete some practice tests to see your areas for improvement.
+            </p>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-// Replace these with your actual Stripe price IDs from your Stripe dashboard
-const MONTHLY_PRICE_ID = 'price_1R6ByNRsB8SZfizzEasQoB3t'; 
-const ANNUAL_PRICE_ID = 'price_1R6Cj5RsB8SZfizzC3lMgOtO';   
+// Price IDs from your Stripe dashboard
+const MONTHLY_PRICE_ID = 'price_1RAE6l2Q67U6CAuLVI3uGCuu';
+const ANNUAL_PRICE_ID = 'price_1RAE3f2Q67U6CAuLC5a3rnPD';
 
 export const SubscriptionPlans = () => {
-  const { user, profile } = useAuthContext();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -33,7 +33,7 @@ export const SubscriptionPlans = () => {
     try {
       // Get the current URL for success/cancel redirects
       const origin = window.location.origin;
-      const successUrl = `${origin}/profile?subscription=success`;
+      const successUrl = `${origin}/profile?session_id={CHECKOUT_SESSION_ID}`;
       const cancelUrl = `${origin}/profile?subscription=canceled`;
 
       // Call the Supabase Edge Function to create a checkout session

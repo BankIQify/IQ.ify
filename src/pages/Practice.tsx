@@ -6,13 +6,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 const Practice = () => {
   const { category } = useParams<{ category?: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
   // Immediately create standard exam when category is selected

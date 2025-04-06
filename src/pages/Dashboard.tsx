@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "@/contexts/AuthContext";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardTabs } from "@/components/dashboard/DashboardTabs";
@@ -10,12 +9,13 @@ import { OverviewTab } from "@/components/dashboard/tabs/OverviewTab";
 import { ProgressTab } from "@/components/dashboard/tabs/ProgressTab";
 import { AchievementsTab } from "@/components/dashboard/tabs/AchievementsTab";
 import { Loader2 } from "lucide-react";
+import { DataInputDashboard } from "@/components/dashboard/admin/DataInputDashboard";
 
 const Dashboard = () => {
-  const { user, profile, isAdmin, authInitialized } = useAuthContext();
+  const { user, profile, isAdmin, authInitialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState(isAdmin ? "admin" : "overview");
+  const [activeTab, setActiveTab] = useState<string>("overview");
 
   // Add debug logging
   useEffect(() => {
@@ -40,6 +40,13 @@ const Dashboard = () => {
     }
   }, [user, navigate, toast, authInitialized]);
 
+  // Set initial tab based on user role
+  useEffect(() => {
+    if (isAdmin) {
+      setActiveTab("admin");
+    }
+  }, [isAdmin]);
+
   if (!authInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -63,42 +70,57 @@ const Dashboard = () => {
     setActiveTab(tab);
   };
 
+  // Check if user is a data input user
+  const isDataInput = profile?.role === 'data_input';
+
   return (
     <div className="page-container max-w-6xl mx-auto py-8 px-4 animate-fadeIn bg-gradient-to-b from-[rgba(30,174,219,0.2)] to-[rgba(255,105,180,0.2)] rounded-xl">
       <DashboardHeader profile={{...profile, name: displayName}} />
 
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
-        <DashboardTabs 
-          isAdmin={isAdmin} 
-          activeTab={activeTab} 
-        />
-        
-        <TabsContent value="overview" className="mt-6">
-          {profile ? (
-            <OverviewTab profile={profile} />
-          ) : (
-            <div className="flex items-center justify-center p-8">
-              <div className="text-center">
-                <p className="text-muted-foreground">Loading profile...</p>
-              </div>
-            </div>
+      {isDataInput ? (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-6">Question Management Dashboard</h2>
+          <DataInputDashboard />
+        </div>
+      ) : (
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-8">
+          <DashboardTabs 
+            isAdmin={isAdmin} 
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+          />
+          
+          {!isAdmin && (
+            <>
+              <TabsContent value="overview" className="mt-6">
+                {profile ? (
+                  <OverviewTab profile={profile} />
+                ) : (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="text-center">
+                      <p className="text-muted-foreground">Loading profile...</p>
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="progress" className="mt-6">
+                <ProgressTab />
+              </TabsContent>
+              
+              <TabsContent value="achievements" className="mt-6">
+                <AchievementsTab />
+              </TabsContent>
+            </>
           )}
-        </TabsContent>
-        
-        <TabsContent value="progress" className="mt-6">
-          <ProgressTab />
-        </TabsContent>
-        
-        <TabsContent value="achievements" className="mt-6">
-          <AchievementsTab />
-        </TabsContent>
-        
-        {isAdmin && (
-          <TabsContent value="admin" className="mt-6">
-            <AdminTab />
-          </TabsContent>
-        )}
-      </Tabs>
+          
+          {isAdmin && (
+            <TabsContent value="admin" className="mt-6">
+              <AdminTab />
+            </TabsContent>
+          )}
+        </Tabs>
+      )}
     </div>
   );
 };

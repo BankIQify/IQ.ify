@@ -1,8 +1,7 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 type QuestionCategory = 'verbal' | 'non_verbal' | 'brain_training';
 
@@ -18,7 +17,7 @@ interface SubTopic {
 
 export function useCustomExamForm() {
   const { toast } = useToast();
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const [customName, setCustomName] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<QuestionCategory[]>([]);
   const [selectedSubTopics, setSelectedSubTopics] = useState<string[]>([]);

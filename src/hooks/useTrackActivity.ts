@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import { useAuthContext } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { type ActivityType, type QuickAction } from '@/types/activity/types';
 
 export const useTrackActivity = () => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   const trackActivity = useCallback(async (
     type: ActivityType,

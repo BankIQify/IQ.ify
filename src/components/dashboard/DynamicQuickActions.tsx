@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { Target, Brain, BookOpen, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from '@/integrations/supabase/client';
 
 interface QuickAction {
   id: string;
@@ -17,6 +17,19 @@ interface QuickAction {
   textColor: string;
   iconColor: string;
   accessCount: number;
+}
+
+interface ActivityData {
+  id: string;
+  title: string;
+  path: string;
+  icon: string;
+  gradient_from: string;
+  gradient_to: string;
+  border_color: string;
+  text_color: string;
+  icon_color: string;
+  access_count: number;
 }
 
 // Map of icon names to components
@@ -42,9 +55,9 @@ const defaultQuickAction: QuickAction = {
 };
 
 export const DynamicQuickActions = () => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
-  const { data: quickActions = [defaultQuickAction] } = useQuery({
+  const { data: quickActions = [defaultQuickAction] } = useQuery<QuickAction[]>({
     queryKey: ['quickActions', user?.id],
     queryFn: async () => {
       if (!user) return [defaultQuickAction];
@@ -52,7 +65,7 @@ export const DynamicQuickActions = () => {
       try {
         const { data: activities, error } = await supabase
           .from('user_activities')
-          .select('*')
+          .select('id, title, path, icon, gradient_from, gradient_to, border_color, text_color, icon_color, access_count')
           .eq('user_id', user.id)
           .order('access_count', { ascending: false })
           .limit(4);
@@ -63,7 +76,10 @@ export const DynamicQuickActions = () => {
           return [defaultQuickAction];
         }
 
-        return activities.map((activity): QuickAction => ({
+        // Type assertion with unknown first to satisfy TypeScript
+        const typedActivities = (activities as unknown) as ActivityData[];
+        
+        return typedActivities.map((activity): QuickAction => ({
           id: activity.id,
           title: activity.title,
           path: activity.path,

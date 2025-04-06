@@ -1,7 +1,6 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useExam } from "@/hooks/useExam";
 
 // Components
@@ -16,7 +15,7 @@ import { Card } from "@/components/ui/card";
 
 const TakeExam = () => {
   const { examId } = useParams<{ examId: string }>();
-  const { user, authInitialized } = useAuthContext();
+  const { user, authInitialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   

@@ -1,30 +1,22 @@
-
+import { useManageQuestions } from "@/hooks/useManageQuestions";
 import { Tabs } from "@/components/ui/tabs";
-import { TabHeader } from "@/components/manage-questions/TabHeader";
-import { TabContent } from "@/components/manage-questions/TabContent";
+import { TabHeader } from "./TabHeader";
+import { TabContent } from "./TabContent";
 
-interface QuestionManagementLayoutProps {
-  activeTab: string;
-  handleTabChange: (value: string) => void;
-  showHomepageTab: boolean;
-  showWebhooksTab: boolean;
-  pendingCount: number;
-}
+export const QuestionManagementLayout = () => {
+  const {
+    activeTab,
+    handleTabChange,
+    showHomepageTab,
+    showWebhooksTab,
+    pendingCount
+  } = useManageQuestions();
 
-export const QuestionManagementLayout = ({
-  activeTab,
-  handleTabChange,
-  showHomepageTab,
-  showWebhooksTab,
-  pendingCount
-}: QuestionManagementLayoutProps) => {
-  console.log("QuestionManagementLayout rendering with activeTab:", activeTab);
-  
   return (
-    <div className="page-container p-4 md:p-6">
-      <h1 className="section-title text-2xl font-bold mb-6">Question Management</h1>
-
-      <Tabs value={activeTab} onValueChange={handleTabChange} defaultValue="bank">
+    <div className="container py-6 space-y-6">
+      <h1 className="text-3xl font-bold">Manage Questions</h1>
+      
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabHeader
           activeTab={activeTab}
           handleTabChange={handleTabChange}

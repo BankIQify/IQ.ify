@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import { useAuthContext } from '@/contexts/AuthContext';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { type SubjectType } from '@/types/performance/types';
 
 export const useSubjectPerformance = () => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const updatePerformance = useCallback(async (

@@ -1,7 +1,6 @@
-
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { CustomExamForm } from "@/components/exams/CustomExamForm";
@@ -9,7 +8,7 @@ import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const ManageExams = () => {
-  const { user, authInitialized } = useAuthContext();
+  const { user, authInitialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 

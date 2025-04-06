@@ -1,62 +1,119 @@
-
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { hairColors, skinColors, type AvatarConfig } from "./avatarConfig";
 
 interface BasicTabProps {
   config: AvatarConfig;
-  updateAvatarConfig: (key: keyof AvatarConfig, value: any) => void;
+  onConfigChange: (key: keyof AvatarConfig, value: string) => void;
 }
 
-export const BasicTab = ({ config, updateAvatarConfig }: BasicTabProps) => {
+export const BasicTab = ({ config, onConfigChange }: BasicTabProps) => {
   return (
     <div className="space-y-6">
-      <div>
-        <Label className="block mb-2">Gender</Label>
-        <RadioGroup 
-          value={config.gender} 
-          onValueChange={(value) => updateAvatarConfig('gender', value)}
-          className="flex space-x-4"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="male" id="male" />
-            <Label htmlFor="male">Male</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="female" id="female" />
-            <Label htmlFor="female">Female</Label>
-          </div>
-        </RadioGroup>
-      </div>
-      
-      <div>
-        <Label className="block mb-2">Skin Tone</Label>
-        <div className="flex space-x-2">
-          {skinColors.map((skin) => (
-            <button
-              key={skin.value}
-              onClick={() => updateAvatarConfig('skinColor', skin.value)}
-              className={`w-10 h-10 rounded-full ${skin.className} ${
-                config.skinColor === skin.value ? 'ring-2 ring-offset-2 ring-education-600' : ''
-              }`}
-              title={skin.label}
-            />
+      {/* Hair Colour Selection */}
+      <div className="space-y-2">
+        <h3 className="text-white text-sm font-semibold font-playfair">Hair Colour</h3>
+        <div className="grid grid-cols-3 gap-2">
+          {hairColors.map(color => (
+            <motion.button
+              key={color.value}
+              onClick={() => onConfigChange('facialHairColor', color.value)}
+              className={cn(
+                "p-2 rounded-lg flex items-center gap-2",
+                config.facialHairColor === color.value
+                  ? "bg-bright-pink text-white"
+                  : "bg-white/10 text-white hover:bg-white/20"
+              )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className={cn("w-4 h-4 rounded-full", color.className)} />
+              <span className="text-xs font-medium">{color.label}</span>
+            </motion.button>
           ))}
         </div>
       </div>
-      
-      <div>
-        <Label className="block mb-2">Hair Color</Label>
-        <div className="flex space-x-2">
-          {hairColors.map((hair) => (
-            <button
-              key={hair.value}
-              onClick={() => updateAvatarConfig('hairColor', hair.value)}
-              className={`w-10 h-10 rounded-full ${hair.className} ${
-                config.hairColor === hair.value ? 'ring-2 ring-offset-2 ring-education-600' : ''
-              }`}
-              title={hair.label}
-            />
+
+      {/* Skin Tone Selection */}
+      <div className="space-y-2">
+        <h3 className="text-white text-sm font-semibold font-playfair">Skin Tone</h3>
+        <div className="grid grid-cols-3 gap-2">
+          {skinColors.map(color => (
+            <motion.button
+              key={color.value}
+              onClick={() => onConfigChange('skinColor', color.value)}
+              className={cn(
+                "p-2 rounded-lg flex items-center gap-2",
+                config.skinColor === color.value
+                  ? "bg-bright-pink text-white"
+                  : "bg-white/10 text-white hover:bg-white/20"
+              )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <span className={cn("w-4 h-4 rounded-full", color.className)} />
+              <span className="text-xs font-medium">{color.label}</span>
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Hair Style Selection */}
+      <div className="space-y-2">
+        <h3 className="text-white text-sm font-semibold font-playfair">Hair Style</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { value: 'ShortHairShortWaved', label: 'Short Wavy' },
+            { value: 'LongHairStraight', label: 'Long Straight' },
+            { value: 'LongHairCurly', label: 'Long Curly' },
+            { value: 'ShortHairTheCaesar', label: 'Caesar Cut' },
+            { value: 'LongHairBun', label: 'Bun' },
+            { value: 'NoHair', label: 'No Hair' },
+          ].map(style => (
+            <motion.button
+              key={style.value}
+              onClick={() => onConfigChange('topType', style.value)}
+              className={cn(
+                "p-2 rounded-lg text-xs font-medium",
+                config.topType === style.value
+                  ? "bg-bright-pink text-white"
+                  : "bg-white/10 text-white hover:bg-white/20"
+              )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {style.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      {/* Facial Hair Selection */}
+      <div className="space-y-2">
+        <h3 className="text-white text-sm font-semibold font-playfair">Facial Hair</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { value: 'Blank', label: 'None' },
+            { value: 'BeardLight', label: 'Light Beard' },
+            { value: 'BeardMedium', label: 'Medium Beard' },
+            { value: 'BeardMajestic', label: 'Full Beard' },
+            { value: 'MoustacheFancy', label: 'Fancy Moustache' },
+            { value: 'MoustacheMagnum', label: 'Magnum Moustache' },
+          ].map(style => (
+            <motion.button
+              key={style.value}
+              onClick={() => onConfigChange('facialHairType', style.value)}
+              className={cn(
+                "p-2 rounded-lg text-xs font-medium",
+                config.facialHairType === style.value
+                  ? "bg-bright-pink text-white"
+                  : "bg-white/10 text-white hover:bg-white/20"
+              )}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {style.label}
+            </motion.button>
           ))}
         </div>
       </div>

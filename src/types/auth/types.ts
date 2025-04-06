@@ -11,15 +11,18 @@ export type FocusArea =
 
 export interface Profile {
   id: string;
-  name: string | null;
+  email: string;
   username: string | null;
+  name: string | null;
+  avatar_url: string | null;
   created_at: string;
   updated_at: string;
-  avatar_url: string | null;
+  last_sign_in_at: string | null;
+  role?: 'admin' | 'data_input' | 'pro' | 'user';
+  subscription_status?: 'active' | 'trialing' | 'inactive';
   avatar_config: Record<string, any> | null;
   focus_areas: FocusArea[];
   subscription_tier: string | null;
-  subscription_status: string | null;
   subscription_id: string | null;
   subscription_expires_at: string | null;
   full_name: string | null;
@@ -48,11 +51,9 @@ export interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   isAdmin: boolean;
-  signInWithEmail: (email: string, password: string) => Promise<any>;
-  signInWithGoogle: () => Promise<any>;
-  signUp: (email: string, password: string, profileData: ProfileData) => Promise<any>;
-  signOut: () => Promise<void>;
-  updateProfile: (data: Partial<ProfileData>) => Promise<void>;
+  isDataInput: boolean;
   authInitialized: boolean;
   authError: Error | null;
-}
+  signOut: () => Promise<void>;
+  logActivity: (activityType: string, details?: any, success?: boolean) => Promise<void>;
+};

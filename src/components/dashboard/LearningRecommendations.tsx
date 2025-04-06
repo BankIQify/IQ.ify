@@ -2,9 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { type MainSubject, type SubTopicPerformance } from "@/types/performance/types";
 import { cn } from "@/lib/utils";
 
@@ -37,7 +37,7 @@ const subjectInfo = {
 } as const;
 
 export const LearningRecommendations = ({ className }: LearningRecommendationsProps) => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   const { data: performance = [] } = useQuery<PerformanceWithSubtopic[]>({
     queryKey: ['subjectPerformance', user?.id],

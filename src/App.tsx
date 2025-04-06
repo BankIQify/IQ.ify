@@ -1,9 +1,11 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import '@fontsource/playfair-display';
+import '@fontsource/inter';
+import { Toaster } from "./components/ui/toaster";
+import { Toaster as Sonner } from "sonner";
+import { TooltipProvider } from "./components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuthContext } from "@/contexts/AuthContext";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, Outlet, useLocation, RouterProvider, createBrowserRouter, UNSAFE_DataRouterContext } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import Navigation from "./components/Navigation";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
@@ -16,21 +18,64 @@ import SubjectProgress from "./pages/SubjectProgress";
 import Practice from "./pages/Practice"; 
 import TakeExam from "./pages/TakeExam";
 import Profile from "./pages/Profile";
-import { useState, useEffect } from "react";
+import LetsPractice from "./pages/LetsPractice";
+import UserLogs from "./pages/UserLogs";
+import { useState, useEffect, Suspense, startTransition } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AvatarCreator from "./pages/AvatarCreator";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { TestimonialForm } from "@/components/testimonials/TestimonialForm";
+import ManageSubscription from '@/pages/subscription/ManageSubscription';
+import { AboutUs } from '@/pages/AboutUs';
+import { DataInputLayout } from "@/components/layout/DataInputLayout";
+import WebhookDataPage from "@/pages/WebhookDataPage";
+import QuestionEditor from "@/pages/QuestionEditor";
+import { routes } from "./routes";
+import { ThemeProvider } from "@/components/theme-provider";
+import { useAuth } from "@/hooks/useAuth";
+
+console.log('App component loading...');
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
+      retry: false,
+      refetchOnWindowFocus: false
+    }
+  }
 });
+
+const router = createBrowserRouter(routes, {
+  future: {
+    v7_relativeSplatPath: true
+  }
+});
+
+const LoadingFallback = () => (
+  <div className="flex h-screen w-full items-center justify-center">
+    <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
+  </div>
+);
+
+const ErrorFallback = ({ error }: { error: Error }) => (
+  <div className="flex items-center justify-center min-h-screen p-4">
+    <Alert variant="destructive" className="max-w-md">
+      <AlertCircle className="h-4 w-4" />
+      <AlertTitle>Application Error</AlertTitle>
+      <AlertDescription>
+        <p>There was a problem loading the application:</p>
+        <p className="mt-2 font-mono text-xs break-all">{error.message}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-destructive/10 hover:bg-destructive/20 text-destructive rounded-md transition-colors"
+        >
+          Try reloading
+        </button>
+      </AlertDescription>
+    </Alert>
+  </div>
+);
 
 const AuthLoader = () => (
   <div className="flex items-center justify-center min-h-screen">
@@ -55,60 +100,41 @@ const AuthError = ({ error }: { error: Error }) => (
   </div>
 );
 
-const ProtectedDataRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin, authInitialized, authError } = useAuthContext();
-  const [hasDataInputRole, setHasDataInputRole] = useState(false);
-  const [loading, setLoading] = useState(true);
+const ProtectedRoute = () => {
+  const { user, authInitialized, authError } = useAuth();
+  const [isDataInput, setIsDataInput] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
   
   useEffect(() => {
     const checkDataInputRole = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+      if (!user) return;
       
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('user_roles')
           .select('*')
           .eq('user_id', user.id)
           .eq('role', 'data_input')
           .maybeSingle();
 
-        if (error) {
-          console.error('Error checking data_input role:', error);
+        startTransition(() => {
+          setIsDataInput(!!data);
+        });
+        
+        // If user is data input and not already on a data-input route, redirect them
+        if (!!data && !location.pathname.startsWith('/data-input')) {
+          navigate('/data-input/webhook');
         }
-
-        setHasDataInputRole(!!data);
       } catch (error) {
-        console.error('Error in checkDataInputRole:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error checking data_input role:', error);
       }
     };
 
     if (authInitialized) {
       checkDataInputRole();
     }
-  }, [user, authInitialized]);
-  
-  console.log('ProtectedDataRoute check:', { user, isAdmin, hasDataInputRole, loading, authInitialized });
-  
-  if (authError) {
-    return <AuthError error={authError} />;
-  }
-  
-  if (!authInitialized || loading) {
-    return <AuthLoader />;
-  }
-  
-  return <>{children}</>;
-};
-
-const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, isAdmin, authInitialized, authError } = useAuthContext();
-  
-  console.log('ProtectedAdminRoute check:', { user, isAdmin, authInitialized });
+  }, [user, authInitialized, navigate, location]);
   
   if (authError) {
     return <AuthError error={authError} />;
@@ -118,46 +144,84 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
     return <AuthLoader />;
   }
   
-  return <>{children}</>;
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <Outlet />;
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="min-h-screen bg-gradient-to-b from-[rgba(30,174,219,0.05)] via-white to-[rgba(255,105,180,0.05)]">
-            <Navigation />
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/lets-practice" element={<ManageExams />} />
-              <Route path="/brain-training" element={<BrainTraining />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/progress/:subject" element={<SubjectProgress />} />
-              <Route path="/practice/:category" element={<Practice />} />
-              <Route path="/practice" element={<Practice />} />
-              <Route path="/take-exam/:examId" element={<TakeExam />} />
-              <Route 
-                path="/manage-questions" 
-                element={
-                  <ProtectedDataRoute>
-                    <ManageQuestions />
-                  </ProtectedDataRoute>
-                } 
-              />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/avatar-creator" element={<AvatarCreator />} />
-              <Route path="/testimonials/new" element={<TestimonialForm />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const DataInputProtectedRoute = () => {
+  const { user, authInitialized, authError } = useAuth();
+  const [isDataInput, setIsDataInput] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkDataInputRole = async () => {
+      if (!user) return;
+      
+      try {
+        const { data } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('role', 'data_input')
+          .maybeSingle();
+
+        startTransition(() => {
+          setIsDataInput(!!data);
+        });
+        
+        // If user is not data input, redirect to home
+        if (!data) {
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('Error checking data_input role:', error);
+      }
+    };
+
+    if (authInitialized) {
+      checkDataInputRole();
+    }
+  }, [user, authInitialized, navigate]);
+
+  if (authError) {
+    return <AuthError error={authError} />;
+  }
+  
+  if (!authInitialized) {
+    return <AuthLoader />;
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isDataInput) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+};
+
+const App = () => {
+  console.log('Rendering App component...');
+  
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <RouterProvider router={router} />
+            <Toaster />
+            <Sonner />
+          </ThemeProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </Suspense>
+  );
+};
 
 export default App;
+

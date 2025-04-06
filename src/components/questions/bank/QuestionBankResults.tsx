@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { EditableQuestionsList } from "@/components/questions/editable-questions";
 import { QuestionWithDuplicateFlag } from "../utils/duplicationDetector";
@@ -9,7 +8,8 @@ import {
   PaginationItem, 
   PaginationLink, 
   PaginationNext, 
-  PaginationPrevious 
+  PaginationPrevious,
+  PaginationEllipsis
 } from "@/components/ui/pagination";
 import { Loader2, FileQuestion } from "lucide-react";
 
@@ -30,6 +30,39 @@ export const QuestionBankResults = ({
   totalPages = 1,
   onPageChange
 }: QuestionBankResultsProps) => {
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = [];
+    
+    if (totalPages <= 7) {
+      // If 7 or fewer pages, show all
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    // Always show first page
+    pages.push(1);
+
+    if (currentPage > 3) {
+      pages.push('ellipsis');
+    }
+
+    // Show pages around current page
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      pages.push(i);
+    }
+
+    if (currentPage < totalPages - 2) {
+      pages.push('ellipsis');
+    }
+
+    // Always show last page
+    if (totalPages > 1) {
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
   if (isLoading) {
     return (
       <Card className="p-8 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100">
@@ -80,11 +113,23 @@ export const QuestionBankResults = ({
                 />
               </PaginationItem>
               
-              <PaginationItem className="hidden sm:inline-flex">
-                <span className="flex h-9 items-center justify-center px-4 font-medium bg-blue-100 text-blue-800 rounded-md">
-                  Page {currentPage} of {totalPages}
-                </span>
-              </PaginationItem>
+              {getPageNumbers().map((pageNum, index) => (
+                pageNum === 'ellipsis' ? (
+                  <PaginationItem key={`ellipsis-${index}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      onClick={() => onPageChange && onPageChange(pageNum)}
+                      isActive={currentPage === pageNum}
+                      className={`${currentPage === pageNum ? 'bg-blue-100 text-blue-800' : 'bg-blue-50 border-blue-100 hover:bg-blue-100'}`}
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              ))}
               
               <PaginationItem>
                 <PaginationNext

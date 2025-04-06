@@ -73,15 +73,11 @@ export const saveQuestion = async (
   // The backend will set a default if needed
   const { data: subTopicData } = await supabase
     .from('sub_topics')
-    .select(`
-      question_sections:section_id (
-        category
-      )
-    `)
+    .select('id, category')
     .eq('id', subTopicId)
     .single();
   
-  const isBrainTraining = subTopicData?.question_sections?.[0]?.category === 'brain_training';
+  const isBrainTraining = subTopicData?.category === 'brain_training';
   
   const { error } = await supabase
     .from("questions")

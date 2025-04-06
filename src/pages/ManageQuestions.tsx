@@ -1,24 +1,13 @@
-
 import { useEffect } from "react";
-import { useManageQuestions } from "@/hooks/useManageQuestions";
-import { QuestionManagementLayout } from "@/components/manage-questions/QuestionManagementLayout";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useManageQuestions } from "@/hooks/useManageQuestions";
+import { QuestionManagementLayout } from "@/components/manage-questions/QuestionManagementLayout";
+import { useAuth } from "@/hooks/useAuth";
 
 const ManageQuestions = () => {
-  const {
-    user,
-    isAdmin,
-    hasDataInputRole,
-    pendingCount,
-    activeTab,
-    handleTabChange,
-    showHomepageTab,
-    showWebhooksTab,
-    authInitialized
-  } = useManageQuestions();
-  
+  const { user, isAdmin, isDataInput, authInitialized } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -27,11 +16,10 @@ const ManageQuestions = () => {
     console.log("ManageQuestions component:", {
       user: user?.id,
       isAdmin,
-      hasDataInputRole,
-      activeTab,
+      isDataInput,
       authInitialized
     });
-  }, [user, isAdmin, hasDataInputRole, activeTab, authInitialized]);
+  }, [user, isAdmin, isDataInput, authInitialized]);
 
   useEffect(() => {
     // Only run redirects after auth is initialized
@@ -41,7 +29,7 @@ const ManageQuestions = () => {
     }
 
     // Redirect if needed
-    if (user === null) {
+    if (!user) {
       console.log("No user, redirecting to auth page");
       toast({
         title: "Authentication Required",
@@ -49,7 +37,7 @@ const ManageQuestions = () => {
         variant: "destructive",
       });
       navigate("/auth");
-    } else if (!isAdmin && !hasDataInputRole) {
+    } else if (!isAdmin && !isDataInput) {
       console.log("User doesn't have permission, redirecting to home");
       toast({
         title: "Access Denied",
@@ -58,9 +46,8 @@ const ManageQuestions = () => {
       });
       navigate("/");
     }
-  }, [user, isAdmin, hasDataInputRole, navigate, toast, authInitialized]);
+  }, [user, isAdmin, isDataInput, navigate, toast, authInitialized]);
 
-  // Show loading state while auth is initializing
   if (!authInitialized) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -72,20 +59,11 @@ const ManageQuestions = () => {
     );
   }
 
-  // Only render content when we have permission
-  if (!user || (!isAdmin && !hasDataInputRole)) {
+  if (!user || (!isAdmin && !isDataInput)) {
     return null;
   }
 
-  return (
-    <QuestionManagementLayout
-      activeTab={activeTab}
-      handleTabChange={handleTabChange}
-      showHomepageTab={showHomepageTab}
-      showWebhooksTab={showWebhooksTab}
-      pendingCount={pendingCount}
-    />
-  );
+  return <QuestionManagementLayout />;
 };
 
 export default ManageQuestions;

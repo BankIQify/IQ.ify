@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { SubtopicPerformance, IconType } from '@/types/subtopics';
 import { PostgrestResponse } from '@supabase/supabase-js';
@@ -24,7 +24,7 @@ const isValidIcon = (icon: string): icon is IconType => {
 };
 
 export const useSubtopicPerformance = (examType?: 'custom' | 'standard') => {
-  const { user } = useAuthContext();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: ['subtopicPerformance', user?.id, examType] as const,
