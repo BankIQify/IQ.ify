@@ -60,6 +60,31 @@ const FOCUS_AREAS: { value: FocusArea; label: string }[] = [
   { value: "confidence_building", label: "Confidence building" }
 ];
 
+const focusAreaOptions = [
+  { value: "verbal_reasoning", label: "Verbal Reasoning" },
+  { value: "non_verbal_reasoning", label: "Non-Verbal Reasoning" },
+  { value: "numerical_reasoning", label: "Numerical Reasoning" },
+  { value: "spatial_reasoning", label: "Spatial Reasoning" },
+  { value: "logical_reasoning", label: "Logical Reasoning" },
+  { value: "critical_thinking", label: "Critical Thinking" },
+  { value: "problem_solving", label: "Problem Solving" },
+  { value: "memory_skills", label: "Memory Skills" },
+  { value: "attention_skills", label: "Attention Skills" },
+  { value: "processing_speed", label: "Processing Speed" },
+  { value: "working_memory", label: "Working Memory" },
+  { value: "visual_processing", label: "Visual Processing" },
+  { value: "auditory_processing", label: "Auditory Processing" },
+  { value: "executive_functioning", label: "Executive Functioning" },
+  { value: "cognitive_flexibility", label: "Cognitive Flexibility" },
+  { value: "pattern_recognition", label: "Pattern Recognition" },
+  { value: "analytical_thinking", label: "Analytical Thinking" },
+  { value: "decision_making", label: "Decision Making" },
+  { value: "planning_skills", label: "Planning Skills" },
+  { value: "time_management", label: "Time Management" },
+  { value: "stress_management", label: "Stress Management" },
+  { value: "confidence_building", label: "Confidence Building" }
+] as const;
+
 export const EnhancedSignUpForm = ({ onToggleMode, onGoogleSignIn }: SignUpFormProps) => {
   const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);

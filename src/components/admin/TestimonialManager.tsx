@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Star, Check, X, ArrowUp, ArrowDown } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Star, Check, X, ArrowUp, ArrowDown, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Testimonial {
   id: string;
@@ -25,7 +25,7 @@ export const TestimonialManager = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
 
-  const { data: testimonials = [], isLoading } = useQuery({
+  const { data: testimonials = [], isLoading, error } = useQuery({
     queryKey: ["testimonials", activeTab],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -35,46 +35,59 @@ export const TestimonialManager = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as Testimonial[];
+      return data as unknown as Testimonial[];
     },
   });
 
   const updateTestimonialMutation = useMutation({
     mutationFn: async ({ id, status, displayOrder }: { id: string; status: string; displayOrder?: number }) => {
-      if (status === "approved") {
-        // First, update the testimonial status
-        const { error: testimonialError } = await supabase
-          .from("testimonials")
-          .update({ status })
-          .eq("id", id);
+      try {
+        if (status === "approved") {
+          // First, update the testimonial status
+          const { error: testimonialError } = await supabase
+            .from("testimonials")
+            .update({ status })
+            .eq("id", id);
 
-        if (testimonialError) throw testimonialError;
+          if (testimonialError) throw testimonialError;
 
-        // Then, add to approved_testimonials if not already there
-        const { error: approvedError } = await supabase
-          .from("approved_testimonials")
-          .upsert({ 
-            testimonial_id: id,
-            display_order: displayOrder || 0
-          });
-
-        if (approvedError) throw approvedError;
-      } else {
-        // If rejecting, remove from approved_testimonials if present
-        if (status === "rejected") {
-          await supabase
+          // Get the current max display order
+          const { data: maxOrder } = await supabase
             .from("approved_testimonials")
-            .delete()
-            .eq("testimonial_id", id);
+            .select("display_order")
+            .order("display_order", { ascending: false })
+            .limit(1)
+            .single();
+
+          // Then, add to approved_testimonials if not already there
+          const { error: approvedError } = await supabase
+            .from("approved_testimonials")
+            .upsert({ 
+              testimonial_id: id,
+              display_order: displayOrder ?? ((maxOrder?.display_order as number) ?? 0) + 1
+            });
+
+          if (approvedError) throw approvedError;
+        } else {
+          // If rejecting, remove from approved_testimonials if present
+          if (status === "rejected") {
+            await supabase
+              .from("approved_testimonials")
+              .delete()
+              .eq("testimonial_id", id);
+          }
+
+          // Update testimonial status
+          const { error } = await supabase
+            .from("testimonials")
+            .update({ status })
+            .eq("id", id);
+
+          if (error) throw error;
         }
-
-        // Update testimonial status
-        const { error } = await supabase
-          .from("testimonials")
-          .update({ status })
-          .eq("id", id);
-
-        if (error) throw error;
+      } catch (error) {
+        console.error("Error in updateTestimonialMutation:", error);
+        throw error;
       }
     },
     onSuccess: () => {
@@ -96,24 +109,32 @@ export const TestimonialManager = () => {
 
   const updateDisplayOrderMutation = useMutation({
     mutationFn: async ({ id, direction }: { id: string; direction: "up" | "down" }) => {
-      const { data: currentOrder } = await supabase
-        .from("approved_testimonials")
-        .select("display_order")
-        .eq("testimonial_id", id)
-        .single();
+      try {
+        const { data: currentOrder } = await supabase
+          .from("approved_testimonials")
+          .select("display_order")
+          .eq("testimonial_id", id)
+          .single();
 
-      if (!currentOrder) throw new Error("Testimonial not found");
+        if (!currentOrder) throw new Error("Testimonial not found");
 
-      const newOrder = direction === "up" 
-        ? currentOrder.display_order - 1 
-        : currentOrder.display_order + 1;
+        const newOrder = direction === "up" 
+          ? (currentOrder.display_order as number) - 1 
+          : (currentOrder.display_order as number) + 1;
 
-      const { error } = await supabase
-        .from("approved_testimonials")
-        .update({ display_order: newOrder })
-        .eq("testimonial_id", id);
+        // Ensure the new order is not negative
+        if (newOrder < 0) throw new Error("Cannot move testimonial up further");
 
-      if (error) throw error;
+        const { error } = await supabase
+          .from("approved_testimonials")
+          .update({ display_order: newOrder })
+          .eq("testimonial_id", id);
+
+        if (error) throw error;
+      } catch (error) {
+        console.error("Error in updateDisplayOrderMutation:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
@@ -140,6 +161,21 @@ export const TestimonialManager = () => {
     updateDisplayOrderMutation.mutate({ id, direction });
   };
 
+  if (error) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>Error Loading Testimonials</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-destructive py-4">
+            Failed to load testimonials. Please try again later.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -156,9 +192,13 @@ export const TestimonialManager = () => {
           {["pending", "approved", "rejected"].map((status) => (
             <TabsContent key={status} value={status}>
               {isLoading ? (
-                <div className="text-center py-4">Loading testimonials...</div>
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
               ) : testimonials.length === 0 ? (
-                <div className="text-center py-4">No {status} testimonials</div>
+                <div className="text-center py-4 text-muted-foreground">
+                  No {status} testimonials
+                </div>
               ) : (
                 <div className="space-y-4">
                   {testimonials.map((testimonial) => (
@@ -192,6 +232,7 @@ export const TestimonialManager = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleDisplayOrderUpdate(testimonial.id, "up")}
+                                disabled={updateDisplayOrderMutation.isPending}
                               >
                                 <ArrowUp className="h-4 w-4" />
                               </Button>
@@ -199,6 +240,7 @@ export const TestimonialManager = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleDisplayOrderUpdate(testimonial.id, "down")}
+                                disabled={updateDisplayOrderMutation.isPending}
                               >
                                 <ArrowDown className="h-4 w-4" />
                               </Button>
@@ -211,6 +253,7 @@ export const TestimonialManager = () => {
                                 size="sm"
                                 className="text-green-600"
                                 onClick={() => handleStatusUpdate(testimonial.id, "approved")}
+                                disabled={updateTestimonialMutation.isPending}
                               >
                                 <Check className="h-4 w-4" />
                               </Button>
@@ -219,6 +262,7 @@ export const TestimonialManager = () => {
                                 size="sm"
                                 className="text-red-600"
                                 onClick={() => handleStatusUpdate(testimonial.id, "rejected")}
+                                disabled={updateTestimonialMutation.isPending}
                               >
                                 <X className="h-4 w-4" />
                               </Button>
@@ -230,6 +274,7 @@ export const TestimonialManager = () => {
                               size="sm"
                               className="text-green-600"
                               onClick={() => handleStatusUpdate(testimonial.id, "approved")}
+                              disabled={updateTestimonialMutation.isPending}
                             >
                               Approve
                             </Button>

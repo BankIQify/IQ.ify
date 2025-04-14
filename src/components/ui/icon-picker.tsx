@@ -1,5 +1,69 @@
 import * as React from "react";
-import * as Icons from "lucide-react";
+import {
+  Lightbulb,
+  Star,
+  Trophy,
+  LineChart,
+  Rocket,
+  Shield,
+  Puzzle,
+  Brain,
+  Medal,
+  Target,
+  Sparkles,
+  Award,
+  GraduationCap,
+  BookOpen,
+  BookMarked,
+  Book,
+  School,
+  University,
+  Library,
+  PenTool,
+  Pencil,
+  Highlighter,
+  Notebook,
+  NotebookPen,
+  ClipboardList,
+  ClipboardCheck,
+  CheckCircle,
+  CheckSquare,
+  ThumbsUp,
+  Heart,
+  Smile,
+  Crown,
+  Gem,
+  Diamond,
+  Coins,
+  Globe,
+  Map,
+  Compass,
+  Flag,
+  Anchor,
+  Plane,
+  Car,
+  Train,
+  Bus,
+  Satellite,
+  Telescope,
+  Microscope,
+  Beaker,
+  TestTube,
+  Atom,
+  Dna,
+  HeartPulse,
+  Eye,
+  Hand,
+  Skull,
+  Ghost,
+  Cat,
+  Dog,
+  Fish,
+  Bird,
+  House,
+  Rainbow,
+  type LucideIcon
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,17 +72,83 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const iconMap = {
+  Lightbulb,
+  Star,
+  Trophy,
+  LineChart,
+  Rocket,
+  Shield,
+  Puzzle,
+  Brain,
+  Medal,
+  Target,
+  Sparkles,
+  Award,
+  GraduationCap,
+  BookOpen,
+  BookMarked,
+  Book,
+  School,
+  University,
+  Library,
+  PenTool,
+  Pencil,
+  Highlighter,
+  Notebook,
+  NotebookPen,
+  ClipboardList,
+  ClipboardCheck,
+  CheckCircle,
+  CheckSquare,
+  ThumbsUp,
+  Heart,
+  Smile,
+  Crown,
+  Gem,
+  Diamond,
+  Coins,
+  Globe,
+  Map,
+  Compass,
+  Flag,
+  Anchor,
+  Plane,
+  Car,
+  Train,
+  Bus,
+  Satellite,
+  Telescope,
+  Microscope,
+  Beaker,
+  TestTube,
+  Atom,
+  Dna,
+  HeartPulse,
+  Eye,
+  Hand,
+  Skull,
+  Ghost,
+  Cat,
+  Dog,
+  Fish,
+  Bird,
+  House,
+  Rainbow,
+} as const;
+
+type IconName = keyof typeof iconMap;
+
 interface IconPickerProps {
   value: string;
   onChange: (value: string) => void;
+  availableIcons?: string[];
 }
 
-export const IconPicker: React.FC<IconPickerProps> = ({ value, onChange }) => {
-  const iconNames = Object.keys(Icons).filter(
-    (key) => typeof Icons[key as keyof typeof Icons] === "function" && key !== "createLucideIcon"
-  );
+export const IconPicker: React.FC<IconPickerProps> = ({ value, onChange, availableIcons }) => {
+  const iconNames = (availableIcons || Object.keys(iconMap)) as IconName[];
 
-  const SelectedIcon = Icons[value as keyof typeof Icons] as React.FC<Icons.LucideProps>;
+  const SelectedIcon = iconMap[value as IconName];
 
   return (
     <Select value={value} onValueChange={onChange}>
@@ -32,7 +162,7 @@ export const IconPicker: React.FC<IconPickerProps> = ({ value, onChange }) => {
       </SelectTrigger>
       <SelectContent>
         {iconNames.map((iconName) => {
-          const Icon = Icons[iconName as keyof typeof Icons] as React.FC<Icons.LucideProps>;
+          const Icon = iconMap[iconName];
           return (
             <SelectItem key={iconName} value={iconName}>
               <div className="flex items-center gap-2">

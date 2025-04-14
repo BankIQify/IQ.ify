@@ -7,50 +7,50 @@ import { handleAuthError } from "@/components/auth/AuthUtils";
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check current session
+    let mounted = true;
+
     const checkSession = async () => {
-      console.log('Checking current session...');
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Error getting session:', error);
-        return;
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          if (mounted) {
+            setAuthInitialized(true);
+          }
+          return;
+        }
+        
+        if (mounted) {
+          setUser(session?.user ?? null);
+          setAuthInitialized(true);
+        }
+      } catch (err) {
+        console.error('Unexpected error checking session:', err);
+        if (mounted) {
+          setAuthInitialized(true);
+        }
       }
-      
-      console.log('Session check result:', {
-        hasSession: !!session,
-        userId: session?.user?.id,
-        userEmail: session?.user?.email
-      });
-      
-      setUser(session?.user ?? null);
     };
 
-    // Call immediately
     checkSession();
 
-    // Subscribe to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', { event, userId: session?.user?.id });
-      setUser(session?.user ?? null);
-      
-      // Double check session if we think we're logged out
-      if (!session) {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (currentSession) {
-          console.log('Found session despite auth change indicating none:', {
-            userId: currentSession.user?.id
-          });
-          setUser(currentSession.user);
-        }
+      if (!mounted) return;
+
+      if (event === 'SIGNED_IN') {
+        setUser(session?.user ?? null);
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
       }
     });
 
-    // Cleanup subscription
     return () => {
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);
@@ -230,7 +230,9 @@ export const useAuth = () => {
 
   return {
     user,
-    setUser,
+    authInitialized,
+    isAdmin: user?.user_metadata?.isAdmin ?? false,
+    isDataInput: user?.user_metadata?.isDataInput ?? false,
     signInWithEmail,
     signInWithGoogle,
     signUp,

@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Question, ExamData } from "@/types/exam";
 import { fetchExamById, fetchExamQuestions } from "@/services/examService";
-import { verbalReasoningLayouts } from "@/components/questions/utils/answer-layouts/verbal-layouts";
+import { layouts } from "@/components/questions/utils/answer-layouts";
 
 interface UseExamDataProps {
   examId: string | undefined;
@@ -62,7 +61,7 @@ export const useExamData = ({ examId, userId }: UseExamDataProps) => {
             console.log('Normalized sub-topic:', normalizedSubTopic);
             
             // Get the layout config if available
-            const layoutConfig = verbalReasoningLayouts[normalizedSubTopic];
+            const layoutConfig = layouts[normalizedSubTopic];
             console.log('Layout config for sub-topic:', layoutConfig);
             
             // Enhance content based on layout if needed

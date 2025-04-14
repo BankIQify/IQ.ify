@@ -18,12 +18,6 @@ interface Feature {
   description: string;
 }
 
-interface Differentiator {
-  icon: string;
-  title: string;
-  description: string;
-}
-
 interface Testimonial {
   name: string;
   avatar: string;
@@ -35,7 +29,6 @@ interface HomepageContent {
   hero_title: string | null;
   hero_subtitle: string | null;
   features: Feature[] | null;
-  differentiators: Differentiator[] | null;
   social_proof: {
     rating: string;
     students: string;
@@ -69,7 +62,6 @@ export const HomepageEditor = () => {
       const transformedData: HomepageContent = {
         ...data,
         features: data.features ? (data.features as unknown as Feature[]) : [],
-        differentiators: data.differentiators ? (data.differentiators as unknown as Differentiator[]) : [],
         social_proof: data.social_proof ? (data.social_proof as unknown as { rating: string; students: string; science: string }) : null,
         testimonials: data.testimonials ? (data.testimonials as unknown as Testimonial[]) : [],
         stats_cards: data.stats_cards ? (data.stats_cards as unknown as { id: string; highlight: string; supportingText: string }[]) : []
@@ -83,7 +75,6 @@ export const HomepageEditor = () => {
     hero_title: "",
     hero_subtitle: "",
     features: [],
-    differentiators: [],
     social_proof: {
       rating: "4.8 rating",
       students: "Trusted by over 8,000+ students",
@@ -100,7 +91,6 @@ export const HomepageEditor = () => {
         hero_title: content.hero_title || "",
         hero_subtitle: content.hero_subtitle || "",
         features: content.features || [],
-        differentiators: content.differentiators || [],
         social_proof: content.social_proof || {
           rating: "4.8 rating",
           students: "Trusted by over 8,000+ students",
@@ -119,7 +109,6 @@ export const HomepageEditor = () => {
         hero_title: formData.hero_title,
         hero_subtitle: formData.hero_subtitle,
         features: formData.features as unknown as Json,
-        differentiators: formData.differentiators as unknown as Json,
         social_proof: formData.social_proof as unknown as Json,
         testimonials: formData.testimonials as unknown as Json,
         stats_cards: formData.stats_cards as unknown as Json
@@ -166,29 +155,6 @@ export const HomepageEditor = () => {
       ...prev,
       features: prev.features?.map((feature, i) => 
         i === index ? { ...feature, [field]: value } : feature
-      )
-    }));
-  };
-
-  const addDifferentiator = () => {
-    setFormData(prev => ({
-      ...prev,
-      differentiators: [...(prev.differentiators || []), { icon: "Star", title: "", description: "" }]
-    }));
-  };
-
-  const removeDifferentiator = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      differentiators: prev.differentiators?.filter((_, i) => i !== index)
-    }));
-  };
-
-  const updateDifferentiator = (index: number, field: keyof Differentiator, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      differentiators: prev.differentiators?.map((diff, i) => 
-        i === index ? { ...diff, [field]: value } : diff
       )
     }));
   };
@@ -320,54 +286,6 @@ export const HomepageEditor = () => {
           </Card>
 
           <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Differentiators</h3>
-              <Button onClick={addDifferentiator} variant="outline" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Differentiator
-              </Button>
-            </div>
-            <div className="space-y-6">
-              {formData.differentiators?.map((diff, index) => (
-                <div key={index} className="space-y-4 p-4 border rounded-lg relative">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
-                    onClick={() => removeDifferentiator(index)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                  <div>
-                    <Label>Icon Name</Label>
-                    <Input
-                      value={diff.icon}
-                      onChange={(e) => updateDifferentiator(index, "icon", e.target.value)}
-                      placeholder="Icon name (e.g., Star, Check)"
-                    />
-                  </div>
-                  <div>
-                    <Label>Title</Label>
-                    <Input
-                      value={diff.title}
-                      onChange={(e) => updateDifferentiator(index, "title", e.target.value)}
-                      placeholder="Differentiator title"
-                    />
-                  </div>
-                  <div>
-                    <Label>Description</Label>
-                    <Textarea
-                      value={diff.description}
-                      onChange={(e) => updateDifferentiator(index, "description", e.target.value)}
-                      placeholder="Differentiator description"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="p-6">
             <h3 className="text-xl font-semibold mb-4">Social Proof</h3>
             <div className="space-y-4">
               <div>
@@ -485,18 +403,6 @@ export const HomepageEditor = () => {
                 <div key={index} className="p-4 border rounded-lg">
                   <p className="font-medium">{feature.title}</p>
                   <p className="text-gray-600">{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Differentiators</h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {content?.differentiators?.map((diff, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <p className="font-medium">{diff.title}</p>
-                  <p className="text-gray-600">{diff.description}</p>
                 </div>
               ))}
             </div>

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS subtopics (
     category TEXT NOT NULL,
     description TEXT,
     icon TEXT NOT NULL,
+    main_subject TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -13,14 +14,15 @@ CREATE TABLE IF NOT EXISTS subtopics (
 CREATE TABLE IF NOT EXISTS user_subtopic_performance (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    subtopic_id UUID REFERENCES subtopics(id) ON DELETE CASCADE,
+    subtopic_id UUID,
     exam_id UUID,  -- Optional reference to the specific exam
     score INTEGER NOT NULL,
     improvement_suggestions TEXT,
     last_tested TIMESTAMPTZ DEFAULT NOW(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    UNIQUE(user_id, subtopic_id, exam_id)
+    UNIQUE(user_id, subtopic_id, exam_id),
+    FOREIGN KEY (subtopic_id) REFERENCES subtopics(id) ON DELETE CASCADE
 );
 
 -- Enable RLS
@@ -37,6 +39,44 @@ CREATE POLICY "Users can view their own performance"
     ON user_subtopic_performance
     FOR SELECT
     USING (auth.uid() = user_id);
+
+-- Create function to get user performance with subjects
+CREATE OR REPLACE FUNCTION get_user_performance_with_subjects(p_user_id UUID)
+RETURNS TABLE (
+    id UUID,
+    user_id UUID,
+    subtopic_id UUID,
+    score INTEGER,
+    improvement_suggestions TEXT,
+    last_tested TIMESTAMPTZ,
+    created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
+    main_subject TEXT,
+    subtopic_name TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        usp.id,
+        usp.user_id,
+        usp.subtopic_id,
+        usp.score,
+        usp.improvement_suggestions,
+        usp.last_tested,
+        usp.created_at,
+        usp.updated_at,
+        s.main_subject,
+        s.name as subtopic_name
+    FROM user_subtopic_performance usp
+    JOIN subtopics s ON s.id = usp.subtopic_id
+    WHERE usp.user_id = p_user_id
+    ORDER BY usp.score ASC
+    LIMIT 3;
+END;
+$$;
 
 -- Create function to update user subtopic performance
 CREATE OR REPLACE FUNCTION update_user_subtopic_performance(

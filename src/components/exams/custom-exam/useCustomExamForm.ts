@@ -18,7 +18,6 @@ interface SubTopic {
 export function useCustomExamForm() {
   const { toast } = useToast();
   const { user } = useAuth();
-  const [customName, setCustomName] = useState("");
   const [selectedTopics, setSelectedTopics] = useState<QuestionCategory[]>([]);
   const [selectedSubTopics, setSelectedSubTopics] = useState<string[]>([]);
   const [questionCount, setQuestionCount] = useState<number>(20);
@@ -64,10 +63,10 @@ export function useCustomExamForm() {
   };
 
   const handleCreateCustomExam = async () => {
-    if (!customName || selectedTopics.length === 0) {
+    if (selectedTopics.length === 0) {
       toast({
         title: "Error",
-        description: "Please fill in all required fields",
+        description: "Please select at least one topic",
         variant: "destructive"
       });
       return;
@@ -104,7 +103,6 @@ export function useCustomExamForm() {
 
     try {
       console.log('Creating custom exam:', { 
-        name: customName, 
         category: selectedTopics[0],
         userId: user.id,
         subTopics: selectedSubTopics
@@ -114,7 +112,7 @@ export function useCustomExamForm() {
       const { data: exam, error: examError } = await supabase
         .from('exams')
         .insert({
-          name: customName,
+          name: `Custom ${selectedTopics[0].replace('_', ' ')} Test`,
           category: selectedTopics[0], // Primary category
           question_count: questionCount,
           time_limit_minutes: timeLimit,
@@ -146,7 +144,6 @@ export function useCustomExamForm() {
       });
 
       // Reset form
-      setCustomName("");
       setSelectedTopics([]);
       setSelectedSubTopics([]);
       setQuestionCount(20);
@@ -164,8 +161,6 @@ export function useCustomExamForm() {
   };
 
   return {
-    customName,
-    setCustomName,
     selectedTopics,
     selectedSubTopics,
     setSelectedSubTopics,

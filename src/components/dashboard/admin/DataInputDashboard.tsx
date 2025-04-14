@@ -33,6 +33,13 @@ interface SummaryStats {
   averageQuestionsPerSubject: number;
 }
 
+interface RawSubTopic {
+  id: string;
+  name: string;
+  main_subject: string;
+  questions: { id: string }[] | null;
+}
+
 export const DataInputDashboard = () => {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
@@ -50,68 +57,65 @@ export const DataInputDashboard = () => {
   useEffect(() => {
     const fetchQuestionCounts = async () => {
       try {
-        // Fetch subjects with their question counts
-        const { data: subjectsData, error: subjectsError } = await supabase
-          .from('subjects')
+        setLoading(true);
+
+        // Fetch subjects with their sub_topics
+        const { data: rawSubTopics, error: subjectsError } = await supabase
+          .from('sub_topics')
           .select(`
             id,
             name,
-            subtopics (
-              id,
-              name
+            main_subject,
+            questions (
+              id
             )
           `);
 
-        if (subjectsError) throw subjectsError;
+        if (subjectsError) {
+          throw subjectsError;
+        }
 
-        // For each subject, fetch question counts
-        const subjectsWithCounts = await Promise.all(
-          (subjectsData || []).map(async (subject) => {
-            // Get total questions for the subject
-            const { count: totalQuestions, error: countError } = await supabase
-              .from('questions')
-              .select('id', { count: 'exact' })
-              .eq('subject_id', subject.id);
+        // Process the data
+        const subjectsWithCounts = (rawSubTopics as RawSubTopic[]).map(subject => ({
+          id: subject.id,
+          name: subject.name,
+          mainSubject: subject.main_subject,
+          questionCount: subject.questions?.length || 0
+        }));
 
-            if (countError) throw countError;
-
-            // Get question counts for each subtopic
-            const subtopicsWithCounts = await Promise.all(
-              (subject.subtopics || []).map(async (subtopic: any) => {
-                const { count: questionCount, error: subtopicError } = await supabase
-                  .from('questions')
-                  .select('id', { count: 'exact' })
-                  .eq('subtopic_id', subtopic.id);
-
-                if (subtopicError) throw subtopicError;
-
-                return {
-                  id: subtopic.id,
-                  name: subtopic.name,
-                  questionCount: questionCount || 0
-                };
-              })
-            );
-
-            return {
-              id: subject.id,
-              name: subject.name,
-              totalQuestions: totalQuestions || 0,
-              subtopics: subtopicsWithCounts
+        // Group by main subject
+        const groupedSubjects = subjectsWithCounts.reduce((acc, subject) => {
+          if (!acc[subject.mainSubject]) {
+            acc[subject.mainSubject] = {
+              id: subject.mainSubject,
+              name: subject.mainSubject.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+              totalQuestions: 0,
+              subtopics: []
             };
-          })
-        );
+          }
+          
+          acc[subject.mainSubject].subtopics.push({
+            id: subject.id,
+            name: subject.name,
+            questionCount: subject.questionCount
+          });
+          
+          acc[subject.mainSubject].totalQuestions += subject.questionCount;
+          return acc;
+        }, {} as Record<string, Subject>);
 
-        setSubjects(subjectsWithCounts);
-        setFilteredSubjects(subjectsWithCounts);
+        const finalSubjects = Object.values(groupedSubjects);
+
+        setSubjects(finalSubjects);
+        setFilteredSubjects(finalSubjects);
         
         // Calculate summary statistics
-        const totalSubjects = subjectsWithCounts.length;
-        const totalSubtopics = subjectsWithCounts.reduce(
+        const totalSubjects = finalSubjects.length;
+        const totalSubtopics = finalSubjects.reduce(
           (acc, subject) => acc + subject.subtopics.length,
           0
         );
-        const totalQuestions = subjectsWithCounts.reduce(
+        const totalQuestions = finalSubjects.reduce(
           (acc, subject) => acc + subject.totalQuestions,
           0
         );

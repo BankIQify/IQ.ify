@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BookOpen, Brain, Trophy, Lock, CheckCircle, Target, Users, Clock, RefreshCw, Accessibility, Sparkles, Star, MessageSquare, Shield } from "lucide-react";
+import { BookOpen, Brain, Trophy, Lock, CheckCircle, Target, Users, Clock, RefreshCw, Accessibility, Sparkles, Star, MessageSquare, Shield, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
@@ -11,12 +11,136 @@ import { AboutUs } from "@/components/home/AboutUs";
 import { Testimonials } from "@/components/home/Testimonials";
 import { CustomAvatar } from "@/components/profile/avatar/CustomAvatar";
 import { defaultConfig } from "@/components/profile/avatar/avatarConfig";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
+import { LogoCarousel } from "@/components/home/LogoCarousel";
+import { Icon } from "@/components/ui/icon";
+
+interface Feature {
+  id: string;
+  title: string;
+  description: string;
+  media_url: string | null;
+  media_type: 'image' | 'video' | null;
+  media_path: string | null;
+  order_index: number;
+}
+
+interface WhyChooseCard {
+  id: string;
+  title: string;
+  description: string;
+  media_url: string;
+  media_type: 'image' | 'video' | null;
+  media_alt_text?: string;
+  order_index: number;
+}
+
+interface Differentiator {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  media_url?: string;
+  media_type?: 'image' | 'video';
+  media_alt_text?: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+const POST_IT_COLORS = [
+  { value: "yellow", color: "#fff8b8" },
+  { value: "blue", color: "#b8fff9" },
+  { value: "pink", color: "#ffb8ee" },
+];
+
+const AVAILABLE_ICONS = [
+  'lightbulb',
+  'rocket',
+  'star',
+  'heart',
+  'shield',
+  'trophy',
+  'award',
+  'gem',
+  'crown',
+  'sparkles'
+];
 
 const Index = () => {
   const { user } = useAuth();
-  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
-  const [homepageContent, setHomepageContent] = useState<any>(null);
+  const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const { isAdmin } = useAuth();
+
+  const { data: features = [], error: featuresError } = useQuery({
+    queryKey: ["features"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("features")
+          .select("*")
+          .order("order_index");
+        
+        if (error) {
+          console.error("Error fetching features:", error);
+          return [];
+        }
+        
+        if (!data || data.length === 0) {
+          return [];
+        }
+
+        return data.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          media_url: item.media_url,
+          media_type: item.media_type,
+          media_path: item.media_path,
+          order_index: item.order_index
+        })) as Feature[];
+      } catch (err) {
+        console.error("Unexpected error fetching features:", err);
+        return [];
+      }
+    },
+  });
+
+  // Temporary features data
+  const tempFeatures = [
+    {
+      id: "temp-1",
+      title: "Personalised Learning Paths",
+      description: "Our AI-powered system creates custom learning paths based on your strengths, weaknesses, and learning style.",
+      media_url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200",
+      media_type: "image",
+      media_path: null,
+      order_index: 0
+    },
+    {
+      id: "temp-2",
+      title: "Interactive Practice Questions",
+      description: "Engage with our extensive library of interactive questions that adapt to your performance level.",
+      media_url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200",
+      media_type: "image",
+      media_path: null,
+      order_index: 1
+    },
+    {
+      id: "temp-3",
+      title: "Real-time Progress Tracking",
+      description: "Monitor your progress with detailed analytics and insights to help you stay on track.",
+      media_url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=1200",
+      media_type: "image",
+      media_path: null,
+      order_index: 2
+    }
+  ];
+
+  // Combine database features with temporary features
+  const allFeatures = [...features, ...tempFeatures];
 
   const { data: homepageContentData } = useQuery({
     queryKey: ["homepage-content"],
@@ -30,61 +154,26 @@ const Index = () => {
     },
   });
 
-  const features = [
-    {
-      icon: <Target className="w-8 h-8 text-pink-500" />,
-      title: "Personalised Learning",
-      description: "Areas of strengths and weakness are identified and development plans are created.",
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80",
-      color: "pink"
-    },
-    {
-      icon: <Brain className="w-8 h-8 text-green-500" />,
-      title: "Expert-Led Questions",
-      description: "Carefully crafted questions by educational experts to challenge and develop your skills.",
-      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40",
-      color: "green"
-    },
-    {
-      icon: <BookOpen className="w-8 h-8 text-yellow-500" />,
-      title: "Interactive Content",
-      description: "Engaging exercises and activities that make learning enjoyable and effective.",
-      image: "https://images.unsplash.com/photo-1665686306574-1ace09918530",
-      color: "yellow"
-    },
-    {
-      icon: <Clock className="w-8 h-8 text-blue-500" />,
-      title: "Flexible Learning",
-      description: "Learn at your own pace with on-demand access to course materials.",
-      image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80",
-      color: "blue"
-    },
-    {
-      icon: <Users className="w-8 h-8 text-purple-500" />,
-      title: "Community Support",
-      description: "Join a collaborative learning environment with peer-to-peer interaction.",
-      image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80",
-      color: "purple"
-    },
-  ];
+  const { data: differentiators = [], isLoading: isLoadingDifferentiators } = useQuery({
+    queryKey: ["differentiators"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("differentiators")
+        .select("*")
+        .order("created_at", { ascending: true });
 
-  const differentiators = [
-    {
-      icon: <RefreshCw className="w-6 h-6 text-pink-500" />,
-      title: "Continuous Updates",
-      description: "Regularly updated content reflecting the latest educational trends.",
+      if (error) throw error;
+
+      return data.map((item) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        icon: item.icon,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+      })) as Differentiator[];
     },
-    {
-      icon: <Accessibility className="w-6 h-6 text-green-500" />,
-      title: "Accessibility Features",
-      description: "Inclusive design with subtitles, screen reader support, and adjustable text sizes.",
-    },
-    {
-      icon: <Sparkles className="w-6 h-6 text-yellow-500" />,
-      title: "Free Trial",
-      description: "Experience our platform's offerings firsthand with a free trial period.",
-    },
-  ];
+  });
 
   const testimonials = homepageContentData?.testimonials || [
     {
@@ -134,12 +223,45 @@ const Index = () => {
     }
   ];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTestimonialIndex((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [testimonials.length]);
+  const handleTestimonialChange = (newIndex: number) => {
+    setDirection(newIndex > currentTestimonial ? 1 : -1);
+    setCurrentTestimonial(newIndex);
+  };
+
+  const { data: whyChooseData = [] } = useQuery({
+    queryKey: ["why-choose-cards"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('why_choose_cards')
+        .select('*')
+        .order('order_index');
+      
+      if (error) throw error;
+      
+      // Ensure type safety by mapping the data
+      return (data || []).map(item => {
+        // Ensure the media_url is properly formatted
+        let mediaUrl = item.media_url as string | null;
+        if (mediaUrl && !mediaUrl.startsWith('http')) {
+          // If it's a storage path, get the public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('why-choose-iqify-media')
+            .getPublicUrl(mediaUrl);
+          mediaUrl = publicUrl;
+        }
+
+        return {
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          media_url: mediaUrl || '',
+          media_type: item.media_type as 'image' | 'video' | null,
+          media_alt_text: item.media_alt_text || '',
+          order_index: item.order_index
+        };
+      }) as WhyChooseCard[];
+    }
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[rgba(30,174,219,0.1)] to-[rgba(255,105,180,0.1)]">
@@ -239,15 +361,17 @@ const Index = () => {
       </section>
 
       {/* About Us Section */}
-      <AboutUs />
+      <section className="container mx-auto px-4 py-16">
+        <AboutUs />
+      </section>
 
       {/* Features Section */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Why Choose iQify?</h2>
+        <h2 className="text-3xl font-bold text-center mb-12">Why Choose IQify?</h2>
         <div className="space-y-16">
-          {features.map((feature, index) => (
+          {whyChooseData.map((card, index) => (
             <motion.div
-              key={feature.title}
+              key={card.id}
               className="bg-white rounded-xl shadow-lg overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -255,16 +379,28 @@ const Index = () => {
             >
               <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
                 <div className="p-8 md:w-1/2 flex flex-col justify-center">
-                  <div className="mb-4">{feature.icon}</div>
-                  <h3 className="text-2xl font-semibold mb-4">{feature.title}</h3>
-                  <p className="text-muted-foreground text-lg">{feature.description}</p>
+                  <h3 className="text-2xl font-semibold mb-4">{card.title}</h3>
+                  <p className="text-muted-foreground text-lg">{card.description}</p>
                 </div>
-                <div className="md:w-1/2 h-64 md:h-auto">
-                  <img 
-                    src={feature.image} 
-                    alt={feature.title}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-full md:w-1/2 aspect-video">
+                  {card.media_type === 'video' ? (
+                    <video
+                      src={card.media_url}
+                      className="w-full h-full object-cover rounded-r-xl"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      crossOrigin="anonymous"
+                    />
+                  ) : (
+                    <img 
+                      src={card.media_url} 
+                      alt={card.media_alt_text || card.title}
+                      className="w-full h-full object-cover rounded-r-xl"
+                      crossOrigin="anonymous"
+                    />
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -290,12 +426,11 @@ const Index = () => {
           <h2 className="text-3xl font-bold text-center mb-16">Differentiators</h2>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {differentiators.map((differentiator, index) => (
+            {differentiators?.map((differentiator, index) => (
               <motion.div
-                key={differentiator.title}
+                key={differentiator.id}
                 className={`
                   p-6 rounded-sm shadow-lg transform rotate-${Math.floor(Math.random() * 3) - 1}
-                  ${index === 0 ? 'bg-[#fff8b8]' : index === 1 ? 'bg-[#b8fff9]' : 'bg-[#ffb8ee]'}
                   hover:rotate-0 transition-transform duration-300
                   relative
                 `}
@@ -303,7 +438,8 @@ const Index = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 style={{
-                  boxShadow: '2px 2px 5px rgba(0,0,0,0.1), -1px -1px 2px rgba(0,0,0,0.05)'
+                  boxShadow: '2px 2px 5px rgba(0,0,0,0.1), -1px -1px 2px rgba(0,0,0,0.05)',
+                  backgroundColor: POST_IT_COLORS.find(c => c.value === differentiator.color)?.color || '#fff8b8'
                 }}
               >
                 {/* Fake pin */}
@@ -311,14 +447,42 @@ const Index = () => {
                 
                 <div className="flex flex-col items-center text-center">
                   <div className="mb-4 transform hover:scale-110 transition-transform">
-                    {differentiator.icon}
+                    {AVAILABLE_ICONS.includes(differentiator.icon) ? (
+                      <Icon name={differentiator.icon} className="w-6 h-6" />
+                    ) : (
+                      <Sparkles className="w-6 h-6" />
+                    )}
                   </div>
                   <h3 className="text-xl font-semibold mb-3 font-handwriting">{differentiator.title}</h3>
-                  <p className="text-gray-700 font-handwriting">{differentiator.description}</p>
+                  <p className="text-gray-700 font-handwriting mb-4">{differentiator.description}</p>
+                  {differentiator.media_url && (
+                    <div className="w-full aspect-video rounded-md overflow-hidden">
+                      {differentiator.media_type === 'video' ? (
+                        <video
+                          src={differentiator.media_url}
+                          className="w-full h-full object-cover"
+                          controls
+                        />
+                      ) : (
+                        <img
+                          src={differentiator.media_url}
+                          alt={differentiator.media_alt_text || differentiator.title}
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Logo Carousel Section */}
+      <section className="py-12 bg-white/50 backdrop-blur-sm">
+        <div className="container mx-auto px-4">
+          <LogoCarousel />
         </div>
       </section>
 
@@ -329,13 +493,15 @@ const Index = () => {
       <section className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-3xl font-bold mb-6">Ready to Start Your Learning Journey?</h2>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Join thousands of students who are already improving their skills with iQify.
+          Join thousands of students who are already improving their skills with IQify.
         </p>
-        <Link to={user ? "/dashboard" : "/auth"}>
-          <Button size="lg">
-            {user ? "Continue Learning" : "Sign Up Now"}
-          </Button>
-        </Link>
+        <div className="flex justify-center">
+          <Link to={user ? "/dashboard" : "/auth"}>
+            <Button size="lg">
+              {user ? "Go to Dashboard" : "Get Started"}
+            </Button>
+          </Link>
+        </div>
       </section>
     </div>
   );

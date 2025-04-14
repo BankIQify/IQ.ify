@@ -7,15 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { WhyChooseIqifyEditor } from "./WhyChooseIqifyEditor";
 
 interface Feature {
-  id: string;
-  icon: string;
-  title: string;
-  description: string;
-}
-
-interface WhyChooseUs {
   id: string;
   icon: string;
   title: string;
@@ -32,7 +26,6 @@ interface AboutUsContent {
     description: string;
   };
   features: Feature[];
-  whyChooseUs: WhyChooseUs[];
   cta: {
     title: string;
     description: string;
@@ -70,32 +63,6 @@ export const AboutUsManager = () => {
         description: "Leveraging cutting-edge AI technology to provide accurate assessments and intelligent feedback."
       }
     ],
-    whyChooseUs: [
-      {
-        id: "1",
-        icon: "BookOpen",
-        title: "Research-Based",
-        description: "Our assessments are grounded in established psychological research and cognitive science."
-      },
-      {
-        id: "2",
-        icon: "Users",
-        title: "Community-Driven",
-        description: "Join a growing community of learners committed to cognitive development and personal growth."
-      },
-      {
-        id: "3",
-        icon: "Award",
-        title: "Expert-Crafted",
-        description: "Questions and puzzles designed by educational experts and cognitive psychologists."
-      },
-      {
-        id: "4",
-        icon: "Target",
-        title: "Goal-Oriented",
-        description: "Clear progress tracking and achievement systems to help you reach your cognitive goals."
-      }
-    ],
     cta: {
       title: "Ready to Begin Your Journey?",
       description: "Join thousands of users who are already enhancing their cognitive abilities with IQify."
@@ -115,30 +82,10 @@ export const AboutUsManager = () => {
     }));
   };
 
-  const addWhyChooseUs = () => {
-    const newItem: WhyChooseUs = {
-      id: Date.now().toString(),
-      icon: "Star",
-      title: "New Reason",
-      description: "Description of why to choose IQify"
-    };
-    setContent(prev => ({
-      ...prev,
-      whyChooseUs: [...prev.whyChooseUs, newItem]
-    }));
-  };
-
   const removeFeature = (id: string) => {
     setContent(prev => ({
       ...prev,
       features: prev.features.filter(f => f.id !== id)
-    }));
-  };
-
-  const removeWhyChooseUs = (id: string) => {
-    setContent(prev => ({
-      ...prev,
-      whyChooseUs: prev.whyChooseUs.filter(w => w.id !== id)
     }));
   };
 
@@ -289,58 +236,8 @@ export const AboutUsManager = () => {
         <CardHeader>
           <CardTitle>Why Choose IQify</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {content.whyChooseUs.map((item, index) => (
-            <div key={item.id} className="space-y-4 p-4 border rounded-lg">
-              <div className="flex justify-between items-center">
-                <h4 className="font-semibold">Reason {index + 1}</h4>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => removeWhyChooseUs(item.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="space-y-2">
-                <Label>Icon</Label>
-                <Input
-                  value={item.icon}
-                  onChange={(e) => {
-                    const newItems = [...content.whyChooseUs];
-                    newItems[index] = { ...item, icon: e.target.value };
-                    setContent(prev => ({ ...prev, whyChooseUs: newItems }));
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Title</Label>
-                <Input
-                  value={item.title}
-                  onChange={(e) => {
-                    const newItems = [...content.whyChooseUs];
-                    newItems[index] = { ...item, title: e.target.value };
-                    setContent(prev => ({ ...prev, whyChooseUs: newItems }));
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea
-                  value={item.description}
-                  onChange={(e) => {
-                    const newItems = [...content.whyChooseUs];
-                    newItems[index] = { ...item, description: e.target.value };
-                    setContent(prev => ({ ...prev, whyChooseUs: newItems }));
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-          <Button onClick={addWhyChooseUs} className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Reason
-          </Button>
+        <CardContent>
+          <WhyChooseIqifyEditor />
         </CardContent>
       </Card>
 

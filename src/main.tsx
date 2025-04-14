@@ -1,8 +1,13 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
+import ReactDOM from 'react-dom/client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './contexts/AuthContext';
+import App from './App';
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from './components/ui/tooltip';
+import { ThemeProvider } from '@/components/theme-provider';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import './index.css';
 
 // Safari-specific fixes
 if (!window.globalThis) {
@@ -31,18 +36,36 @@ console.log('Starting application...', {
   isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 });
 
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 const container = document.getElementById('root');
 
 if (container) {
   console.log('Found root element, rendering app...');
   try {
-    // Force the container to be treated as an Element
-    const root = createRoot(container as Element);
+    const root = ReactDOM.createRoot(container);
     root.render(
       <React.StrictMode>
         <ErrorBoundary>
-          <App />
+          <QueryClientProvider client={queryClient}>
+            <AuthProvider>
+              <ThemeProvider defaultTheme="light" storageKey="IQify-theme">
+                <TooltipProvider>
+                  <App />
+                </TooltipProvider>
+              </ThemeProvider>
+            </AuthProvider>
+          </QueryClientProvider>
         </ErrorBoundary>
+        <Toaster />
       </React.StrictMode>
     );
     console.log('App rendered successfully');

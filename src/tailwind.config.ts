@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -53,9 +52,9 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Define iQify colors as direct color values rather than HSL variables
+        // Define IQify colors as direct color values rather than HSL variables
         // This makes them work properly with opacity modifiers
-        iqify: {
+        IQify: {
           blue: "#1EAEDB",
           yellow: "#FFD700",
           green: "#00FF7F",
@@ -122,7 +121,7 @@ export default {
       },
       backgroundImage: {
         'gradient-pastel': 'linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)',
-        'gradient-iqify': 'linear-gradient(to right, #1EAEDB, #00FF7F, #FFD700, #FF7F00, #FF69B4)',
+        'gradient-IQify': 'linear-gradient(to right, #1EAEDB, #00FF7F, #FFD700, #FF7F00, #FF69B4)',
       },
       transform: {
         'perspective-1000': 'perspective(1000px)',

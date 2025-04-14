@@ -6,6 +6,10 @@ import type { Database } from '@/types/supabase';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
 console.log('Supabase URL:', supabaseUrl);
 
 // Create a single instance of the Supabase client
@@ -16,8 +20,11 @@ export const supabase = (() => {
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
-        storageKey: 'iqify-auth-token',
-        storage: window.localStorage
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: 'IQify-auth',
+        storage: window.localStorage,
+        flowType: 'pkce'
       }
     });
   }

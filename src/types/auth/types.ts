@@ -1,4 +1,5 @@
 import { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
 
 export type FocusArea = 
   | "eleven_plus_prep"
@@ -18,7 +19,7 @@ export interface Profile {
   created_at: string;
   updated_at: string;
   last_sign_in_at: string | null;
-  role?: 'admin' | 'data_input' | 'pro' | 'user';
+  role: 'admin' | 'data_input' | 'pro' | 'user';
   subscription_status?: 'active' | 'trialing' | 'inactive';
   avatar_config: Record<string, any> | null;
   focus_areas: FocusArea[];
@@ -45,6 +46,26 @@ export interface ProfileData {
   city?: string;
   educationLevel?: string;
   subjects?: string[];
+}
+
+export function isAdminProfile(profile: Profile): boolean {
+  return profile.role === 'admin';
+}
+
+export async function checkAdminStatus(userId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('role', 'admin')
+    .single();
+
+  if (error) {
+    console.error('Error checking admin status:', error);
+    return false;
+  }
+
+  return !!data;
 }
 
 export interface AuthContextType {

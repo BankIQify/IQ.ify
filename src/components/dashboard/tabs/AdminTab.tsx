@@ -15,14 +15,17 @@ import {
   Shield,
   Activity,
   StickyNote,
-  FileEdit
+  FileEdit,
+  LineChart,
+  List
 } from "lucide-react";
 import { AdminUsersList } from "@/components/dashboard/admin/AdminUsersList";
 import { AdminRolesManager } from "@/components/dashboard/admin/AdminRolesManager";
 import { AdminActivityLog } from "@/components/dashboard/admin/AdminActivityLog";
-import { DifferentiatorManager } from "@/components/admin/DifferentiatorManager";
+import { ActivityDashboard } from "@/components/dashboard/admin/ActivityDashboard";
 import { AdminDashboard } from "@/components/dashboard/admin/AdminDashboard";
 import { AboutUsManager } from "@/components/admin/AboutUsManager";
+import { DifferentiatorManager } from "@/components/admin/DifferentiatorManager";
 
 export const AdminTab = () => {
   return (
@@ -42,7 +45,7 @@ export const AdminTab = () => {
         </TabsTrigger>
         <TabsTrigger value="activity" className="flex items-center gap-2">
           <Activity className="w-4 h-4" />
-          Activity Logs
+          Activity Monitoring
         </TabsTrigger>
         <TabsTrigger value="differentiators" className="flex items-center gap-2">
           <StickyNote className="w-4 h-4" />
@@ -104,12 +107,29 @@ export const AdminTab = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <ActivitySquare className="h-5 w-5" />
-              Activity Logs
+              Activity Monitoring
             </CardTitle>
             <CardDescription>Monitor user activity and system events</CardDescription>
           </CardHeader>
           <CardContent>
-            <AdminActivityLog />
+            <Tabs defaultValue="dashboard" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="dashboard" className="flex items-center gap-2">
+                  <LineChart className="w-4 h-4" />
+                  Activity Dashboard
+                </TabsTrigger>
+                <TabsTrigger value="logs" className="flex items-center gap-2">
+                  <List className="w-4 h-4" />
+                  Activity Logs
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="dashboard">
+                <ActivityDashboard />
+              </TabsContent>
+              <TabsContent value="logs">
+                <AdminActivityLog />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </TabsContent>
@@ -129,6 +149,7 @@ export const AdminTab = () => {
           </CardHeader>
           <CardContent>
             <AboutUsManager />
+            <DifferentiatorManager />
           </CardContent>
         </Card>
       </TabsContent>

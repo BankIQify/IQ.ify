@@ -44,4 +44,9 @@ export interface SubjectRecommendation {
   bgColor: string;
   link: string;
   averageScore: number;
+}
+
+export interface SubjectPerformance {
+  subject: MainSubject;
+  score: number;
 } 

@@ -1,14 +1,15 @@
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu as MenuIcon, X as CloseIcon, User, Settings, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User as UserType } from "@supabase/supabase-js";
 
 interface NavLinksProps {
   isDataInput: boolean;
   isAdmin: boolean;
-  user: any;
+  user: UserType | null;
   onMobileClick?: () => void;
 }
 
@@ -89,13 +90,11 @@ const NavLinks = ({ isDataInput, isAdmin, user, onMobileClick }: NavLinksProps) 
 };
 
 const Navigation = () => {
-  // Always declare hooks at the top
   const { user, profile, signOut, isAdmin, isDataInput, authInitialized } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Handle sign out
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -105,17 +104,14 @@ const Navigation = () => {
     }
   };
 
-  // Handle mobile menu toggle
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Don't show navigation on auth pages
   if (location.pathname === "/auth") {
     return null;
   }
 
-  // Show loading state while auth is initializing
   if (!authInitialized) {
     return (
       <nav className="border-b bg-[#1EAEDB] shadow-sm">
@@ -124,10 +120,10 @@ const Navigation = () => {
             <Link to="/" className="hover:scale-105 transition-transform">
               <img 
                 src="/lovable-uploads/fa3e7201-848d-4ab9-a19d-74319434852e.png" 
-                alt="iQify Logo" 
+                alt="IQify Logo" 
                 className="h-12 md:h-14"
                 onError={(e) => {
-                  e.currentTarget.src = '/logo.png'; // Fallback logo
+                  e.currentTarget.src = '/logo.png';
                 }}
               />
             </Link>
@@ -145,7 +141,7 @@ const Navigation = () => {
           <Link to={isDataInput ? "/data-input/webhook" : "/"} className="hover:scale-105 transition-transform">
             <img 
               src="/lovable-uploads/fa3e7201-848d-4ab9-a19d-74319434852e.png" 
-              alt="iQify Logo" 
+              alt="IQify Logo" 
               className="h-12 md:h-14"
               onError={(e) => {
                 e.currentTarget.src = '/logo.png';
@@ -196,52 +192,86 @@ const Navigation = () => {
                         </AvatarFallback>
                       )}
                     </Avatar>
-                    <span className="text-sm font-medium">
-                      Character
-                    </span>
+                    <span className="text-sm font-medium text-white">Character</span>
                   </Link>
                 )}
-                <Link to={isDataInput ? "/data-input/webhook" : "/profile"}>
-                  <Button 
-                    variant="outline"
-                    className="hover:bg-[rgba(0,255,127,0.2)] border-[#00FF7F] text-[#001F3F]"
-                  >
-                    <Settings className="h-4 w-4 mr-1" />
-                    {isDataInput ? "Dashboard" : "Profile"}
-                  </Button>
-                </Link>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleSignOut}
-                  className="hover:bg-[rgba(0,255,127,0.2)] border-[#00FF7F] text-[#001F3F]"
+                  className="text-white hover:bg-white/20"
                 >
                   Sign Out
                 </Button>
               </div>
             ) : (
-              <Link to="/auth">
-                <Button variant="outline" className="hover:bg-[rgba(0,255,127,0.2)] border-[#00FF7F] text-[#001F3F]">
-                  <User className="h-4 w-4 mr-1" />
-                  Sign In
-                </Button>
-              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/auth")}
+                className="text-white hover:bg-white/20"
+              >
+                Sign In
+              </Button>
             )}
           </div>
-
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="absolute top-full left-0 right-0 bg-[#1EAEDB] md:hidden">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                <NavLinks 
-                  isDataInput={isDataInput} 
-                  isAdmin={isAdmin} 
-                  user={user}
-                  onMobileClick={() => setIsMobileMenuOpen(false)}
-                />
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden py-4">
+            <div className="flex flex-col space-y-2">
+              <NavLinks 
+                isDataInput={isDataInput} 
+                isAdmin={isAdmin} 
+                user={user}
+                onMobileClick={toggleMobileMenu}
+              />
+              {user ? (
+                <div className="flex flex-col space-y-2">
+                  {!isDataInput && (
+                    <Link 
+                      to="/avatar-creator" 
+                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/20 rounded-md font-medium text-white"
+                      onClick={toggleMobileMenu}
+                    >
+                      <Avatar className="h-6 w-6">
+                        {profile?.avatar_url ? (
+                          <AvatarImage 
+                            src={profile.avatar_url} 
+                            alt="User avatar"
+                          />
+                        ) : (
+                          <AvatarFallback className="bg-[#00FF7F] text-white text-xs">
+                            {profile?.name?.charAt(0) || profile?.username?.charAt(0) || "U"}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                      <span>Character</span>
+                    </Link>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSignOut}
+                    className="text-white hover:bg-white/20 justify-start"
+                  >
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/auth")}
+                  className="text-white hover:bg-white/20 justify-start"
+                >
+                  Sign In
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

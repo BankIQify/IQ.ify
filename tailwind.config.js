@@ -1,11 +1,13 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   darkMode: ["class"],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
 	],
   theme: {
     container: {
@@ -51,11 +53,11 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         // Brand colours
-        'neon-green': '#39FF14',
-        'bright-pink': '#FF1493',
-        'yellow': '#FFD700',
-        'bright-blue': '#00BFFF',
-        'royal-blue': '#4169E1',
+        'neon-green': '#39ff14',
+        'bright-pink': '#ff1493',
+        'bright-yellow': '#ffff00',
+        'bright-blue': '#00ffff',
+        'royal-blue': '#1a1b4b',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -70,6 +72,20 @@ module.exports = {
         "accordion-up": {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: 0 },
+        },
+        blob: {
+          '0%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
+          '33%': {
+            transform: 'translate(30px, -50px) scale(1.1)',
+          },
+          '66%': {
+            transform: 'translate(-20px, 20px) scale(0.9)',
+          },
+          '100%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
         },
         confetti: {
           '0%': { 
@@ -97,6 +113,7 @@ module.exports = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "blob": "blob 7s infinite",
         "confetti": "confetti 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards",
         "fadeIn": "fadeIn 0.5s ease-in-out",
         "slideIn": "slideIn 0.3s ease-out"
@@ -104,6 +121,8 @@ module.exports = {
       fontFamily: {
         'playfair': ['Playfair Display', 'serif'],
         'inter': ['Inter', 'sans-serif'],
+        'display': ['Quicksand', 'sans-serif'],
+        handwriting: ['"Dancing Script"', 'cursive'],
       },
     },
   },

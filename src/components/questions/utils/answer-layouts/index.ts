@@ -1,10 +1,22 @@
-
 import type { QuestionCategory } from "@/types/questions";
 import { verbalReasoningLayouts } from "./verbal-layouts";
 import { nonVerbalReasoningLayouts } from "./non-verbal-layouts";
 import { brainTrainingLayouts } from "./brain-training-layouts";
 import { generateContentStructure } from "./content-generator";
-export { type AnswerLayout, type AnswerLayoutConfig } from "./types";
+import type { AnswerLayout, AnswerLayoutConfig } from "./types";
+
+// Export types
+export type { AnswerLayout, AnswerLayoutConfig };
+
+// Export layouts
+export const layouts = {
+  verbal: verbalReasoningLayouts,
+  non_verbal: nonVerbalReasoningLayouts,
+  brain_training: brainTrainingLayouts
+};
+
+// Export content generator
+export { generateContentStructure };
 
 // Export a function to get the answer layout for a specific sub-topic
 export const getSubTopicLayout = (
@@ -18,24 +30,17 @@ export const getSubTopicLayout = (
   
   // Find the sub-topic by ID
   const subTopic = subTopics.find(st => st.id === subTopicId);
-  if (!subTopic) {
-    return null;
-  }
-  
-  // Convert the name to lowercase and replace spaces with underscores for lookup
-  const normalizedName = subTopic.name.toLowerCase().replace(/\s+/g, '_');
-  
-  // Handle layouts based on category
-  if (category === "verbal") {
-    return verbalReasoningLayouts[normalizedName] || null;
-  } else if (category === "non_verbal") {
-    return nonVerbalReasoningLayouts[normalizedName] || null;
-  } else if (category === "brain_training") {
-    return brainTrainingLayouts[normalizedName] || null;
-  }
-  
-  return null;
-};
+  if (!subTopic) return null;
 
-// Re-export the content structure generator
-export { generateContentStructure };
+  // Get the appropriate layout based on the category
+  switch (category) {
+    case "verbal":
+      return layouts.verbal[subTopic.name.toLowerCase()] || null;
+    case "non_verbal":
+      return layouts.non_verbal[subTopic.name.toLowerCase()] || null;
+    case "brain_training":
+      return layouts.brain_training[subTopic.name.toLowerCase()] || null;
+    default:
+      return null;
+  }
+};

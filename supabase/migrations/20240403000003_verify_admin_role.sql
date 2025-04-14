@@ -1,4 +1,16 @@
--- Verify and ensure admin role for bankiqify@gmail.com
+-- First, check if the user exists
+SELECT id, email FROM auth.users WHERE email = 'bankiqify@gmail.com';
+
+-- Check current roles
+SELECT 
+    u.email,
+    ur.role,
+    ur.created_at
+FROM auth.users u
+LEFT JOIN public.user_roles ur ON u.id = ur.user_id
+WHERE u.email = 'bankiqify@gmail.com';
+
+-- Fix the admin role
 DO $$
 DECLARE
     admin_user_id UUID;
@@ -10,19 +22,12 @@ BEGIN
 
     -- If the user exists
     IF admin_user_id IS NOT NULL THEN
-        -- Ensure user_roles table exists
-        CREATE TABLE IF NOT EXISTS public.user_roles (
-            id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-            user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-            role TEXT NOT NULL,
-            created_at TIMESTAMPTZ DEFAULT now(),
-            UNIQUE(user_id, role)
-        );
+        -- Remove any existing roles for this user
+        DELETE FROM public.user_roles WHERE user_id = admin_user_id;
 
-        -- Add admin role if it doesn't exist
+        -- Add admin role
         INSERT INTO public.user_roles (user_id, role)
-        VALUES (admin_user_id, 'admin')
-        ON CONFLICT (user_id, role) DO NOTHING;
+        VALUES (admin_user_id, 'admin');
 
         -- Verify the role was added
         IF EXISTS (
@@ -35,46 +40,35 @@ BEGIN
         ELSE
             RAISE EXCEPTION 'Failed to add admin role for user %', admin_user_id;
         END IF;
-
-        -- Ensure RLS is enabled
-        ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
-
-        -- Recreate RLS policies
-        DROP POLICY IF EXISTS "Users can view their own roles" ON public.user_roles;
-        DROP POLICY IF EXISTS "Admins can view all roles" ON public.user_roles;
-        DROP POLICY IF EXISTS "Admins can manage roles" ON public.user_roles;
-
-        CREATE POLICY "Users can view their own roles"
-            ON public.user_roles
-            FOR SELECT
-            USING (auth.uid() = user_id);
-
-        CREATE POLICY "Admins can view all roles"
-            ON public.user_roles
-            FOR SELECT
-            USING (EXISTS (
-                SELECT 1 
-                FROM public.user_roles 
-                WHERE user_id = auth.uid() 
-                AND role = 'admin'
-            ));
-
-        CREATE POLICY "Admins can manage roles"
-            ON public.user_roles
-            FOR ALL
-            USING (EXISTS (
-                SELECT 1 
-                FROM public.user_roles 
-                WHERE user_id = auth.uid() 
-                AND role = 'admin'
-            ));
-
-        -- Grant necessary permissions
-        GRANT ALL ON public.user_roles TO authenticated;
-        GRANT ALL ON public.user_roles TO service_role;
-
     ELSE
-        RAISE EXCEPTION 'User bankiqify@gmail.com not found in auth.users';
+        RAISE EXCEPTION 'Admin user not found';
     END IF;
-END;
-$$; 
+END $$;
+
+-- Fix RLS policies to prevent infinite recursion
+DO $$
+BEGIN
+    -- Drop existing policies
+    DROP POLICY IF EXISTS "Users can view their own roles" ON public.user_roles;
+    DROP POLICY IF EXISTS "Admins can view all roles" ON public.user_roles;
+    DROP POLICY IF EXISTS "Admins can manage roles" ON public.user_roles;
+
+    -- Create simplified policies
+    CREATE POLICY "Users can view their own roles"
+        ON public.user_roles
+        FOR SELECT
+        USING (auth.uid() = user_id);
+
+    -- Grant necessary permissions
+    GRANT ALL ON public.user_roles TO authenticated;
+    GRANT ALL ON public.user_roles TO service_role;
+END $$;
+
+-- Verify the fix
+SELECT 
+    u.email,
+    ur.role,
+    ur.created_at
+FROM auth.users u
+LEFT JOIN public.user_roles ur ON u.id = ur.user_id
+WHERE u.email = 'bankiqify@gmail.com'; 

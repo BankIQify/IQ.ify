@@ -1,4 +1,3 @@
-
 import type { AnswerLayoutConfig } from "./types";
 
 // Verbal reasoning sub-topic answer layout mappings
@@ -32,7 +31,7 @@ export const verbalReasoningLayouts: Record<string, AnswerLayoutConfig> = {
   "vocabulary": {
     layout: "multiple_choice",
     optionsCount: 4,
-    description: "Questions testing knowledge of word meanings."
+    description: "Questions testing knowledge of word meanings and usage."
   },
   "verbal_classification": {
     layout: "multiple_choice",
@@ -46,5 +45,15 @@ export const verbalReasoningLayouts: Record<string, AnswerLayoutConfig> = {
   "verbal_problems": {
     layout: "text",
     description: "Word problems requiring written solutions."
+  },
+  "synonyms": {
+    layout: "multiple_choice",
+    optionsCount: 4,
+    description: "Questions asking to identify words with similar meanings."
+  },
+  "word_relationships": {
+    layout: "multiple_choice",
+    optionsCount: 4,
+    description: "Questions about how words relate to each other."
   }
 };

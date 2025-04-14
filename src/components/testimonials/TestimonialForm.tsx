@@ -112,4 +112,6 @@ export const TestimonialForm = () => {
       </CardContent>
     </Card>
   );
-}; 
+};
+
+export default TestimonialForm; 

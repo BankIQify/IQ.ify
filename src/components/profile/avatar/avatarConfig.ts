@@ -126,3 +126,16 @@ export const defaultConfig: AvatarConfig = {
   mouthType: 'Default',
   skinColor: 'Light'
 };
+
+export function generateAvatarUrl(config: Partial<AvatarConfig> = {}): string {
+  const finalConfig = { ...defaultConfig, ...config };
+  const baseUrl = 'https://avataaars.io/';
+  const params = new URLSearchParams();
+
+  // Add each config option to the URL parameters
+  Object.entries(finalConfig).forEach(([key, value]) => {
+    params.append(key, value);
+  });
+
+  return `${baseUrl}?${params.toString()}`;
+}

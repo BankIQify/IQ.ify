@@ -14,13 +14,13 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 190 82% 50%;  /* iQify blue */
+    --primary: 190 82% 50%;  /* IQify blue */
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 330 81% 60%;  /* iQify pink */
+    --accent: 330 81% 60%;  /* IQify pink */
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -134,46 +134,46 @@
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
 }
 
-.btn-iqify-blue {
+.btn-IQify-blue {
   @apply bg-[#1EAEDB] hover:bg-[#1EAEDB]/90 text-white;
 }
 
-.btn-iqify-green {
+.btn-IQify-green {
   @apply bg-[#00FF94] hover:bg-[#00FF94]/90 text-white;
 }
 
-.btn-iqify-yellow {
+.btn-IQify-yellow {
   @apply bg-[#FFE500] hover:bg-[#FFE500]/90 text-white;
 }
 
-.btn-iqify-pink {
+.btn-IQify-pink {
   @apply bg-[#FF00E5] hover:bg-[#FF00E5]/90 text-white;
 }
 
-.btn-iqify-orange {
+.btn-IQify-orange {
   @apply bg-[#FFA500] hover:bg-[#FFA500]/90 text-white;
 }
 
-.card-iqify {
+.card-IQify {
   @apply bg-white rounded-lg shadow-md p-6;
 }
 
-.card-iqify-blue {
+.card-IQify-blue {
   @apply bg-gradient-to-br from-[#1EAEDB] to-[#0047FF] text-white;
 }
 
-.card-iqify-green {
+.card-IQify-green {
   @apply bg-gradient-to-br from-[#00FF94] to-[#0047FF] text-white;
 }
 
-.card-iqify-yellow {
+.card-IQify-yellow {
   @apply bg-gradient-to-br from-[#FFE500] to-[#00FF94] text-white;
 }
 
-.card-iqify-pink {
+.card-IQify-pink {
   @apply bg-gradient-to-br from-[#FF00E5] to-[#0047FF] text-white;
 }
 
-.card-iqify-orange {
+.card-IQify-orange {
   @apply bg-gradient-to-br from-[#FFA500] to-[#FF00E5] text-white;
 }

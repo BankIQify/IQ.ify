@@ -157,7 +157,7 @@ export const Testimonials = ({ testimonials = preloadedTestimonials }: { testimo
                         {[...Array(testimonials[currentIndex].rating)].map((_, i) => (
                           <Star
                             key={i}
-                            className="w-5 h-5 text-yellow fill-current"
+                            className="w-5 h-5 text-yellow-400 fill-current"
                           />
                         ))}
                       </div>

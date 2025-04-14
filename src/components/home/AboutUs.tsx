@@ -129,13 +129,13 @@ export const AboutUs = () => {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-b from-white to-gray-50">
-      <div className="container mx-auto px-4">
+    <div className="w-full bg-[rgba(30,174,219,0.1)] py-20">
+      <section className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column - Text Content */}
           <div className="lg:col-span-4 space-y-6">
-            <h2 className="text-3xl font-bold">About IQify</h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <h2 className="text-3xl font-bold text-gray-900">About IQify</h2>
+            <p className="text-lg text-gray-700 leading-relaxed">
               IQify is dedicated to unlocking your full cognitive potential through scientifically-proven methods. 
               Our global approach has empowered students in Britain and China to achieve exceptional academic success. 
               Explore how our approach can bridge the gap between potential and achievement.
@@ -198,40 +198,22 @@ export const AboutUs = () => {
                           "w-[280px] sm:w-[350px] md:w-[450px]",
                           "h-[250px] sm:h-[300px] md:h-[400px]",
                           "transition-all duration-300",
-                          isCenter ? "scale-100" : "scale-90",
                           cardStyles[styleIndex].background,
-                          "hover:shadow-xl mx-auto"
+                          "shadow-lg"
                         )}>
-                          <CardContent className="p-3 sm:p-4 md:p-8 h-full flex flex-col items-center justify-center">
-                            <div className="w-full h-full flex flex-col items-center justify-center space-y-3 sm:space-y-4 md:space-y-8">
-                              {/* Highlight Text - Handwritten style */}
-                              <div className={cn(
-                                "transform -rotate-3 origin-center",
-                                cardStyles[styleIndex].highlight,
-                                "text-xl sm:text-2xl md:text-3xl font-bold leading-tight font-caveat",
-                                "opacity-90",
-                                "drop-shadow-sm",
-                                "hover:scale-105 transition-transform duration-200",
-                                "w-full text-center px-2"
-                              )}>
-                                <div className="relative">
-                                  <div className="absolute inset-0 bg-current opacity-10 blur-sm"></div>
-                                  <div className="relative">
-                                    {card.highlight}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Supporting Text - Horizontal */}
-                              <div className={cn(
-                                "w-full px-2",
-                                cardStyles[styleIndex].supporting,
-                                "text-base sm:text-lg md:text-xl text-center",
-                                "leading-relaxed"
-                              )}>
-                                {card.supportingText}
-                              </div>
-                            </div>
+                          <CardContent className="p-6 h-full flex flex-col justify-center">
+                            <h3 className={cn(
+                              "text-xl md:text-2xl font-bold mb-4",
+                              cardStyles[styleIndex].highlight
+                            )}>
+                              {card.highlight}
+                            </h3>
+                            <p className={cn(
+                              "text-sm md:text-base",
+                              cardStyles[styleIndex].supporting
+                            )}>
+                              {card.supportingText}
+                            </p>
                           </CardContent>
                         </Card>
                       </motion.div>
@@ -264,7 +246,9 @@ export const AboutUs = () => {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   );
-}; 
+};
+
+export default AboutUs; 

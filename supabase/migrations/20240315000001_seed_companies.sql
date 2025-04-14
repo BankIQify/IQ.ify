@@ -1,0 +1,22 @@
+-- Seed companies table with initial data
+INSERT INTO companies (name, logo, message) VALUES
+  ('Google', 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg', 'Leading the way in AI and cloud computing'),
+  ('Microsoft', 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg', 'Empowering every person and organization to achieve more'),
+  ('Amazon', 'https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg', 'Earth''s most customer-centric company'),
+  ('Apple', 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg', 'Think different, create extraordinary'),
+  ('Meta', 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg', 'Building the future of social connection'),
+  ('Tesla', 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Tesla_Motors.svg', 'Accelerating the world''s transition to sustainable energy'),
+  ('Netflix', 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg', 'Entertainment for everyone, everywhere'),
+  ('Uber', 'https://upload.wikimedia.org/wikipedia/commons/5/58/Uber_logo_2018.svg', 'Moving the world forward'),
+  ('Airbnb', 'https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg', 'Belong anywhere'),
+  ('Spotify', 'https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg', 'Music for everyone'),
+  ('LinkedIn', 'https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png', 'Connecting the world''s professionals'),
+  ('Twitter', 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Logo_of_Twitter.svg', 'What''s happening?'),
+  ('Adobe', 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Adobe_Systems_logo_and_wordmark.svg', 'Creativity for all'),
+  ('Salesforce', 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg', 'The customer success platform'),
+  ('IBM', 'https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg', 'Let''s create'),
+  ('Intel', 'https://upload.wikimedia.org/wikipedia/commons/7/7d/Intel_logo_%282006-2020%29.svg', 'Experience what''s inside'),
+  ('Oracle', 'https://upload.wikimedia.org/wikipedia/commons/5/50/Oracle_logo.svg', 'The future of cloud'),
+  ('SAP', 'https://upload.wikimedia.org/wikipedia/commons/5/59/SAP_2011_logo.svg', 'Run better'),
+  ('Dell', 'https://upload.wikimedia.org/wikipedia/commons/1/18/Dell_logo_2016.svg', 'Innovation that matters'),
+  ('HP', 'https://upload.wikimedia.org/wikipedia/commons/a/ad/HP_logo_2012.svg', 'Keep reinventing'); 

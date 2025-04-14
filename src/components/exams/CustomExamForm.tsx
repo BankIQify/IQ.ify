@@ -1,10 +1,8 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { TopicSelector } from "./TopicSelector";
 import { SubTopicSelector } from "./SubTopicSelector";
-import { ExamNameInput } from "./custom-exam/ExamNameInput";
 import { QuestionConfig } from "./custom-exam/QuestionConfig";
 import { useCustomExamForm } from "./custom-exam/useCustomExamForm";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,8 +17,6 @@ interface SubTopic {
 
 export function CustomExamForm() {
   const {
-    customName,
-    setCustomName,
     selectedTopics,
     selectedSubTopics,
     setSelectedSubTopics,
@@ -47,7 +43,7 @@ export function CustomExamForm() {
     }
   });
 
-  const { data: subTopics = [], isLoading: isLoadingSubTopics } = useQuery({
+  const { data: subTopics = [], isLoading: isLoadingSubTopics } = useQuery<SubTopic[]>({
     queryKey: ['sub_topics'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -55,7 +51,9 @@ export function CustomExamForm() {
         .select('*');
       
       if (error) throw error;
-      return data || [];
+      // Cast to unknown first to satisfy TypeScript
+      const typedData = (data || []) as unknown as SubTopic[];
+      return typedData;
     }
   });
 
@@ -76,7 +74,6 @@ export function CustomExamForm() {
     return (
       <div className="space-y-4">
         <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
         <Skeleton className="h-32 w-full" />
         <Skeleton className="h-10 w-full" />
       </div>
@@ -85,8 +82,6 @@ export function CustomExamForm() {
 
   return (
     <div className="space-y-4">
-      <ExamNameInput customName={customName} setCustomName={setCustomName} />
-
       <div className="space-y-2">
         <TopicSelector
           selectedTopics={selectedTopics}
