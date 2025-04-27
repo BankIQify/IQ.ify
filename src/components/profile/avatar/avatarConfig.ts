@@ -36,6 +36,7 @@ export interface AvatarConfig {
   eyebrowType: string;
   mouthType: string;
   skinColor: string;
+  mood: string;
 }
 
 export type AvatarOptionKey = keyof AvatarConfig;
@@ -53,6 +54,7 @@ export interface AvatarOptionValues {
   eyebrowType: readonly string[];
   mouthType: readonly string[];
   skinColor: readonly string[];
+  mood: readonly string[];
 }
 
 export const avatarOptions: AvatarOptionValues = {
@@ -109,8 +111,19 @@ export const avatarOptions: AvatarOptionValues = {
   ] as const,
   skinColor: [
     'Tanned', 'Yellow', 'Pale', 'Light', 'Brown', 'DarkBrown', 'Black'
+  ] as const,
+  mood: [
+    'default', 'excited', 'calm', 'happy', 'serious'
   ] as const
 } as const;
+
+export const moods = [
+  { value: "default", label: "Default" },
+  { value: "excited", label: "Excited" },
+  { value: "calm", label: "Calm" },
+  { value: "happy", label: "Happy" },
+  { value: "serious", label: "Serious" }
+];
 
 export const defaultConfig: AvatarConfig = {
   gender: 'male',
@@ -124,7 +137,8 @@ export const defaultConfig: AvatarConfig = {
   eyeType: 'Default',
   eyebrowType: 'Default',
   mouthType: 'Default',
-  skinColor: 'Light'
+  skinColor: 'Light',
+  mood: 'default'
 };
 
 export function generateAvatarUrl(config: Partial<AvatarConfig> = {}): string {

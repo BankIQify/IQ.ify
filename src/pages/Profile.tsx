@@ -2,15 +2,18 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { AvatarCreator } from "@/components/profile/AvatarCreator";
+import AvatarCreator from "@/components/profile/AvatarCreator";
 import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans";
 import { Navigate, useSearchParams, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { motion } from "framer-motion";
+import { ChevronRight } from "lucide-react";
 
 const Profile = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   
@@ -49,95 +52,173 @@ const Profile = () => {
     });
   };
 
+  const handleUpdateProfile = async (data: any) => {
+    try {
+      await updateProfile(data);
+      toast({
+        title: "Profile Updated",
+        description: "Your profile has been successfully updated.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update profile. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="page-container max-w-5xl mx-auto py-8 px-4">
-      <div className="mb-8 flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Your Account</h1>
-        <Link to="/avatar-creator">
-          <Button variant="outline" className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 hover:bg-blue-100">
-            Avatar Creator
-          </Button>
-        </Link>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-gradient-to-b from-blue-50 to-purple-50 border-blue-100">
-          <CardHeader>
-            <CardTitle className="text-blue-700">Profile</CardTitle>
-            <CardDescription>Your account information</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            <Avatar className="w-24 h-24 mb-4 border-4 border-white shadow-md">
-              {profile?.avatar_url ? (
-                <AvatarImage src={profile.avatar_url} alt="User avatar" />
-              ) : (
-                <AvatarFallback className="bg-gradient-to-r from-blue-400 to-purple-400 text-white">
-                  {displayName.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              )}
-            </Avatar>
-            <h3 className="text-xl font-semibold">{displayName}</h3>
-            {profile?.username && (
-              <p className="text-gray-500">@{profile.username}</p>
+    <div className="container mx-auto py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="space-y-8">
+          {/* Profile Header */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8 relative">
+            {profile?.subscription_status === 'active' && profile?.subscription_tier === 'pro' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="absolute top-0 right-0 -mt-4 -mr-4 z-10"
+              >
+                <div className="relative">
+                  {/* Ribbon Background */}
+                  <div className="absolute -left-4 -top-4 w-24 h-24 bg-yellow-400/20 transform rotate-45 rounded-full blur-lg"></div>
+                  <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-yellow-400/20 transform rotate-45 rounded-full blur-lg"></div>
+
+                  {/* Ribbon */}
+                  <div className="relative bg-yellow-400 text-white px-6 py-2 rounded-full shadow-lg">
+                    <div className="text-sm font-bold">PRO</div>
+                  </div>
+
+                  {/* Trophy Icon */}
+                  <div className="absolute -left-2 -top-2 transform rotate-45">
+                    <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" className="w-4 h-4">
+                        <path d="M12 2L14.293 5.293L17.586 2L22 7L19.414 9.586L21.707 13L24 15.293L19.414 20.886L17.586 23L12 18L6.414 23L4.586 20.886L0 15.293L2.293 13L4.586 9.586L1.914 7L6.414 2L8.707 5.293L12 2z"/>
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Ribbon Ends */}
+                  <div className="absolute -right-2 -bottom-2 transform rotate-45">
+                    <div className="w-6 h-6 bg-yellow-400 rounded-full"></div>
+                  </div>
+                </div>
+              </motion.div>
             )}
-            <p className="mt-2 text-center">{user.email}</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="md:col-span-2 bg-gradient-to-b from-green-50 to-teal-50 border-green-100">
-          <CardHeader>
-            <CardTitle className="text-green-700">Subscription</CardTitle>
-            <CardDescription>Your current subscription plan</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="p-4 bg-white rounded-lg mb-4 border border-green-100 shadow-sm">
-              <p className="font-medium text-lg text-green-700">
-                {profile?.subscription_tier 
-                  ? `${profile.subscription_tier.charAt(0).toUpperCase() + profile.subscription_tier.slice(1)} Plan` 
-                  : "Free Plan"}
-              </p>
-              <p className="text-gray-500">
-                {profile?.subscription_status === "active" 
-                  ? `Active until ${new Date(profile?.subscription_expires_at || "").toLocaleDateString()}`
-                  : "No active subscription"}
-              </p>
+
+            <div className="flex items-center gap-4">
+              <Avatar className="h-24 w-24 md:h-32 md:w-32">
+                {profile?.avatar_url ? (
+                  <AvatarImage src={profile.avatar_url} alt="User avatar" />
+                ) : (
+                  <AvatarFallback className="bg-[#00FF7F] text-white">
+                    {displayName.charAt(0)}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <div>
+                <h1 className="text-3xl font-bold mb-2">Welcome, {displayName}!</h1>
+                <p className="text-gray-600">
+                  {profile?.bio || "Edit your profile to add a bio"}
+                </p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-blue-100/30">
-          <TabsTrigger value="subscription" className="data-[state=active]:bg-green-100 data-[state=active]:text-green-700">Subscription</TabsTrigger>
-          <TabsTrigger value="settings" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">Account Settings</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="subscription" className="mt-6">
-          <Card className="p-6 bg-gradient-to-b from-green-50 to-teal-50 border-green-100">
-            <CardHeader className="px-0 pt-0">
-              <CardTitle className="text-green-700">Choose Your Subscription</CardTitle>
-              <CardDescription>
-                Upgrade your account to get full access to all features
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0 pb-0">
-              <SubscriptionPlans />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="settings" className="mt-6">
-          <Card className="bg-gradient-to-b from-blue-50 to-indigo-50 border-blue-100">
-            <CardHeader>
-              <CardTitle className="text-blue-700">Account Settings</CardTitle>
-              <CardDescription>Manage your account preferences</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-500">Account settings will be implemented in a future update.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => handleUpdateProfile({ username: "new_username" })}
+              >
+                Edit Profile
+              </Button>
+              <Button 
+                variant="default" 
+                size="lg"
+                onClick={() => handleUpdateProfile({ bio: "new_bio" })}
+              >
+                Update Bio
+              </Button>
+            </div>
+          </div>
+
+          {/* Progress Section */}
+          <div className="bg-white/5 backdrop-blur-sm p-6 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4">Progress Overview</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-4 bg-white/10 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">Practice Sessions</h3>
+                <div className="text-3xl font-bold">{profile?.practice_sessions || 0}</div>
+                <p className="text-gray-600">Total practice sessions completed</p>
+              </div>
+              <div className="p-4 bg-white/10 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">Correct Answers</h3>
+                <div className="text-3xl font-bold">{profile?.correct_answers || 0}</div>
+                <p className="text-gray-600">Total correct answers</p>
+              </div>
+              <div className="p-4 bg-white/10 rounded-lg">
+                <h3 className="text-lg font-medium mb-2">Time Spent</h3>
+                <div className="text-3xl font-bold">{profile?.time_spent || 0}h</div>
+                <p className="text-gray-600">Total time spent learning</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs Section */}
+          <Tabs defaultValue={activeTab} onValueChange={handleTabChange}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="subscription">Subscription</TabsTrigger>
+              <TabsTrigger value="avatar">Avatar</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="subscription" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Current Plan</CardTitle>
+                  <CardDescription>
+                    {profile?.subscription_status === 'active' ? (
+                      <span className="text-green-600 font-medium">
+                        Active Subscription
+                      </span>
+                    ) : (
+                      <span className="text-yellow-600 font-medium">
+                        Trial Period
+                      </span>
+                    )}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SubscriptionPlans />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="avatar" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Customize Your Avatar</CardTitle>
+                  <CardDescription>
+                    Create and customize your unique IQify avatar
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AvatarCreator 
+                    avatarConfig={profile?.avatar_config || {}}
+                    onConfigChange={(config) => handleUpdateProfile({ avatar_config: config })}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </motion.div>
     </div>
   );
 };

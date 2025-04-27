@@ -1,0 +1,183 @@
+/* Background gradient animations */
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Text color animations */
+@keyframes textGlow {
+  0% {
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Card hover effects */
+@keyframes cardPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Feature list animation */
+@keyframes featureSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button hover effects */
+@keyframes buttonPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Section separator animation */
+@keyframes separatorWave {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Gradient overlay for cards */
+.about-card {
+  background: linear-gradient(135deg, rgba(48, 172, 233, 0.1) 0%, rgba(255, 105, 180, 0.1) 100%);
+}
+
+/* Hero section styles */
+.hero-section {
+  background: linear-gradient(135deg, rgba(48, 172, 233, 0.05) 0%, rgba(255, 105, 180, 0.05) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(48, 172, 233, 0.1) 0%, rgba(255, 105, 180, 0.1) 100%);
+  animation: gradientBG 20s ease infinite;
+}
+
+/* Pricing card styles */
+.pricing-card {
+  background: linear-gradient(135deg, rgba(48, 172, 233, 0.05) 0%, rgba(255, 105, 180, 0.05) 100%);
+  border: 1px solid rgba(48, 172, 233, 0.1);
+  transition: all 0.3s ease;
+}
+
+.pricing-card:hover {
+  border: 1px solid rgba(48, 172, 233, 0.3);
+  box-shadow: 0 0 30px rgba(48, 172, 233, 0.2);
+  transform: translateY(-5px);
+}
+
+/* Feature list styles */
+.feature-list {
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, rgba(48, 172, 233, 0.05) 0%, rgba(255, 105, 180, 0.05) 100%);
+}
+
+/* Button styles */
+.pricing-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.pricing-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  background: linear-gradient(45deg, rgba(48, 172, 233, 0.2) 0%, rgba(255, 105, 180, 0.2) 100%);
+  transform: translate(-50%, -50%) rotate(45deg);
+  transition: all 0.5s ease;
+}
+
+.pricing-button:hover::before {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.2);
+}
+
+/* Section separator */
+.section-separator {
+  position: relative;
+  overflow: hidden;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(48, 172, 233, 0.1) 0%, rgba(255, 105, 180, 0.1) 100%);
+  animation: separatorWave 2s ease-in-out infinite;
+}
+
+/* Text styles */
+.hero-title {
+  animation: textGlow 3s ease-in-out infinite;
+}
+
+/* Card pulse animation */
+.card-pulse {
+  animation: cardPulse 2s ease-in-out infinite;
+}
+
+/* Feature slide animation */
+.feature-slide {
+  animation: featureSlide 0.5s ease-out forwards;
+}
+
+/* Button pulse animation */
+.button-pulse {
+  animation: buttonPulse 1s ease-in-out infinite;
+}

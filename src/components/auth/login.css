@@ -1,0 +1,199 @@
+@keyframes float1 {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(300px, -200px) scale(1.1);
+  }
+  50% {
+    transform: translate(600px, 0px) scale(0.9);
+  }
+  75% {
+    transform: translate(300px, 200px) scale(1.1);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes float2 {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(-300px, -200px) scale(1.1);
+  }
+  50% {
+    transform: translate(-600px, 0px) scale(0.9);
+  }
+  75% {
+    transform: translate(-300px, 200px) scale(1.1);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes float3 {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(300px, 200px) scale(1.1);
+  }
+  50% {
+    transform: translate(600px, 0px) scale(0.9);
+  }
+  75% {
+    transform: translate(300px, -200px) scale(1.1);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes float4 {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(-300px, 200px) scale(1.1);
+  }
+  50% {
+    transform: translate(-600px, 0px) scale(0.9);
+  }
+  75% {
+    transform: translate(-300px, -200px) scale(1.1);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes float5 {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(300px, -200px) scale(1.1);
+  }
+  50% {
+    transform: translate(600px, 0px) scale(0.9);
+  }
+  75% {
+    transform: translate(300px, 200px) scale(1.1);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-iteration-count: infinite;
+  filter: blur(20px);
+}
+
+/* Multiple bubbles with different colors and sizes */
+.bubble-1 {
+  width: 120px;
+  height: 120px;
+  top: 20%;
+  left: 30%;
+  background: #1EAEDB;
+  opacity: 0.3;
+  animation: float1 3s infinite;
+}
+
+.bubble-2 {
+  width: 80px;
+  height: 80px;
+  top: 10%;
+  left: 70%;
+  background: #FF6B6B; /* Coral */
+  opacity: 0.4;
+  animation: float2 3.5s infinite;
+}
+
+.bubble-3 {
+  width: 100px;
+  height: 100px;
+  bottom: 25%;
+  left: 50%;
+  background: #4ECDC4; /* Turquoise */
+  opacity: 0.5;
+  animation: float3 4s infinite;
+}
+
+.bubble-4 {
+  width: 90px;
+  height: 90px;
+  bottom: 15%;
+  right: 30%;
+  background: #45B7D1; /* Sky Blue */
+  opacity: 0.4;
+  animation: float4 4.5s infinite;
+}
+
+.bubble-5 {
+  width: 90px;
+  height: 90px;
+  top: 35%;
+  right: 45%;
+  background: #FFEEAD; /* Yellow */
+  opacity: 0.3;
+  animation: float5 5s infinite;
+}
+
+/* Additional bubbles */
+.bubble-6 {
+  width: 150px;
+  height: 150px;
+  top: 40%;
+  left: 20%;
+  background: #9B59B6; /* Purple */
+  opacity: 0.4;
+  animation: float1 4s infinite;
+}
+
+.bubble-7 {
+  width: 70px;
+  height: 70px;
+  top: 5%;
+  left: 80%;
+  background: #3498DB; /* Blue */
+  opacity: 0.5;
+  animation: float2 3s infinite;
+}
+
+.bubble-8 {
+  width: 110px;
+  height: 110px;
+  bottom: 30%;
+  left: 60%;
+  background: #E67E22; /* Orange */
+  opacity: 0.45;
+  animation: float3 3.5s infinite;
+}
+
+.bubble-9 {
+  width: 100px;
+  height: 100px;
+  bottom: 20%;
+  right: 50%;
+  background: #2ECC71; /* Green */
+  opacity: 0.4;
+  animation: float4 4s infinite;
+}
+
+.bubble-10 {
+  width: 80px;
+  height: 80px;
+  top: 50%;
+  right: 25%;
+  background: #E74C3C; /* Red */
+  opacity: 0.35;
+  animation: float5 4.5s infinite;
+}

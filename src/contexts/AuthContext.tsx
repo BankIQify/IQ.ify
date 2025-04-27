@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { createBrowserClient } from '@supabase/ssr';
 import type { Profile, ProfileData } from "@/types/auth/types";
-import { User, Session } from "@supabase/supabase-js";
+import { User, Session, AuthError, Provider } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { isAdminProfile, checkAdminStatus } from "@/types/auth/types";
 
@@ -11,7 +11,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isDataInput: boolean;
   authInitialized: boolean;
-  authError: Error | null;
+  authError: AuthError | null;
   loading: boolean;
   signOut: () => Promise<void>;
   signInWithPassword: (email: string, password: string) => Promise<any>;
@@ -21,11 +21,11 @@ interface AuthContextType {
   logActivity: (activityType: string, details?: any, success?: boolean) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -37,13 +37,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isDataInput, setIsDataInput] = useState(false);
   const [authInitialized, setAuthInitialized] = useState(false);
-  const [authError, setAuthError] = useState<Error | null>(null);
+  const [authError, setAuthError] = useState<AuthError | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   // Create the Supabase client inside the component
   const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    import.meta.env.VITE_SUPABASE_URL,
+    import.meta.env.VITE_SUPABASE_ANON_KEY
   );
 
   const updateRoleState = useCallback(async (profile: Profile | null) => {
@@ -80,6 +81,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const initializeAuth = useCallback(async (session: Session | null) => {
     try {
+      setLoading(true);
       if (session?.user) {
         const { data: profile, error } = await supabase
           .from('profiles')
@@ -99,170 +101,185 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setProfile(typedProfile);
           await updateRoleState(typedProfile);
         }
-      } else {
-        setProfile(null);
-        await updateRoleState(null);
       }
+      setUser(session?.user ?? null);
+      setAuthInitialized(true);
     } catch (error) {
       console.error('Error initializing auth:', error);
-      setAuthError(error as Error);
-      setProfile(null);
-      await updateRoleState(null);
+      setAuthError(error as AuthError);
+    } finally {
+      setLoading(false);
     }
   }, [supabase, updateRoleState]);
 
   useEffect(() => {
-    let mounted = true;
+    // Get current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      initializeAuth(session);
+    });
 
-    const initialize = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting session:', error);
-          if (mounted) {
-            setAuthError(error);
-            setAuthInitialized(true);
-          }
-          return;
-        }
-
-        if (mounted) {
-          setUser(session?.user ?? null);
-          await initializeAuth(session);
-          setAuthInitialized(true);
-        }
-      } catch (error) {
-        console.error('Error during auth initialization:', error);
-        if (mounted) {
-          setAuthError(error as Error);
-          setAuthInitialized(true);
-        }
-      }
-    };
-
-    initialize();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!mounted) return;
-
-      if (event === 'SIGNED_IN') {
-        setUser(session?.user ?? null);
-        await initializeAuth(session);
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null);
-        setProfile(null);
-        setIsAdmin(false);
-        setIsDataInput(false);
-        setAuthInitialized(true);
-      }
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      initializeAuth(session);
     });
 
     return () => {
-      mounted = false;
       subscription.unsubscribe();
     };
-  }, [initializeAuth, supabase]);
+  }, [initializeAuth, supabase.auth]);
 
-  const value: AuthContextType = {
-    user,
-    profile,
-    isAdmin,
-    isDataInput,
-    authInitialized,
-    authError,
-    loading: !authInitialized,
-    signInWithPassword: async (email: string, password: string) => {
-      try {
-        setAuthError(null);
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        return data;
-      } catch (error) {
-        setAuthError(error as Error);
-        throw error;
-      }
-    },
-    signInWithGoogle: async () => {
-      try {
-        setAuthError(null);
-        const { data, error } = await supabase.auth.signInWithOAuth({ 
-          provider: 'google',
-          options: {
-            redirectTo: `${window.location.origin}/auth/callback`
-          }
-        });
-        if (error) throw error;
-        return data;
-      } catch (error) {
-        setAuthError(error as Error);
-        throw error;
-      }
-    },
-    signOut: async () => {
-      try {
-        setAuthError(null);
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-      } catch (error) {
-        setAuthError(error as Error);
-        throw error;
-      }
-    },
-    signUp: async (email: string, password: string, profileData: ProfileData) => {
-      try {
-        setAuthError(null);
-        const { data, error } = await supabase.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            data: profileData
-          }
-        });
-        if (error) throw error;
-        return data;
-      } catch (error) {
-        setAuthError(error as Error);
-        throw error;
-      }
-    },
-    updateProfile: async (data: ProfileData) => {
-      try {
-        setAuthError(null);
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .update(data)
-          .eq('id', user?.id)
-          .select()
-          .single();
-        if (error) throw error;
-        return profile as Profile;
-      } catch (error) {
-        setAuthError(error as Error);
-        throw error;
-      }
-    },
-    logActivity: async (activityType: string, details?: any, success?: boolean) => {
-      if (!user) return;
-      try {
-        const { error } = await supabase
-          .from('user_activities')
-          .insert({
-            user_id: user.id,
-            activity_type: activityType,
-            details,
-            success: success ?? true
-          });
-        if (error) throw error;
-      } catch (error) {
-        console.error('Error logging activity:', error);
-      }
+  const signOut = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      setProfile(null);
+      setIsAdmin(false);
+      setIsDataInput(false);
+      setAuthInitialized(false);
+      toast({
+        title: "Success",
+        description: "Successfully signed out",
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      setAuthError(error as AuthError);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [supabase.auth, toast]);
+
+  const signInWithPassword = useCallback(async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      await initializeAuth(data.session);
+      return data;
+    } catch (error) {
+      console.error('Error signing in:', error);
+      setAuthError(error as AuthError);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase.auth, initializeAuth]);
+
+  const signInWithGoogle = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+
+      if (error) throw error;
+      await initializeAuth(data.session);
+      return data;
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+      setAuthError(error as AuthError);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase.auth, initializeAuth]);
+
+  const signUp = useCallback(async (email: string, password: string, profileData: ProfileData) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: profileData,
+        },
+      });
+
+      if (error) throw error;
+      await initializeAuth(data.session);
+      return data;
+    } catch (error) {
+      console.error('Error signing up:', error);
+      setAuthError(error as AuthError);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase.auth, initializeAuth]);
+
+  const updateProfile = useCallback(async (data: ProfileData) => {
+    try {
+      setLoading(true);
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .update(data)
+        .eq('id', user?.id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      setProfile(profile as unknown as Profile);
+      await updateRoleState(profile as unknown as Profile);
+      return profile as unknown as Profile;
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setAuthError(error as AuthError);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, user?.id, updateRoleState]);
+
+  const logActivity = useCallback(async (activityType: string, details?: any, success?: boolean) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('user_activity')
+        .insert([{
+          user_id: user?.id,
+          activity_type: activityType,
+          details: details || {},
+          success: success,
+          timestamp: new Date().toISOString(),
+        }]);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      setAuthError(error as AuthError);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, user?.id]);
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{
+      user,
+      profile,
+      isAdmin,
+      isDataInput,
+      authInitialized,
+      authError,
+      loading,
+      signOut,
+      signInWithPassword,
+      signInWithGoogle,
+      signUp,
+      updateProfile,
+      logActivity,
+    }}>
       {children}
     </AuthContext.Provider>
   );
-}; 
+};

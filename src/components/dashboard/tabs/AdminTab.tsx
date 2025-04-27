@@ -9,23 +9,23 @@ import {
   Users, 
   Settings, 
   ShieldCheck, 
-  ActivitySquare,
+  Activity,
   FileText,
   LayoutDashboard,
-  Shield,
-  Activity,
+  ActivitySquare,
   StickyNote,
   FileEdit,
   LineChart,
-  List
+  List,
+  PiSquare
 } from "lucide-react";
 import { AdminUsersList } from "@/components/dashboard/admin/AdminUsersList";
 import { AdminRolesManager } from "@/components/dashboard/admin/AdminRolesManager";
 import { AdminActivityLog } from "@/components/dashboard/admin/AdminActivityLog";
 import { ActivityDashboard } from "@/components/dashboard/admin/ActivityDashboard";
 import { AdminDashboard } from "@/components/dashboard/admin/AdminDashboard";
-import { AboutUsManager } from "@/components/admin/AboutUsManager";
-import { DifferentiatorManager } from "@/components/admin/DifferentiatorManager";
+import { HighlightsManager } from "@/components/dashboard/admin/HighlightsManager";
+import { DataInputMonitoring } from "@/components/dashboard/data-input/DataInputMonitoring";
 
 export const AdminTab = () => {
   return (
@@ -36,24 +36,20 @@ export const AdminTab = () => {
           Overview
         </TabsTrigger>
         <TabsTrigger value="users" className="flex items-center gap-2">
-          <Users className="w-4 h-4" />
+          <PiSquare className="w-4 h-4" />
           User Management
         </TabsTrigger>
-        <TabsTrigger value="roles" className="flex items-center gap-2">
-          <Shield className="w-4 h-4" />
-          Roles & Permissions
+        <TabsTrigger value="monitor" className="flex items-center gap-2">
+          <FileText className="w-4 h-4" />
+          Data Input Monitoring
         </TabsTrigger>
         <TabsTrigger value="activity" className="flex items-center gap-2">
           <Activity className="w-4 h-4" />
           Activity Monitoring
         </TabsTrigger>
-        <TabsTrigger value="differentiators" className="flex items-center gap-2">
-          <StickyNote className="w-4 h-4" />
-          Differentiators
-        </TabsTrigger>
-        <TabsTrigger value="about" className="flex items-center gap-2">
-          <FileEdit className="w-4 h-4" />
-          About Us
+        <TabsTrigger value="highlights" className="flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4" />
+          Highlights from HQ
         </TabsTrigger>
       </TabsList>
 
@@ -76,10 +72,10 @@ export const AdminTab = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+              <PiSquare className="h-5 w-5" />
               User Management
             </CardTitle>
-            <CardDescription>Manage user accounts, roles and permissions</CardDescription>
+            <CardDescription>Manage user accounts and permissions</CardDescription>
           </CardHeader>
           <CardContent>
             <AdminUsersList />
@@ -87,17 +83,17 @@ export const AdminTab = () => {
         </Card>
       </TabsContent>
 
-      <TabsContent value="roles">
+      <TabsContent value="monitor">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5" />
-              Roles & Permissions
+              <FileText className="h-5 w-5" />
+              Data Input Monitoring
             </CardTitle>
-            <CardDescription>Manage user roles and associated permissions</CardDescription>
+            <CardDescription>Monitor data input activities and statistics</CardDescription>
           </CardHeader>
           <CardContent>
-            <AdminRolesManager />
+            <DataInputMonitoring />
           </CardContent>
         </Card>
       </TabsContent>
@@ -106,50 +102,28 @@ export const AdminTab = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ActivitySquare className="h-5 w-5" />
+              <Activity className="h-5 w-5" />
               Activity Monitoring
             </CardTitle>
-            <CardDescription>Monitor user activity and system events</CardDescription>
+            <CardDescription>View system-wide activity logs</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="dashboard" className="w-full">
-              <TabsList className="mb-4">
-                <TabsTrigger value="dashboard" className="flex items-center gap-2">
-                  <LineChart className="w-4 h-4" />
-                  Activity Dashboard
-                </TabsTrigger>
-                <TabsTrigger value="logs" className="flex items-center gap-2">
-                  <List className="w-4 h-4" />
-                  Activity Logs
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="dashboard">
-                <ActivityDashboard />
-              </TabsContent>
-              <TabsContent value="logs">
-                <AdminActivityLog />
-              </TabsContent>
-            </Tabs>
+            <AdminActivityLog />
           </CardContent>
         </Card>
       </TabsContent>
 
-      <TabsContent value="differentiators">
-        <DifferentiatorManager />
-      </TabsContent>
-
-      <TabsContent value="about">
+      <TabsContent value="highlights">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileEdit className="h-5 w-5" />
-              About Us Content
+              <ShieldCheck className="h-5 w-5" />
+              Highlights from HQ
             </CardTitle>
-            <CardDescription>Manage the content displayed on the About Us page</CardDescription>
+            <CardDescription>Manage and update platform highlights</CardDescription>
           </CardHeader>
           <CardContent>
-            <AboutUsManager />
-            <DifferentiatorManager />
+            <HighlightsManager />
           </CardContent>
         </Card>
       </TabsContent>

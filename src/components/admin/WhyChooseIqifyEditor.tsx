@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Upload, Save, X, Link } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { Progress } from "@/components/ui/progress";
 import { useAdminSave } from '@/contexts/AdminSaveContext';
 import { AdminWrapper } from './AdminWrapper';
@@ -24,12 +24,13 @@ interface WhyChooseCard {
 export const WhyChooseIqifyEditor = () => {
   const { toast } = useToast();
   const { registerSaveHandler, unregisterSaveHandler } = useAdminSave();
-  const supabase = createClientComponentClient();
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+  const supabase = createClient(supabaseUrl, supabaseKey);
   const [cards, setCards] = useState<WhyChooseCard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
