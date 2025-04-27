@@ -4,7 +4,6 @@ import { MultiStepSignUp } from "@/components/auth/MultiStepSignUp";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { Logo } from "@/components/Logo";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -33,7 +32,14 @@ const Auth = () => {
       {/* Logo */}
       <Link to="/" className="absolute top-6 left-6 z-10">
         <div className="w-16 h-16 rounded-full bg-[#1EAEDB]/10 backdrop-blur-sm shadow-lg shadow-[#1EAEDB]/20 flex items-center justify-center hover:bg-[#1EAEDB]/20 transition-colors duration-200">
-          <Logo className="w-10 h-auto" />
+          <img 
+            src="/lovable-uploads/fa3e7201-848d-4ab9-a19d-74319434852e.png" 
+            alt="IQify Logo" 
+            className="w-10 h-auto"
+            onError={(e) => {
+              e.currentTarget.src = '/logo.png';
+            }}
+          />
         </div>
       </Link>
 

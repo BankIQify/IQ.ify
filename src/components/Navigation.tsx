@@ -224,51 +224,9 @@ const Navigation = () => {
               <NavLinks 
                 isDataInput={isDataInput} 
                 isAdmin={isAdmin} 
-                user={user}
+                user={user} 
                 onMobileClick={toggleMobileMenu}
               />
-              {user ? (
-                <div className="flex flex-col space-y-2">
-                  {!isDataInput && (
-                    <Link 
-                      to="/avatar-creator" 
-                      className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-white/20 rounded-md font-medium text-white"
-                      onClick={toggleMobileMenu}
-                    >
-                      <Avatar className="h-6 w-6">
-                        {profile?.avatar_url ? (
-                          <AvatarImage 
-                            src={profile.avatar_url} 
-                            alt="User avatar"
-                          />
-                        ) : (
-                          <AvatarFallback className="bg-[#00FF7F] text-white text-xs">
-                            {profile?.name?.charAt(0) || profile?.username?.charAt(0) || "U"}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <span>Character</span>
-                    </Link>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSignOut}
-                    className="text-white hover:bg-white/20 justify-start"
-                  >
-                    Sign Out
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate("/auth")}
-                  className="text-white hover:bg-white/20 justify-start"
-                >
-                  Sign In
-                </Button>
-              )}
             </div>
           </div>
         )}
