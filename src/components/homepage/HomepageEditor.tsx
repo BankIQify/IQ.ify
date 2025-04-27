@@ -12,18 +12,6 @@ import type { Json } from "@/integrations/supabase/types";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { StatsManager } from "@/components/admin/StatsManager";
 
-interface Feature {
-  icon: string;
-  title: string;
-  description: string;
-}
-
-interface Testimonial {
-  name: string;
-  avatar: string;
-  quote: string;
-}
-
 interface HomepageContent {
   id: string;
   hero_title: string | null;
@@ -44,6 +32,30 @@ interface HomepageContent {
   updated_at: string;
 }
 
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface Testimonial {
+  name: string;
+  avatar: string;
+  quote: string;
+}
+
+interface StatsCard {
+  id: string;
+  highlight: string;
+  supportingText: string;
+}
+
+interface SocialProof {
+  rating: string;
+  students: string;
+  science: string;
+}
+
 export const HomepageEditor = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -51,90 +63,136 @@ export const HomepageEditor = () => {
   const { data: content, refetch } = useQuery({
     queryKey: ["homepage-content"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: rawData, error } = await supabase
         .from("homepage_content")
         .select("*")
+        .limit(1)
         .single();
-
+    
       if (error) throw error;
-      
+    
+      // Type assertion to match our expected type
+      const data = rawData as unknown as HomepageContent;
+    
       // Transform the fetched data to match our expected type
       const transformedData: HomepageContent = {
-        ...data,
-        features: data.features ? (data.features as unknown as Feature[]) : [],
-        social_proof: data.social_proof ? (data.social_proof as unknown as { rating: string; students: string; science: string }) : null,
-        testimonials: data.testimonials ? (data.testimonials as unknown as Testimonial[]) : [],
-        stats_cards: data.stats_cards ? (data.stats_cards as unknown as { id: string; highlight: string; supportingText: string }[]) : []
+        id: data.id,
+        hero_title: typeof data.hero_title === 'string' ? data.hero_title : "",
+        hero_subtitle: typeof data.hero_subtitle === 'string' ? data.hero_subtitle : "",
+        features: Array.isArray(data.features) ? data.features : [],
+        social_proof: typeof data.social_proof === 'object' ? {
+          rating: typeof data.social_proof.rating === 'string' ? data.social_proof.rating : "4.8 rating",
+          students: typeof data.social_proof.students === 'string' ? data.social_proof.students : "Trusted by over 8,000+ students",
+          science: typeof data.social_proof.science === 'string' ? data.social_proof.science : "Backed by cognitive science"
+        } : {
+          rating: "4.8 rating",
+          students: "Trusted by over 8,000+ students",
+          science: "Backed by cognitive science"
+        },
+        testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
+        stats_cards: Array.isArray(data.stats_cards) ? data.stats_cards : [],
+        created_at: typeof data.created_at === 'string' ? data.created_at : new Date().toISOString(),
+        updated_at: typeof data.updated_at === 'string' ? data.updated_at : new Date().toISOString()
       };
-      
+    
       return transformedData;
-    },
+    }
   });
 
-  const [formData, setFormData] = useState<Partial<HomepageContent>>({
-    hero_title: "",
-    hero_subtitle: "",
-    features: [],
+  const [formData, setFormData] = useState<HomepageContent>({
+    id: crypto.randomUUID(),
+    hero_title: null,
+    hero_subtitle: null,
+    features: [{
+      icon: "",
+      title: "",
+      description: ""
+    }],
     social_proof: {
       rating: "4.8 rating",
       students: "Trusted by over 8,000+ students",
       science: "Backed by cognitive science"
     },
-    testimonials: [],
-    stats_cards: []
+    testimonials: [{
+      name: "",
+      avatar: "",
+      quote: ""
+    }],
+    stats_cards: [{
+      id: crypto.randomUUID(),
+      highlight: "",
+      supportingText: ""
+    }],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   });
 
   // Update form data when content is loaded
   useEffect(() => {
     if (content) {
       setFormData({
-        hero_title: content.hero_title || "",
-        hero_subtitle: content.hero_subtitle || "",
-        features: content.features || [],
-        social_proof: content.social_proof || {
-          rating: "4.8 rating",
-          students: "Trusted by over 8,000+ students",
-          science: "Backed by cognitive science"
+        id: content.id,
+        hero_title: content.hero_title ?? "",
+        hero_subtitle: content.hero_subtitle ?? "",
+        features: content.features ?? [],
+        social_proof: {
+          rating: formData.social_proof?.rating || null,
+          students: formData.social_proof?.students || null,
+          science: formData.social_proof?.science || null
         },
-        testimonials: content.testimonials || [],
-        stats_cards: content.stats_cards || []
+        testimonials: content.testimonials ?? [],
+        stats_cards: content.stats_cards ?? [],
+        created_at: content.created_at,
+        updated_at: content.updated_at
       });
     }
   }, [content]);
-
   const handleSave = async () => {
     try {
-      const dataToSave = {
-        id: content?.id || "default",
-        hero_title: formData.hero_title,
-        hero_subtitle: formData.hero_subtitle,
-        features: formData.features as unknown as Json,
-        social_proof: formData.social_proof as unknown as Json,
-        testimonials: formData.testimonials as unknown as Json,
-        stats_cards: formData.stats_cards as unknown as Json
+      if (!content?.id) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "No content record found to update",
+        });
+        return;
+      }
+  
+      const dataToSave: Partial<HomepageContent> = {
+        hero_title: formData.hero_title === "" ? null : formData.hero_title,
+        hero_subtitle: formData.hero_subtitle === "" ? null : formData.hero_subtitle,
+        features: formData.features.length === 0 ? null : formData.features,
+        social_proof: {
+          rating: formData.social_proof?.rating || null,
+          students: formData.social_proof?.students || null,
+          science: formData.social_proof?.science || null
+        },
+        testimonials: formData.testimonials.length === 0 ? null : formData.testimonials,
+        stats_cards: formData.stats_cards.length === 0 ? null : formData.stats_cards
       };
-
+  
       const { error } = await supabase
         .from("homepage_content")
-        .upsert(dataToSave);
-
-      if (error) throw error;
-
+        .update(dataToSave)
+        .eq('id', content.id);
+  
       toast({
         title: "Success",
         description: "Homepage content updated successfully",
       });
+      
       refetch();
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving homepage content:", error);
       toast({
-        title: "Error",
-        description: "Failed to update homepage content",
         variant: "destructive",
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
       });
     }
   };
+
 
   const addFeature = () => {
     setFormData(prev => ({
@@ -182,13 +240,13 @@ export const HomepageEditor = () => {
     }));
   };
 
-  const updateSocialProof = (field: keyof typeof formData.social_proof, value: string) => {
+  const updateSocialProof = (field: keyof SocialProof, value: string) => {
     setFormData(prev => ({
       ...prev,
       social_proof: {
-        rating: prev.social_proof?.rating || "",
-        students: prev.social_proof?.students || "",
-        science: prev.social_proof?.science || "",
+        rating: prev.social_proof?.rating ?? "",
+        students: prev.social_proof?.students ?? "",
+        science: prev.social_proof?.science ?? "",
         [field]: value
       }
     }));
@@ -220,7 +278,7 @@ export const HomepageEditor = () => {
                 <Label htmlFor="hero_title">Title</Label>
                 <Input
                   id="hero_title"
-                  value={formData.hero_title || ""}
+                  value={formData.hero_title ?? ""}
                   onChange={(e) => setFormData(prev => ({ ...prev, hero_title: e.target.value }))}
                   placeholder="Enter hero title"
                 />
@@ -229,7 +287,7 @@ export const HomepageEditor = () => {
                 <Label htmlFor="hero_subtitle">Subtitle</Label>
                 <Textarea
                   id="hero_subtitle"
-                  value={formData.hero_subtitle || ""}
+                  value={formData.hero_subtitle ?? ""}
                   onChange={(e) => setFormData(prev => ({ ...prev, hero_subtitle: e.target.value }))}
                   placeholder="Enter hero subtitle"
                 />
@@ -291,7 +349,7 @@ export const HomepageEditor = () => {
               <div>
                 <Label>Rating</Label>
                 <Input
-                  value={formData.social_proof?.rating || ""}
+                  value={formData.social_proof?.rating ?? ""}
                   onChange={(e) => updateSocialProof("rating", e.target.value)}
                   placeholder="e.g., 4.8 rating"
                 />
@@ -299,7 +357,7 @@ export const HomepageEditor = () => {
               <div>
                 <Label>Students</Label>
                 <Input
-                  value={formData.social_proof?.students || ""}
+                  value={formData.social_proof?.students ?? ""}
                   onChange={(e) => updateSocialProof("students", e.target.value)}
                   placeholder="e.g., Trusted by over 8,000+ students"
                 />
@@ -307,7 +365,7 @@ export const HomepageEditor = () => {
               <div>
                 <Label>Science</Label>
                 <Input
-                  value={formData.social_proof?.science || ""}
+                  value={formData.social_proof?.science ?? ""}
                   onChange={(e) => updateSocialProof("science", e.target.value)}
                   placeholder="e.g., Backed by cognitive science"
                 />
@@ -377,7 +435,7 @@ export const HomepageEditor = () => {
           <Card className="p-6">
             <h3 className="text-xl font-semibold mb-4">Stats Cards</h3>
             <StatsManager
-              initialStats={formData.stats_cards || []}
+              initialStats={formData.stats_cards ?? []}
               onSave={(stats) => setFormData(prev => ({ ...prev, stats_cards: stats }))}
             />
           </Card>

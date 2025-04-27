@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
@@ -70,7 +70,7 @@ const cardStyles = [
   }
 ];
 
-export const AboutUs = () => {
+export const AboutUsHome = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [stats, setStats] = useState<StatCard[]>(defaultStats);
@@ -251,4 +251,4 @@ export const AboutUs = () => {
   );
 };
 
-export default AboutUs; 
+export default AboutUsHome; 
