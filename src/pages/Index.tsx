@@ -7,12 +7,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useState, useEffect } from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
-import { AboutUs } from "@/components/home/AboutUs";
+import { AboutIQify } from "@/components/home/AboutIQify";
+import { WhyChooseCards } from "@/components/home/WhyChooseCards";
 import { Testimonials } from "@/components/home/Testimonials";
 import { CustomAvatar } from "@/components/profile/avatar/CustomAvatar";
 import { defaultConfig } from "@/components/profile/avatar/avatarConfig";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogoCarousel } from "@/components/home/LogoCarousel";
+import LogoCarousel from "@/components/home/LogoCarousel";
 import { Icon } from "@/components/ui/icon";
 
 interface Feature {
@@ -70,8 +71,6 @@ const AVAILABLE_ICONS = [
 
 const Index = () => {
   const { user } = useAuth();
-  const [currentTestimonial, setCurrentTestimonial] = useState(0);
-  const [direction, setDirection] = useState(1);
   const { isAdmin } = useAuth();
 
   const { data: features = [], error: featuresError } = useQuery({
@@ -223,11 +222,6 @@ const Index = () => {
     }
   ];
 
-  const handleTestimonialChange = (newIndex: number) => {
-    setDirection(newIndex > currentTestimonial ? 1 : -1);
-    setCurrentTestimonial(newIndex);
-  };
-
   const { data: whyChooseData = [] } = useQuery({
     queryKey: ["why-choose-cards"],
     queryFn: async () => {
@@ -360,52 +354,14 @@ const Index = () => {
         </div>
       </section>
 
-      {/* About Us Section */}
+      {/* About IQify Section */}
       <section className="container mx-auto px-4 py-16">
-        <AboutUs />
+        <AboutIQify />
       </section>
 
-      {/* Features Section */}
+      {/* Why Choose IQify Section */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">Why Choose IQify?</h2>
-        <div className="space-y-16">
-          {whyChooseData.map((card, index) => (
-            <motion.div
-              key={card.id}
-              className="bg-white rounded-xl shadow-lg overflow-hidden"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                <div className="p-8 md:w-1/2 flex flex-col justify-center">
-                  <h3 className="text-2xl font-semibold mb-4">{card.title}</h3>
-                  <p className="text-muted-foreground text-lg">{card.description}</p>
-                </div>
-                <div className="w-full md:w-1/2 aspect-video">
-                  {card.media_type === 'video' ? (
-                    <video
-                      src={card.media_url}
-                      className="w-full h-full object-cover rounded-r-xl"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      crossOrigin="anonymous"
-                    />
-                  ) : (
-                    <img 
-                      src={card.media_url} 
-                      alt={card.media_alt_text || card.title}
-                      className="w-full h-full object-cover rounded-r-xl"
-                      crossOrigin="anonymous"
-                    />
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        <WhyChooseCards />
       </section>
 
       {/* Differentiators Section */}
