@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { detectDuplicateQuestions } from "../utils/duplicationDetector";
 import type { QuestionCategory, QuestionContent } from "@/types/questions";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
 import { PostgrestFilterBuilder, PostgrestQueryBuilder } from '@supabase/postgrest-js';
 
 interface Question {

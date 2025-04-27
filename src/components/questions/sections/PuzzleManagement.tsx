@@ -1,111 +1,69 @@
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Progress } from "@/components/ui/progress";
-import { AlertCircle, CheckCircle2, Users, Activity } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Fragment, useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Loader2 } from 'lucide-react';
 
-interface PuzzleStats {
-  totalPuzzles: number;
-  activeUsers: number;
-  puzzlesPerUser: number;
-  lastGenerated: string | null;
-  lowStockThemes: {
-    theme: string;
-    difficulty: string;
-    game_type: string;
-    count: number;
-    availablePerUser: number;
-  }[];
-  themeStats: {
-    theme: string;
-    difficulty: string;
-    game_type: string;
-    totalPuzzles: number;
-    avgPlays: number;
-    neverPlayed: number;
-    lastPlayed: string | null;
-  }[];
+interface StatsResponse {
+  total_puzzles: number;
+  active_users: number;
+  puzzles_per_user: number;
+  last_generated: string | null;
+  low_stock_themes: string; // JSON string
+  theme_stats: string; // JSON string
+}
+
+interface ThemeStats {
+  name: string;
+  game_type: string;
+  difficulty: string;
+  created_at: string;
+  last_played: string | null;
+}
+
+interface LowStockTheme {
+  theme: string;
+  difficulty: string;
+  availablePerUser: number;
 }
 
 const GAME_TYPE_LABELS: Record<string, string> = {
   word_search: "Word Search",
   crossword: "Crossword",
-  sudoku: "Sudoku",
   memory: "Memory Game",
   puzzle: "Puzzle",
-  quiz: "Quiz"
+  quiz: "Quiz",
+  spot_the_difference: "Spot the Difference",
+  trivia: "Trivia"
 };
 
 export function PuzzleManagement() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [stats, setStats] = useState<PuzzleStats | null>(null);
+  const [stats, setStats] = useState<StatsResponse | null>(null);
   const [selectedGameType, setSelectedGameType] = useState<string>("all");
   const { toast } = useToast();
 
-  const fetchPuzzleStats = async () => {
-    try {
-      // Get puzzle statistics
-      const { data: puzzleStats, error: statsError } = await supabase
-        .from('puzzle_statistics')
-        .select('*');
-
-      if (statsError) throw statsError;
-
-      // Get themes with low stock
-      const { data: lowStock, error: lowStockError } = await supabase
-        .rpc('get_low_stock_themes');
-
-      if (lowStockError) throw lowStockError;
-
-      // Calculate active users
-      const { count: activeUsers, error: userError } = await supabase
-        .from('auth.users')
-        .select('*', { count: 'exact', head: true })
-        .filter('last_sign_in_at', 'gte', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-
-      if (userError) throw userError;
-
-      const lastGenerated = puzzleStats?.[0]?.last_played ?? null;
-      const totalPuzzles = puzzleStats?.reduce((sum, stat) => sum + stat.total_puzzles, 0) ?? 0;
-      const puzzlesPerUser = totalPuzzles / (activeUsers ?? 1);
-      
-      setStats({
-        totalPuzzles,
-        activeUsers: activeUsers ?? 0,
-        puzzlesPerUser,
-        lastGenerated,
-        lowStockThemes: lowStock ?? [],
-        themeStats: puzzleStats ?? []
-      });
-    } catch (error) {
-      console.error('Error fetching puzzle stats:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch puzzle statistics",
-        variant: "destructive"
-      });
-    }
-  };
+  const filteredThemeStats = stats?.theme_stats ? JSON.parse(stats.theme_stats) as ThemeStats[] : [];
+  const filteredLowStock = stats?.low_stock_themes ? JSON.parse(stats.low_stock_themes) as LowStockTheme[] : [];
+  const uniqueGameTypes = stats ? Array.from(new Set(filteredThemeStats.map(stat => stat.game_type))) : [];
 
   const handleGeneratePuzzles = async () => {
+    setIsGenerating(true);
     try {
-      setIsGenerating(true);
-      
       const response = await fetch("/api/generate-puzzles", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`
+          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           gameType: selectedGameType === "all" ? undefined : selectedGameType
         })
       });
 
-      if (!response.ok) throw new Error("Failed to generate puzzles");
+      if (!response.ok) throw new Error('Failed to generate puzzles');
 
       const result = await response.json();
       
@@ -128,153 +86,181 @@ export function PuzzleManagement() {
     }
   };
 
-  const filteredThemeStats = stats?.themeStats.filter(
-    stat => selectedGameType === "all" || stat.game_type === selectedGameType
-  ) ?? [];
+  const fetchPuzzleStats = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('puzzle_stats')
+        .select('*')
+        .single();
 
-  const filteredLowStock = stats?.lowStockThemes.filter(
-    stat => selectedGameType === "all" || stat.game_type === selectedGameType
-  ) ?? [];
+      if (error) throw error;
+
+      setStats(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch puzzle stats",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     fetchPuzzleStats();
   }, []);
 
-  const uniqueGameTypes = stats 
-    ? Array.from(new Set(stats.themeStats.map(stat => stat.game_type)))
-    : [];
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Puzzle Management</h3>
-        <Button 
-          onClick={handleGeneratePuzzles} 
+        <h2 className="text-2xl font-bold">Puzzle Management</h2>
+        <Button
+          onClick={handleGeneratePuzzles}
           disabled={isGenerating}
+          className="bg-blue-600 hover:bg-blue-700"
         >
-          {isGenerating ? "Generating..." : "Generate New Puzzles"}
+          {isGenerating ? (
+            <Fragment>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </Fragment>
+          ) : (
+            'Generate Puzzles'
+          )}
         </Button>
       </div>
 
-      {stats && (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="p-4 border rounded-lg">
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-lg border bg-card p-6">
+          <h3 className="text-lg font-semibold mb-4">Statistics</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">Total Puzzles</div>
-              <div className="text-2xl font-bold">{stats.totalPuzzles}</div>
+              <div className="font-medium">{stats?.total_puzzles}</div>
             </div>
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                <div className="text-sm text-muted-foreground">Active Users</div>
-              </div>
-              <div className="text-2xl font-bold">{stats.activeUsers}</div>
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">Active Users</div>
+              <div className="font-medium">{stats?.active_users}</div>
             </div>
-            <div className="p-4 border rounded-lg">
-              <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4" />
-                <div className="text-sm text-muted-foreground">Puzzles per User</div>
-              </div>
-              <div className="text-2xl font-bold">{stats.puzzlesPerUser.toFixed(1)}</div>
-              <Progress 
-                value={(stats.puzzlesPerUser / 20) * 100} 
-                className="mt-2"
-              />
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-muted-foreground">Puzzles per User</div>
+              <div className="font-medium">{stats?.puzzles_per_user}</div>
             </div>
-            <div className="p-4 border rounded-lg">
+            <div className="flex items-center justify-between">
               <div className="text-sm text-muted-foreground">Last Generated</div>
-              <div className="text-2xl font-bold">
-                {stats.lastGenerated 
-                  ? new Date(stats.lastGenerated).toLocaleDateString() 
-                  : 'Never'}
-              </div>
+              <div className="font-medium">{stats?.last_generated}</div>
             </div>
           </div>
+        </div>
 
-          <Tabs defaultValue="all" className="mt-6" onValueChange={setSelectedGameType}>
-            <TabsList>
-              <TabsTrigger value="all">All Games</TabsTrigger>
-              {uniqueGameTypes.map(gameType => (
-                <TabsTrigger key={gameType} value={gameType}>
-                  {GAME_TYPE_LABELS[gameType] || gameType}
-                </TabsTrigger>
+        <div className="rounded-lg border bg-card p-6">
+          <h3 className="text-lg font-semibold mb-4">Low Stock Themes</h3>
+          <div className="space-y-4">
+            {filteredLowStock.map((theme, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {theme.theme} ({theme.difficulty})
+                </div>
+                <div className="font-medium">{theme.availablePerUser}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="all">All Puzzles</TabsTrigger>
+          {uniqueGameTypes.map((gameType) => (
+            <TabsTrigger key={gameType} value={gameType}>
+              {GAME_TYPE_LABELS[gameType] || gameType}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value="all" className="space-y-4">
+          <div className="flex items-center space-x-4">
+            <Label htmlFor="game-type">Game Type</Label>
+            <Select
+              value={selectedGameType}
+              onValueChange={setSelectedGameType}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a game type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                {uniqueGameTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {GAME_TYPE_LABELS[type] || type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-4">
+            {filteredThemeStats
+              .filter(stat => selectedGameType === "all" || stat.game_type === selectedGameType)
+              .map((stat, index) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">{stat.name}</h4>
+                    <div className="flex items-center space-x-2">
+                      <div className="text-sm text-muted-foreground">
+                        {GAME_TYPE_LABELS[stat.game_type] || stat.game_type}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {stat.difficulty}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Created</span>
+                      <span>{new Date(stat.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>Last Played</span>
+                      <span>{stat.last_played ? new Date(stat.last_played).toLocaleDateString() : 'Never'}</span>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </TabsList>
-
-            <TabsContent value="all" className="mt-4">
-              {filteredLowStock.length > 0 && (
-                <Alert className="bg-yellow-50 border-yellow-200">
-                  <AlertCircle className="h-4 w-4 text-yellow-600" />
-                  <AlertTitle className="text-yellow-800">Low Puzzle Stock</AlertTitle>
-                  <AlertDescription className="text-yellow-700">
-                    <ul className="list-disc list-inside">
-                      {filteredLowStock.map(({ theme, difficulty, game_type, count, availablePerUser }) => (
-                        <li key={`${game_type}-${theme}-${difficulty}`}>
-                          {GAME_TYPE_LABELS[game_type] || game_type} - {theme} ({difficulty}): {count} puzzles total, {availablePerUser} per user
-                        </li>
-                      ))}
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {filteredLowStock.length === 0 && (
-                <Alert className="bg-green-50 border-green-200">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                  <AlertTitle className="text-green-800">Puzzle Stock Healthy</AlertTitle>
-                  <AlertDescription className="text-green-700">
-                    All themes have sufficient puzzles for current user base.
-                  </AlertDescription>
-                </Alert>
-              )}
-            </TabsContent>
-
-            {uniqueGameTypes.map(gameType => (
-              <TabsContent key={gameType} value={gameType} className="mt-4">
-                <div className="grid grid-cols-1 gap-4">
-                  {filteredThemeStats
-                    .filter(stat => stat.game_type === gameType)
-                    .map((stat) => (
-                      <div 
-                        key={`${stat.game_type}-${stat.theme}-${stat.difficulty}`}
-                        className="p-4 border rounded-lg"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h5 className="font-medium">{stat.theme}</h5>
-                            <span className="text-sm text-muted-foreground">{stat.difficulty}</span>
-                          </div>
-                          <Badge 
-                            variant={stat.avgPlays > 5 ? "default" : "outline"}
-                            className="ml-2"
-                          >
-                            {stat.avgPlays.toFixed(1)} avg plays
-                          </Badge>
+          </div>
+        </TabsContent>
+        {uniqueGameTypes.map(gameType => (
+          <TabsContent key={gameType} value={gameType} className="space-y-4">
+            <div className="space-y-4">
+              {filteredThemeStats
+                .filter(stat => stat.game_type === gameType)
+                .map((stat, index) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-medium">{stat.name}</h4>
+                      <div className="flex items-center space-x-2">
+                        <div className="text-sm text-muted-foreground">
+                          {GAME_TYPE_LABELS[stat.game_type] || stat.game_type}
                         </div>
-                        <div className="mt-2 grid grid-cols-3 gap-4 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Total Puzzles:</span>
-                            <span className="ml-2 font-medium">{stat.totalPuzzles}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Never Played:</span>
-                            <span className="ml-2 font-medium">{stat.neverPlayed}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Per User:</span>
-                            <span className="ml-2 font-medium">
-                              {(stat.totalPuzzles / stats.activeUsers).toFixed(1)}
-                            </span>
-                          </div>
+                        <div className="text-sm text-muted-foreground">
+                          {stat.difficulty}
                         </div>
                       </div>
-                    ))}
-                </div>
-              </TabsContent>
-            ))}
-          </Tabs>
-        </>
-      )}
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>Created</span>
+                        <span>{new Date(stat.created_at).toLocaleDateString()}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>Last Played</span>
+                        <span>{stat.last_played ? new Date(stat.last_played).toLocaleDateString() : 'Never'}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
-} 
+}

@@ -1,4 +1,3 @@
-
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
@@ -28,10 +27,10 @@ export const TabHeader = ({
         Manual Upload
       </TabsTrigger>
       <TabsTrigger value="categories" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
-        Manage Categories
+        Question Categories
       </TabsTrigger>
       <TabsTrigger value="puzzles" className="whitespace-normal text-center text-xs sm:text-sm h-auto py-2">
-        Puzzle Games
+        Game Categories & Puzzles
       </TabsTrigger>
       
       {showHomepageTab && (
