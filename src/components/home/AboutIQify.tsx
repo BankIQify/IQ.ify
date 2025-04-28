@@ -2,10 +2,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { useState, useEffect, useRef } from "react";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
 
 import { revisionCards } from './data/revisionCards';
 import { pastelColors } from './data/pastelColors';
@@ -34,6 +30,17 @@ const RevisionCard = ({ card, index }: { card: typeof revisionCards[0], index: n
 };
 
 export const AboutIQify = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % revisionCards.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="w-full max-w-[1200px] px-6 py-16">
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-12 items-center">
@@ -52,22 +59,19 @@ export const AboutIQify = () => {
           </Link>
         </div>
         <div className="relative h-[380px] w-full">
-          <Swiper
-            modules={[Navigation]}
-            navigation
-            loop={true}
-            centeredSlides={true}
-            slidesPerView={'auto'}
-            spaceBetween={32}
-            speed={500}
-            className="w-full h-full"
-          >
-            {revisionCards.map((card, index) => (
-              <SwiperSlide key={index} className="w-[300px] h-[380px]">
-                <RevisionCard card={card} index={index} />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+          <div className="relative w-[300px] h-[380px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
+              >
+                <RevisionCard card={revisionCards[currentIndex]} index={currentIndex} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </section>

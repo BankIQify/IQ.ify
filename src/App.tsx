@@ -1,73 +1,81 @@
-import '@fontsource/playfair-display';
-import '@fontsource/inter';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "sonner";
-import { TooltipProvider } from "./components/ui/tooltip";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
+import { ThemeProvider } from 'next-themes';
+import { Toaster } from '@/components/ui/toaster';
+import { useToast } from '@/components/ui/use-toast';
+import { AuthProvider } from './contexts/AuthContext';
+import { AdminSaveProvider } from './contexts/AdminSaveContext';
+import { AppLayout } from './components/layout/AppLayout';
+import { AdminLayout } from './components/layout/AdminLayout';
+import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminProtectedRoute } from './components/AdminProtectedRoute';
+import { DataInputProtectedRoute } from './components/DataInputProtectedRoute';
+import { Favicon } from './components/Favicon';
+import Navigation from "@/components/Navigation";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createBrowserRouter, Outlet } from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { AdminSaveProvider } from "./contexts/AdminSaveContext";
 import { routes } from "@/routes";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Suspense } from "react";
-import Navigation from "@/components/Navigation";
-import { Favicon } from './components/Favicon';
+import { LoadingFallback } from "./components/ui/loading";
+import { queryClient } from "./lib/queryClient";
 
-console.log('App component loading...');
+// Lazy load feature-specific components
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const SignUp = lazy(() => import('./pages/SignUp'));
+const Admin = lazy(() => import('./pages/Admin'));
+const ManageUsers = lazy(() => import('./pages/ManageUsers'));
+const ManageContent = lazy(() => import('./pages/ManageContent'));
+const ManageSettings = lazy(() => import('./pages/ManageSettings'));
+const ManageSubscription = lazy(() => import('./pages/subscription/ManageSubscription'));
+const QuestionBank = lazy(() => import('./pages/QuestionBank'));
+const SubjectProgress = lazy(() => import('./pages/SubjectProgress'));
+const IQTestGame = lazy(() => import('./components/games/IQTestGame'));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false
-    }
-  }
-});
-
-const router = createBrowserRouter([
-  {
-    id: "root",
-    path: "/",
-    element: (
-      <div className="min-h-screen flex flex-col">
-        <Navigation />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-      </div>
-    ),
-    children: routes
-  }
-]);
-
-const LoadingFallback = () => (
-  <div className="flex h-screen w-full items-center justify-center">
-    <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-t-2 border-gray-900"></div>
-  </div>
-);
-
-const App = () => {
-  console.log('Rendering App component...');
-  
+function App() {
   return (
-    <>
-      <Favicon />
-      <Suspense fallback={<LoadingFallback />}>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <AdminSaveProvider>
-              <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-                <RouterProvider router={router} />
-                <Toaster />
-                <Sonner />
-              </ThemeProvider>
-            </AdminSaveProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </Suspense>
-    </>
+    <Favicon />
+    <AuthProvider>
+      <AdminSaveProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <QueryClientProvider client={queryClient}>
+            <Router>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<SignUp />} />
+                  
+                  {/* Protected Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<Home />} />
+                    <Route path="/question-bank" element={<QuestionBank />} />
+                    <Route path="/subject-progress" element={<SubjectProgress />} />
+                    <Route path="/games/iq-test" element={<IQTestGame difficulty="easy" />} />
+                  </Route>
+
+                  {/* Admin Routes */}
+                  <Route element={<AdminProtectedRoute />}>
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/admin/users" element={<ManageUsers />} />
+                    <Route path="/admin/content" element={<ManageContent />} />
+                    <Route path="/admin/settings" element={<ManageSettings />} />
+                  </Route>
+
+                  {/* Subscription Routes */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/subscription" element={<ManageSubscription />} />
+                  </Route>
+                </Routes>
+              </Suspense>
+            </Router>
+            <Toaster />
+          </QueryClientProvider>
+        </ThemeProvider>
+      </AdminSaveProvider>
+    </AuthProvider>
   );
-};
+}
 
 export default App;
-

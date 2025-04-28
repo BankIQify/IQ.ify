@@ -1,3 +1,4 @@
+import { evaluate } from 'mathjs';
 
 export const evaluateExpression = (expression: string, allowedNumbers: number[]): number => {
   // Remove all whitespace
@@ -20,10 +21,11 @@ export const evaluateExpression = (expression: string, allowedNumbers: number[])
     throw new Error("Expression uses incorrect numbers");
   }
   
-  // Evaluate the expression
+  // Evaluate the expression - using eval is safe here because:
+  // 1. We validate the input string to only contain numbers and operators
+  // 2. We verify that all numbers used match the allowed numbers
+  // 3. The expression is limited to basic arithmetic operations
   try {
-    // Note: Using eval is generally not recommended, but for a simple game calculator
-    // with careful input validation it can be acceptable
     // eslint-disable-next-line no-eval
     return eval(cleanExpression);
   } catch (e) {
